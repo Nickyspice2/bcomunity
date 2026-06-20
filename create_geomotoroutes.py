@@ -1,38 +1,39 @@
 #!/usr/bin/env python3
+# -*- coding: utf-8 -*-
 """
-GeoMotoRoutes — Project Generator
-==================================
-Run this script once to scaffold the entire GeoMotoRoutes Next.js project on
-your local machine.
+GeoMotoRoutes — Full Project Generator (Phases 1–3)
+=====================================================
+Scaffolds the entire GeoMotoRoutes Next.js project on your local machine,
+including Georgian localisation, authentication UI, and crowdsourced alerts.
+
+Requirements: Python 3.8+  (no external packages)
 
 Usage
 -----
-  python create_geomotoroutes.py                  # creates ./geomotoroutes/
-  python create_geomotoroutes.py my-folder-name   # creates ./my-folder-name/
+  python create_geomotoroutes.py                 # creates ./geomotoroutes/
+  python create_geomotoroutes.py my-folder       # creates ./my-folder/
 
-After it finishes:
+After scaffold
+--------------
   cd geomotoroutes
   npm install
   npm run dev
-
-Requirements: Python 3.8+  (no external packages needed)
+  # → http://localhost:3000
 """
 
 import os
 import sys
 import textwrap
 
-# ─── Destination ─────────────────────────────────────────────────────────────
-
 ROOT = sys.argv[1] if len(sys.argv) > 1 else "geomotoroutes"
 
 # ─── File registry ────────────────────────────────────────────────────────────
-# Keys are relative paths; values are the exact file contents.
 
 FILES: dict[str, str] = {}
 
-
-# ── package.json ──────────────────────────────────────────────────────────────
+# ══════════════════════════════════════════════════════════════════════════════
+#  CONFIG FILES
+# ══════════════════════════════════════════════════════════════════════════════
 
 FILES["package.json"] = """\
 {
@@ -67,9 +68,6 @@ FILES["package.json"] = """\
 }
 """
 
-
-# ── tsconfig.json ─────────────────────────────────────────────────────────────
-
 FILES["tsconfig.json"] = """\
 {
   "compilerOptions": {
@@ -90,45 +88,23 @@ FILES["tsconfig.json"] = """\
     "paths": { "@/*": ["./src/*"] }
   },
   "include": [
-    "next-env.d.ts",
-    "**/*.ts",
-    "**/*.tsx",
-    ".next/types/**/*.ts",
-    ".next/dev/types/**/*.ts",
-    "**/*.mts"
+    "next-env.d.ts", "**/*.ts", "**/*.tsx",
+    ".next/types/**/*.ts", ".next/dev/types/**/*.ts", "**/*.mts"
   ],
   "exclude": ["node_modules"]
 }
 """
 
-
-# ── next.config.ts ────────────────────────────────────────────────────────────
-
 FILES["next.config.ts"] = """\
 import type { NextConfig } from "next";
-
-const nextConfig: NextConfig = {
-  /* config options here */
-};
-
+const nextConfig: NextConfig = {};
 export default nextConfig;
 """
 
-
-# ── postcss.config.mjs ───────────────────────────────────────────────────────
-
 FILES["postcss.config.mjs"] = """\
-const config = {
-  plugins: {
-    "@tailwindcss/postcss": {},
-  },
-};
-
+const config = { plugins: { "@tailwindcss/postcss": {} } };
 export default config;
 """
-
-
-# ── eslint.config.mjs ────────────────────────────────────────────────────────
 
 FILES["eslint.config.mjs"] = """\
 import { defineConfig, globalIgnores } from "eslint/config";
@@ -138,1308 +114,932 @@ import nextTs from "eslint-config-next/typescript";
 const eslintConfig = defineConfig([
   ...nextVitals,
   ...nextTs,
-  globalIgnores([
-    ".next/**",
-    "out/**",
-    "build/**",
-    "next-env.d.ts",
-  ]),
+  globalIgnores([".next/**", "out/**", "build/**", "next-env.d.ts"]),
 ]);
-
 export default eslintConfig;
 """
 
-
-# ── .gitignore ────────────────────────────────────────────────────────────────
-
 FILES[".gitignore"] = """\
-# dependencies
 /node_modules
 /.pnp
 .pnp.*
-.yarn/*
-!.yarn/patches
-!.yarn/plugins
-!.yarn/releases
-!.yarn/versions
-
-# testing
 /coverage
-
-# next.js
 /.next/
 /out/
-
-# production
 /build
-
-# misc
 .DS_Store
 *.pem
-
-# debug
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
-.pnpm-debug.log*
-
-# env files
 .env*
-
-# vercel
 .vercel
-
-# typescript
 *.tsbuildinfo
 next-env.d.ts
 """
 
-
-# ── src/app/globals.css ───────────────────────────────────────────────────────
+# ══════════════════════════════════════════════════════════════════════════════
+#  APP
+# ══════════════════════════════════════════════════════════════════════════════
 
 FILES["src/app/globals.css"] = """\
 @import "tailwindcss";
 
-/* ─────────────────────────────────────────────
-   GeoMotoRoutes — Design Tokens
-   Premium biker-centric dark theme
-   ───────────────────────────────────────────── */
 @theme inline {
-  /* Surface palette — slate/zinc dark family */
   --color-surface-base:    #0b0d11;
   --color-surface-overlay: #13161d;
   --color-surface-raised:  #1a1f2b;
   --color-surface-card:    #1e2433;
   --color-surface-border:  #2a3045;
   --color-surface-muted:   #3a4155;
-
-  /* Text hierarchy */
-  --color-text-primary:   #f0f2f7;
-  --color-text-secondary: #9aa3b8;
-  --color-text-muted:     #5a6278;
-
-  /* Accent — neon amber/orange (high-visibility on dark) */
-  --color-accent-primary:   #f59e0b;
-  --color-accent-secondary: #fb923c;
-  --color-accent-glow:      rgba(245, 158, 11, 0.25);
-
-  /* Semantic status colours */
-  --color-status-danger:  #ef4444;
-  --color-status-warning: #f59e0b;
-  --color-status-success: #22c55e;
-  --color-status-info:    #3b82f6;
-
-  /* Glassmorphism tokens */
-  --glass-bg:     rgba(19, 22, 29, 0.72);
-  --glass-border: rgba(255, 255, 255, 0.06);
-
-  /* Typography */
+  --color-text-primary:    #f0f2f7;
+  --color-text-secondary:  #9aa3b8;
+  --color-text-muted:      #5a6278;
+  --color-accent-primary:  #f59e0b;
+  --color-accent-secondary:#fb923c;
+  --color-accent-glow:     rgba(245,158,11,0.25);
+  --color-status-danger:   #ef4444;
+  --color-status-warning:  #f59e0b;
+  --color-status-success:  #22c55e;
+  --color-status-info:     #3b82f6;
+  --glass-bg:     rgba(19,22,29,0.72);
+  --glass-border: rgba(255,255,255,0.06);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
 }
 
-/* ─── Base resets ────────────────────────────── */
-*, *::before, *::after { box-sizing: border-box; }
+*,*::before,*::after { box-sizing: border-box; }
+html { font-size:16px; -webkit-font-smoothing:antialiased; -moz-osx-font-smoothing:grayscale; }
+body { background-color:var(--color-surface-base); color:var(--color-text-primary); font-family:var(--font-sans),system-ui,sans-serif; overflow:hidden; }
 
-html {
-  font-size: 16px;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-}
+::-webkit-scrollbar        { width:5px; height:5px; }
+::-webkit-scrollbar-track  { background:var(--color-surface-overlay); }
+::-webkit-scrollbar-thumb  { background:var(--color-surface-muted); border-radius:9999px; }
+::-webkit-scrollbar-thumb:hover { background:var(--color-accent-primary); }
 
-body {
-  background-color: var(--color-surface-base);
-  color: var(--color-text-primary);
-  font-family: var(--font-sans), system-ui, sans-serif;
-  overflow: hidden;
-}
+.leaflet-container { background:#0b0d11!important; font-family:inherit!important; }
+.leaflet-control-zoom { border:none!important; box-shadow:0 4px 24px rgba(0,0,0,.6)!important; }
+.leaflet-control-zoom a { background:var(--color-surface-card)!important; color:var(--color-text-primary)!important; border:1px solid var(--color-surface-border)!important; width:36px!important; height:36px!important; line-height:36px!important; font-size:18px!important; }
+.leaflet-control-zoom a:hover { background:var(--color-surface-muted)!important; color:var(--color-accent-primary)!important; }
+.leaflet-popup-content-wrapper { background:var(--color-surface-card)!important; color:var(--color-text-primary)!important; border:1px solid var(--color-surface-border)!important; border-radius:12px!important; box-shadow:0 8px 32px rgba(0,0,0,.6)!important; }
+.leaflet-popup-tip { background:var(--color-surface-card)!important; }
 
-/* ─── Scrollbar ──────────────────────────────── */
-::-webkit-scrollbar        { width: 5px; height: 5px; }
-::-webkit-scrollbar-track  { background: var(--color-surface-overlay); }
-::-webkit-scrollbar-thumb  { background: var(--color-surface-muted); border-radius: 9999px; }
-::-webkit-scrollbar-thumb:hover { background: var(--color-accent-primary); }
+@keyframes pulse-glow { 0%,100%{box-shadow:0 0 0 0 var(--color-accent-glow);} 50%{box-shadow:0 0 0 8px transparent;} }
+@keyframes slide-in-left { from{transform:translateX(-100%);opacity:0;} to{transform:translateX(0);opacity:1;} }
+@keyframes fade-up { from{transform:translateY(8px);opacity:0;} to{transform:translateY(0);opacity:1;} }
+@keyframes shimmer { 0%{background-position:-200% 0;} 100%{background-position:200% 0;} }
 
-/* ─── Leaflet overrides ──────────────────────── */
-.leaflet-container { background: #0b0d11 !important; font-family: inherit !important; }
-.leaflet-control-zoom { border: none !important; box-shadow: 0 4px 24px rgba(0,0,0,.6) !important; }
-.leaflet-control-zoom a {
-  background: var(--color-surface-card) !important;
-  color: var(--color-text-primary) !important;
-  border: 1px solid var(--color-surface-border) !important;
-  width: 36px !important; height: 36px !important; line-height: 36px !important;
-  font-size: 18px !important;
-}
-.leaflet-control-zoom a:hover {
-  background: var(--color-surface-muted) !important;
-  color: var(--color-accent-primary) !important;
-}
-.leaflet-popup-content-wrapper {
-  background: var(--color-surface-card) !important;
-  color: var(--color-text-primary) !important;
-  border: 1px solid var(--color-surface-border) !important;
-  border-radius: 12px !important;
-  box-shadow: 0 8px 32px rgba(0,0,0,.6) !important;
-}
-.leaflet-popup-tip { background: var(--color-surface-card) !important; }
-
-/* ─── Utility animations ─────────────────────── */
-@keyframes pulse-glow {
-  0%,100% { box-shadow: 0 0 0 0   var(--color-accent-glow); }
-  50%      { box-shadow: 0 0 0 8px transparent; }
-}
-@keyframes slide-in-left {
-  from { transform: translateX(-100%); opacity: 0; }
-  to   { transform: translateX(0);     opacity: 1; }
-}
-@keyframes fade-up {
-  from { transform: translateY(8px); opacity: 0; }
-  to   { transform: translateY(0);   opacity: 1; }
-}
-@keyframes shimmer {
-  0%   { background-position: -200% 0; }
-  100% { background-position:  200% 0; }
-}
-
-.animate-pulse-glow    { animation: pulse-glow    2s ease-in-out infinite; }
-.animate-slide-in-left { animation: slide-in-left 0.3s ease-out both; }
-.animate-fade-up       { animation: fade-up       0.25s ease-out both; }
-.animate-shimmer {
-  background: linear-gradient(
-    90deg,
-    var(--color-surface-card) 25%,
-    var(--color-surface-raised) 50%,
-    var(--color-surface-card) 75%
-  );
-  background-size: 200% 100%;
-  animation: shimmer 1.5s ease-in-out infinite;
-}
+.animate-pulse-glow    { animation:pulse-glow    2s ease-in-out infinite; }
+.animate-slide-in-left { animation:slide-in-left 0.3s ease-out both; }
+.animate-fade-up       { animation:fade-up       0.25s ease-out both; }
+.animate-shimmer { background:linear-gradient(90deg,var(--color-surface-card) 25%,var(--color-surface-raised) 50%,var(--color-surface-card) 75%); background-size:200% 100%; animation:shimmer 1.5s ease-in-out infinite; }
 """
-
-
-# ── src/app/layout.tsx ────────────────────────────────────────────────────────
 
 FILES["src/app/layout.tsx"] = """\
 import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
-  subsets:  ["latin"],
-  display:  "swap",
-});
-
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets:  ["latin"],
-  display:  "swap",
-});
+const geistSans = Geist({ variable:"--font-geist-sans", subsets:["latin"], display:"swap" });
+const geistMono = Geist_Mono({ variable:"--font-geist-mono", subsets:["latin"], display:"swap" });
 
 export const metadata: Metadata = {
-  title:       "GeoMotoRoutes \\u2014 Georgian Motorcycle Route Planner",
+  title:       "GeoMotoRoutes \u2014 Georgian Motorcycle Route Planner",
   description: "Discover premium motorcycle routes across Georgia. Real-time road conditions, gravel warnings, biker-friendly spots, and community-verified alerts.",
-  keywords:    ["motorcycle routes Georgia", "biker Georgia", "Georgian roads", "road conditions Georgia"],
   authors:     [{ name: "GeoMotoRoutes" }],
-  openGraph: {
-    title:       "GeoMotoRoutes",
-    description: "Premium motorcycle route platform for Georgia (Caucasus)",
-    type:        "website",
-  },
 };
 
 export const viewport: Viewport = {
-  width:        "device-width",
-  initialScale: 1,
-  maximumScale: 1,
-  themeColor:   "#0b0d11",
+  width:"device-width", initialScale:1, maximumScale:1, themeColor:"#0b0d11",
 };
 
-interface RootLayoutProps {
-  children: React.ReactNode;
-}
-
-export default function RootLayout({ children }: RootLayoutProps): React.ReactElement {
+export default function RootLayout({ children }: { children: React.ReactNode }): React.ReactElement {
   return (
-    <html lang="en" className={`${geistSans.variable} ${geistMono.variable}`}>
+    <html lang="ka" className={`${geistSans.variable} ${geistMono.variable}`}>
       <body>{children}</body>
     </html>
   );
 }
 """
 
-
-# ── src/app/page.tsx ──────────────────────────────────────────────────────────
-
 FILES["src/app/page.tsx"] = """\
 import { DashboardLayout } from "@/components/layout/DashboardLayout";
-
-/**
- * Root page \\u2014 renders the full-viewport map dashboard.
- * All interactivity lives inside DashboardLayout (client boundary).
- */
 export default function HomePage(): React.ReactElement {
   return <DashboardLayout />;
 }
 """
 
-
-# ── src/lib/types/index.ts ────────────────────────────────────────────────────
+# ══════════════════════════════════════════════════════════════════════════════
+#  LIB / TYPES
+# ══════════════════════════════════════════════════════════════════════════════
 
 FILES["src/lib/types/index.ts"] = """\
-// \\u2500\\u2500\\u2500 Geographic primitives \\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500
+export interface Coordinate { lat: number; lng: number; }
+export interface BoundingBox { north:number; south:number; east:number; west:number; }
 
-export interface Coordinate {
-  lat: number;
-  lng: number;
-}
-
-export interface BoundingBox {
-  north: number;
-  south: number;
-  east:  number;
-  west:  number;
-}
-
-// \\u2500\\u2500\\u2500 Route \\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500
-
-/**
- * Rider-perceived difficulty of the road \\u2014 based on surface quality,
- * elevation change, and technical sections, not vehicle type.
- */
-export type DifficultyLevel =
-  | "beginner"
-  | "intermediate"
-  | "advanced"
-  | "extreme";
-
-/**
- * Physical condition of the riding surface at time of last verification.
- * Determines icon styling and filter chip colour on the map.
- */
-export type AsphaltQuality =
-  | "excellent"   // newly paved, smooth, full lane markings
-  | "good"        // maintained, minor cracks, grippy
-  | "fair"        // visible wear, patched sections, caution advised
-  | "poor"        // significant damage, potholes, reduced speed required
-  | "unpaved";    // gravel/dirt surface \\u2014 off-road capable bike recommended
+export type DifficultyLevel = "beginner"|"intermediate"|"advanced"|"extreme";
+export type AsphaltQuality  = "excellent"|"good"|"fair"|"poor"|"unpaved";
 
 export interface Route {
-  id:             string;
-  name:           string;
-  description:    string;
-  difficulty:     DifficultyLevel;
-  asphaltQuality: AsphaltQuality;
-  /** Ordered array of waypoints defining the polyline on the map. */
-  coordinates:    Coordinate[];
-  distanceKm:     number;
-  durationMin:    number;
-  /** Total elevation gain in metres over the full route. */
-  elevationGain:  number;
-  region:         string;
-  tags:           string[];
-  likeCount:      number;
-  rideCount:      number;
+  id:string; name:string; description:string;
+  difficulty:DifficultyLevel; asphaltQuality:AsphaltQuality;
+  coordinates:Coordinate[];
+  distanceKm:number; durationMin:number; elevationGain:number;
+  region:string; tags:string[]; likeCount:number; rideCount:number;
 }
 
-// \\u2500\\u2500\\u2500 Road alert \\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500
-
-/**
- * Four alert categories surfaced to riders on the map.
- * Kept intentionally narrow \\u2014 covers the highest-impact hazards for motorcyclists.
- */
-export type AlertType =
-  | "gravel"    // loose gravel spread across lane(s)
-  | "camera"    // fixed speed enforcement camera
-  | "work"      // active road construction / lane closures
-  | "danger";   // general high-risk section (hairpins, unstable surface, landslide)
-
-export type AlertSeverity = "low" | "medium" | "high";
+export type AlertType     = "gravel"|"camera"|"work"|"danger";
+export type AlertSeverity = "low"|"medium"|"high";
 
 export interface RoadAlert {
-  id:          string;
-  type:        AlertType;
-  /** WGS-84 decimal latitude of the alert point. */
-  lat:         number;
-  /** WGS-84 decimal longitude of the alert point. */
-  lng:         number;
-  description: string;
-  severity:    AlertSeverity;
-  /** Radius in metres for the area-of-effect circle rendered on the map. */
-  radius:      number;
-  verified:    boolean;
-  reportedAt:  string;   // ISO 8601
-  expiresAt:   string | null;
+  id:string; type:AlertType;
+  lat:number; lng:number;
+  description:string; severity:AlertSeverity;
+  radius:number; verified:boolean;
+  reportedAt:string; expiresAt:string|null;
 }
 
-// \\u2500\\u2500\\u2500 Biker spot \\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500
-
-export type SpotType =
-  | "cafe"
-  | "fuel"
-  | "viewpoint"
-  | "rest_area"
-  | "mechanic"
-  | "hotel";
+export type SpotType = "cafe"|"fuel"|"viewpoint"|"rest_area"|"mechanic"|"hotel";
 
 export interface BikerSpot {
-  id:       string;
-  name:     string;
-  type:     SpotType;
-  /** WGS-84 decimal latitude. */
-  lat:      number;
-  /** WGS-84 decimal longitude. */
-  lng:      number;
-  address?: string;
-  phone?:   string;
-  /** Average rating 1\\u20135. */
-  rating?:  number;
-  verified: boolean;
+  id:string; name:string; type:SpotType;
+  lat:number; lng:number;
+  address?:string; phone?:string; rating?:number; verified:boolean;
 }
-
-// \\u2500\\u2500\\u2500 Active filter state \\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500
 
 export interface FilterState {
-  /** Which alert types are currently visible on the map. */
-  alertTypes:   AlertType[];
-  difficulties: DifficultyLevel[];
-  spotTypes:    SpotType[];
-  showRoutes:   boolean;
-  showAlerts:   boolean;
-  showSpots:    boolean;
-  searchQuery:  string;
+  alertTypes:AlertType[]; difficulties:DifficultyLevel[]; spotTypes:SpotType[];
+  showRoutes:boolean; showAlerts:boolean; showSpots:boolean; searchQuery:string;
 }
 
-// \\u2500\\u2500\\u2500 Map viewport state \\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500
-
 export interface MapViewState {
-  center:  Coordinate;
-  zoom:    number;
-  bounds:  BoundingBox | null;
-  isReady: boolean;
+  center:Coordinate; zoom:number; bounds:BoundingBox|null; isReady:boolean;
 }
 """
 
+# ── i18n ──────────────────────────────────────────────────────────────────────
 
-# ── src/lib/constants/index.ts ────────────────────────────────────────────────
+FILES["src/lib/i18n/ka.ts"] = """\
+/**
+ * Georgian (\u10e5\u10d0\u10e0\u10d7\u10e3\u10da\u10d8) UI string constants.
+ * Single source of truth for all user-facing text in the application.
+ */
+export const KA = {
+  appName:     "GeoMotoRoutes",
+  appSubtitle: "\u10e1\u10d0\u10e5\u10d0\u10e0\u10d7\u10d5\u10d4\u10da\u10dd",
+
+  searchPlaceholder: "\u10db\u10d0\u10e0\u10e8\u10e0\u10e3\u10e2\u10d4\u10d1\u10d8\u10e1, \u10e0\u10d4\u10d2\u10d8\u10dd\u10dc\u10d4\u10d1\u10d8\u10e1, \u10d0\u10d3\u10d2\u10d8\u10da\u10d4\u10d1\u10d8\u10e1 \u10eb\u10d8\u10d4\u10d1\u10d0\u2026",
+  online:            "\u10dd\u10dc\u10da\u10d0\u10d8\u10dc",
+  offline:           "\u10dd\u10e4\u10da\u10d0\u10d8\u10dc \u2014 \u10e5\u10d4\u10e8\u10d8\u10e0\u10d4\u10d1\u10e3\u10da\u10d8",
+  mapLayersLabel:    "\u10e0\u10e3\u10d9\u10d8\u10e1 \u10e4\u10d4\u10dc\u10d4\u10d1\u10d8",
+  activeAlerts:      "\u10d0\u10e5\u10e2\u10d8\u10e3\u10e0\u10d8 \u10d2\u10d0\u10e4\u10e0\u10d7\u10ee\u10d8\u10da\u10d4\u10d1\u10d4\u10d1\u10d8",
+  noAlerts:          "\u10d2\u10d0\u10e4\u10e0\u10d7\u10ee\u10d8\u10da\u10d4\u10d1\u10d0 \u10d0\u10e0 \u10d0\u10e0\u10d8\u10e1",
+  toggleSidebar:     "\u10d2\u10d5\u10d4\u10e0\u10d3\u10d8\u10d7\u10d8 \u10de\u10d0\u10dc\u10d4\u10da\u10d8",
+  clearSearch:       "\u10d2\u10d0\u10e1\u10e3\u10e4\u10d7\u10d0\u10d5\u10d4\u10d1\u10d0",
+  login:             "\u10e8\u10d4\u10e1\u10d5\u10da\u10d0",
+  myProfile:         "\u10de\u10e0\u10dd\u10e4\u10d8\u10da\u10d8",
+  logout:            "\u10d2\u10d0\u10e1\u10d5\u10da\u10d0",
+
+  filters:           "\u10e4\u10d8\u10da\u10e2\u10e0\u10d4\u10d1\u10d8",
+  activeCount:       "\u10d0\u10e5\u10e2\u10d8\u10e3\u10e0\u10d8",
+  resetFilters:      "\u10d2\u10d0\u10e1\u10e3\u10e4\u10d7\u10d0\u10d5\u10d4\u10d1\u10d0",
+  mapLayers:         "\u10e0\u10e3\u10d9\u10d8\u10e1 \u10e4\u10d4\u10dc\u10d4\u10d1\u10d8",
+  routes:            "\u10db\u10d0\u10e0\u10e8\u10e0\u10e3\u10e2\u10d4\u10d1\u10d8",
+  roadAlerts:        "\u10d2\u10d0\u10e4\u10e0\u10d7\u10ee\u10d8\u10da\u10d4\u10d1\u10d4\u10d1\u10d8",
+  bikerSpots:        "\u10d1\u10d8\u10d9\u10d4\u10e0\u10d8\u10e1 \u10d0\u10d3\u10d2\u10d8\u10da\u10d4\u10d1\u10d8",
+  roadAlertsSection: "\u10e1\u10d0\u10d2\u10d6\u10d0\u10dd \u10d2\u10d0\u10e4\u10e0\u10d7\u10ee\u10d8\u10da\u10d4\u10d1\u10d4\u10d1\u10d8",
+  difficulty:        "\u10e1\u10d8\u10e0\u10d7\u10e3\u10da\u10d4",
+  spotsServices:     "\u10d0\u10d3\u10d2\u10d8\u10da\u10d4\u10d1\u10d8 \u10d3\u10d0 \u10e1\u10d4\u10e0\u10d5\u10d8\u10e1\u10d8",
+  featuredRoutes:    "\u10e0\u10d4\u10d9\u10dd\u10db\u10d4\u10dc\u10d3\u10d4\u10d1\u10e3\u10da\u10d8 \u10db\u10d0\u10e0\u10e8\u10e0\u10e3\u10e2\u10d4\u10d1\u10d8",
+  kmSuffix:          "\u10d9\u10db",
+  sidebarFooter:     "\u10db\u10dd\u10d8\u10ea\u10d0\u10d5\u10e1",
+  allNineRegions:    "\u10e1\u10d0\u10e5\u10d0\u10e0\u10d7\u10d5\u10d4\u10da\u10dd\u10e1 \u10e7\u10d5\u10d4\u10da\u10d0 9 \u10e0\u10d4\u10d2\u10d8\u10dd\u10dc\u10e1",
+  communityVerified: "\u10e1\u10d0\u10d6\u10dd\u10d2\u10d0\u10d3\u10dd\u10d4\u10d1\u10d8\u10e1 \u10db\u10d8\u10d4\u10e0 \u10d3\u10d0\u10db\u10dd\u10ec\u10db\u10d4\u10d1\u10e3\u10da\u10d8 \u10db\u10dd\u10dc\u10d0\u10ea\u10d4\u10db\u10d4\u10d1\u10d8.",
+
+  difficultyBeginner:     "\u10db\u10d0\u10e0\u10e2\u10d8\u10d5\u10d8",
+  difficultyIntermediate: "\u10e1\u10d0\u10e8\u10e3\u10d0\u10da\u10dd",
+  difficultyAdvanced:     "\u10e0\u10d7\u10e3\u10da\u10d8",
+  difficultyExtreme:      "\u10d4\u10e5\u10e1\u10e2\u10e0\u10d4\u10db\u10d0\u10da\u10e3\u10e0\u10d8",
+
+  qualityExcellent: "\u10e8\u10d4\u10e1\u10d0\u10dc\u10d8\u10e8\u10dc\u10d0\u10d5\u10d8",
+  qualityGood:      "\u10d9\u10d0\u10e0\u10d2\u10d8",
+  qualityFair:      "\u10d3\u10d0\u10db\u10d0\u10d9\u10db\u10d0\u10e7\u10dd\u10e4\u10d8\u10da\u10d4\u10d1\u10d4\u10da\u10d8",
+  qualityPoor:      "\u10ea\u10e3\u10d3\u10d8",
+  qualityUnpaved:   "\u10d2\u10d6\u10d0 \u10d2\u10d0\u10e0\u10d4\u10e8\u10d4",
+
+  alertGravel: "\u10ee\u10e0\u10d4\u10e8\u10d8",
+  alertCamera: "\u10e1\u10d8\u10e9\u10e5\u10d0\u10e0\u10d8\u10e1 \u10d9\u10d0\u10db\u10d4\u10e0\u10d0",
+  alertWork:   "\u10e1\u10d0\u10d2\u10d6\u10d0\u10dd \u10e1\u10d0\u10db\u10e3\u10e8\u10d0\u10dd\u10d4\u10d1\u10d8",
+  alertDanger: "\u10e1\u10d0\u10e8\u10d8\u10e8\u10d8 \u10db\u10dd\u10dc\u10d0\u10d9\u10d5\u10d4\u10d7\u10d8",
+
+  alertGravelDesc: "\u10d2\u10d6\u10d8\u10e1 \u10d6\u10dd\u10da(\u10d4\u10d1)\u10d6\u10d4 \u10ee\u10e0\u10d4\u10e8\u10d8 \u2014 \u10e1\u10d8\u10e9\u10e5\u10d0\u10e0\u10d4 50 \u10d9\u10db/\u10e1\u10d7-\u10d6\u10d4 \u10d3\u10d0\u10d1\u10da\u10d0",
+  alertCameraDesc: "\u10e4\u10d8\u10e5\u10e1\u10d8\u10e0\u10d4\u10d1\u10e3\u10da\u10d8 \u10e1\u10d8\u10e9\u10e5\u10d0\u10e0\u10d8\u10e1 \u10e1\u10d0\u10d9\u10dd\u10dc\u10e2\u10e0\u10dd\u10da\u10dd \u10d9\u10d0\u10db\u10d4\u10e0\u10d0",
+  alertWorkDesc:   "\u10db\u10d8\u10db\u10d3\u10d8\u10dc\u10d0\u10e0\u10d4 \u10e1\u10d0\u10db\u10e8\u10d4\u10dc\u10d4\u10d1\u10da\u10dd \u10e1\u10d0\u10db\u10e3\u10e8\u10d0\u10dd\u10d4\u10d1\u10d8 \u2014 \u10d6\u10dd\u10da\u10d8 \u10e8\u10d4\u10d8\u10eb\u10da\u10d4\u10d1\u10d0 \u10d3\u10d0\u10d9\u10d4\u10e2\u10d8\u10da\u10d8 \u10d8\u10e7\u10dd\u10e1",
+  alertDangerDesc: "\u10e1\u10d0\u10ee\u10d8\u10e4\u10d0\u10d7\u10dd \u10db\u10dd\u10dc\u10d0\u10d9\u10d5\u10d4\u10d7\u10d8 \u2014 \u10d1\u10e0\u10db\u10d0 \u10db\u10dd\u10ee\u10d5\u10d4\u10d5\u10d4\u10d1\u10d8, \u10d0\u10e0\u10d0\u10e1\u10e2\u10d0\u10d1\u10d8\u10da\u10e3\u10e0\u10d8 \u10d6\u10d4\u10d3\u10d0\u10DE\u10d8\u10e0\u10d8",
+
+  severityLow:    "\u10d3\u10d0\u10d1\u10d0\u10da\u10d8",
+  severityMedium: "\u10e1\u10d0\u10e8\u10e3\u10d0\u10da\u10dd",
+  severityHigh:   "\u10db\u10d0\u10e6\u10d0\u10da\u10d8",
+
+  spotCafe:     "\u10db\u10dd\u10e2\u10dd-\u10d9\u10d0\u10e4\u10d4",
+  spotFuel:     "\u10e1\u10d0\u10ec\u10d5\u10d0\u10d5\u10d8",
+  spotViewpoint:"\u10de\u10d0\u10dc\u10dd\u10e0\u10d0\u10db\u10d0",
+  spotRestArea: "\u10d3\u10d0\u10e1\u10d5\u10d4\u10dc\u10d4\u10d1\u10d8\u10e1 \u10d6\u10dd\u10dc\u10d0",
+  spotMechanic: "\u10db\u10d4\u10e5\u10d0\u10dc\u10d8\u10d9\u10dd\u10e1\u10d8",
+  spotHotel:    "\u10e1\u10d0\u10e1\u10e2\u10e3\u10db\u10e0\u10dd",
+
+  mapAriaLabel: "\u10e1\u10d0\u10e5\u10d0\u10e0\u10d7\u10d5\u10d4\u10da\u10dd\u10e1 \u10db\u10dd\u10e2\u10dd\u10ea\u10d8\u10d9\u10da\u10d8\u10e1 \u10db\u10d0\u10e0\u10e8\u10e0\u10e3\u10e2\u10d4\u10d1\u10d8\u10e1 \u10d8\u10dc\u10e2\u10d4\u10e0\u10d0\u10e5\u10e2\u10d8\u10e3\u10da\u10d8 \u10e0\u10e3\u10d9\u10d0",
+  openFilters:  "\u10e4\u10d8\u10da\u10e2\u10e0\u10d4\u10d1\u10d8\u10e1 \u10d2\u10d0\u10ee\u10e1\u10dc\u10d0",
+
+  distance: "\u10db\u10d0\u10dc\u10eb\u10d8\u10da\u10d8",
+  duration: "\u10ee\u10d0\u10dc\u10d2\u10e0\u10eb\u10da\u10d8\u10d5\u10dd\u10d1\u10d0",
+  climb:    "\u10d0\u10e6\u10db\u10d0\u10e0\u10d7\u10d8",
+  region:   "\u10e0\u10d4\u10d2\u10d8\u10dd\u10dc\u10d8",
+  surface:  "\u10d6\u10d4\u10d3\u10d0\u10DE\u10d8\u10e0\u10d8",
+  verified: "\u2713 \u10d3\u10d0\u10db\u10dd\u10ec\u10db\u10d4\u10d1\u10e3\u10da\u10d8",
+  communityReport: "\u10e1\u10d0\u10d6\u10dd\u10d2\u10d0\u10d3\u10dd\u10d4\u10d1\u10d8\u10e1 \u10e0\u10d4\u10de\u10dd\u10e0\u10e2\u10d8",
+  justNow:  "\u10d0\u10ee\u10da\u10d0\u10ee\u10d0\u10dc\u10e1",
+  reviews:  "\u10e8\u10d4\u10e4\u10d0\u10e1\u10d4\u10d1\u10d0",
+  hours:    "\u10e1\u10d0\u10db\u10e3\u10e8\u10d0\u10dd \u10e1\u10d0\u10d0\u10d7\u10d4\u10d1\u10d8",
+
+  mapInitialising: "\u10e0\u10e3\u10d9\u10d0 \u10d8\u10e2\u10d5\u10d8\u10e0\u10d7\u10d4\u10d1\u10d0\u2026",
+  mapLoadingNet:   "\u10e5\u10e1\u10d4\u10da\u10d8 \u10d8\u10e2\u10d5\u10d8\u10e0\u10d7\u10d4\u10d1\u10d0",
+
+  statRoutes: "\u10db\u10d0\u10e0\u10e8\u10e0\u10e3\u10e2\u10d8",
+  statAlerts: "\u10d2\u10d0\u10e4\u10e0\u10d7\u10ee\u10d8\u10da\u10d4\u10d1\u10d0",
+  statSpots:  "\u10d0\u10d3\u10d2\u10d8\u10da\u10d8",
+
+  addAlertTitle:          "\u10e1\u10d0\u10d2\u10d6\u10d0\u10dd \u10e0\u10d4\u10de\u10dd\u10e0\u10e2\u10d8\u10e1 \u10d3\u10d0\u10db\u10d0\u10e2\u10d4\u10d1\u10d0",
+  addAlertCoords:         "\u10d9\u10dd\u10dd\u10e0\u10d3\u10d8\u10dc\u10d0\u10e2\u10d4\u10d1\u10d8",
+  addAlertTypeLabel:      "\u10d2\u10d0\u10e4\u10e0\u10d7\u10ee\u10d8\u10da\u10d4\u10d1\u10d8\u10e1 \u10e2\u10d8\u10de\u10d8",
+  addAlertDescLabel:      "\u10d0\u10e6\u10ec\u10d4\u10e0\u10d0",
+  addAlertDescPlaceholder:"\u10dc\u10d0\u10ee\u10d4\u10d7, \u10e1\u10d0\u10d3 \u10d3\u10d0 \u10e0\u10d0 \u10e1\u10d0\u10ee\u10d8\u10e1 \u10de\u10e0\u10dd\u10d1\u10da\u10d4\u10db\u10d0\u10d0 \u2014 \u10d1\u10d8\u10d9\u10d4\u10e0\u10d4\u10d1\u10d8\u10e1 \u10d2\u10d0\u10d3\u10d0\u10e1\u10d0\u10e0\u10e9\u10d4\u10dc\u10d0\u10d3\u2026",
+  addAlertSubmit:         "\u10d2\u10d0\u10d6\u10d8\u10d0\u10e0\u10d4\u10d1\u10d0",
+  addAlertCancel:         "\u10d2\u10d0\u10e3\u10e5\u10db\u10d4\u10d1\u10d0",
+  addAlertLoginRequired:  "\u10d2\u10d0\u10e4\u10e0\u10d7\u10ee\u10d8\u10da\u10d4\u10d1\u10d8\u10e1 \u10d3\u10d0\u10e1\u10d0\u10db\u10d0\u10e2\u10d4\u10d1\u10da\u10d0\u10d3 \u10d2\u10d7\u10ee\u10dd\u10d5\u10d7 \u10e8\u10d4\u10ee\u10d5\u10d8\u10d3\u10d4\u10d7 \u10e1\u10d8\u10e1\u10e2\u10d4\u10db\u10d0\u10e8\u10d8.",
+
+  authTabLogin:         "\u10e8\u10d4\u10e1\u10d5\u10da\u10d0",
+  authTabRegister:      "\u10e0\u10d4\u10d2\u10d8\u10e1\u10e2\u10e0\u10d0\u10ea\u10d8\u10d0",
+  authEmailLabel:       "\u10d4\u10da-\u10e4\u10dd\u10e1\u10e2\u10d0",
+  authEmailPlaceholder: "\u10d7\u10e5\u10d5\u10d4\u10dc\u10d8@\u10d4\u10da-\u10e4\u10dd\u10e1\u10e2\u10d0.ge",
+  authPasswordLabel:    "\u10de\u10d0\u10e0\u10dd\u10da\u10d8",
+  authPasswordPlaceholder: "\u2022\u2022\u2022\u2022\u2022\u2022\u2022\u2022",
+  authNameLabel:        "\u10e1\u10d0\u10ee\u10d4\u10da\u10d8",
+  authNamePlaceholder:  "\u10d7\u10e5\u10d5\u10d4\u10dc\u10d8 \u10e1\u10d0\u10ee\u10d4\u10da\u10d8",
+  authMotoLabel:        "\u10db\u10dd\u10e2\u10dd\u10ea\u10d8\u10d9\u10da\u10d8\u10e1 \u10db\u10dd\u10d3\u10d4\u10da\u10d8",
+  authMotoPlaceholder:  "\u10db\u10d0\u10d2. Honda CB500X",
+  authLoginCTA:         "\u10e8\u10d4\u10e1\u10d5\u10da\u10d0",
+  authRegisterCTA:      "\u10d0\u10dc\u10d2\u10d0\u10e0\u10d8\u10e8\u10d8\u10e1 \u10e8\u10d4\u10e5\u10db\u10dc\u10d0",
+  authForgotPassword:   "\u10de\u10d0\u10e0\u10dd\u10da\u10d8 \u10d3\u10d0\u10d2\u10d0\u10d5\u10d8\u10ec\u10e7\u10d3\u10d0\u10d7?",
+  authSwitchToRegister: "\u10d0\u10dc\u10d2\u10d0\u10e0\u10d8\u10e8\u10d8 \u10d0\u10e0 \u10d2\u10d0\u10e5\u10d5\u10d7?",
+  authSwitchToLogin:    "\u10e3\u10d9\u10d5\u10d4 \u10d2\u10d0\u10e5\u10d5\u10d7 \u10d0\u10dc\u10d2\u10d0\u10e0\u10d8\u10e8\u10d8?",
+  authClose:            "\u10d3\u10d0\u10ee\u10e3\u10e0\u10d5\u10d0",
+  authWelcomeBack:      "\u10d9\u10d4\u10d7\u10d8\u10da\u10d8 \u10d8\u10e7\u10dd\u10e1 \u10d7\u10e5\u10d5\u10d4\u10dc\u10d8 \u10d3\u10d0\u10d1\u10e0\u10e3\u10dc\u10d4\u10d1\u10d0",
+  authJoinCommunity:    "\u10e8\u10d4\u10e3\u10d4\u10e0\u10d7\u10d3\u10d8\u10d7 \u10d1\u10d8\u10d9\u10d4\u10e0\u10d4\u10d1\u10d8\u10e1 \u10e1\u10d0\u10d6\u10dd\u10d2\u10d0\u10d3\u10dd\u10d4\u10d1\u10d0\u10e1",
+
+  errorTitle:     "\u10e8\u10d4\u10ea\u10d3\u10dd\u10db\u10d0 \u10db\u10dd\u10ee\u10d3\u10d0",
+  errorMapFailed: "\u10e0\u10e3\u10d9\u10d0 \u10d5\u10d4\u10e0 \u10e9\u10d0\u10d8\u10e2\u10d5\u10d8\u10e0\u10d7\u10d0.",
+  errorGeneric:   "\u10db\u10dd\u10e3\u10da\u10dd\u10d3\u10dc\u10d4\u10da\u10d8 \u10e8\u10d4\u10ea\u10d3\u10dd\u10db\u10d0.",
+  errorRetry:     "\u10d7\u10d0\u10d5\u10d8\u10d3\u10d0\u10dc \u10ea\u10d3\u10d0",
+
+  close: "\u10d3\u10d0\u10ee\u10e3\u10e0\u10d5\u10d0",
+} as const;
+
+export type KaKey = keyof typeof KA;
+"""
+
+# ── constants ─────────────────────────────────────────────────────────────────
 
 FILES["src/lib/constants/index.ts"] = """\
-import type {
-  AlertType,
-  AlertSeverity,
-  AsphaltQuality,
-  Coordinate,
-  DifficultyLevel,
-  FilterState,
-  SpotType,
-} from "@/lib/types";
+import type { AlertType, AlertSeverity, AsphaltQuality, Coordinate, DifficultyLevel, FilterState, SpotType } from "@/lib/types";
+import { KA } from "@/lib/i18n/ka";
 
-// \\u2500\\u2500\\u2500 Georgia (Europe) geography \\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500
-
-/**
- * Geographic centroid of Georgia \\u2014 anchors the map on initial load.
- * Gives balanced coverage across all regions including the Caucasus range.
- */
 export const GEORGIA_CENTER: Coordinate = { lat: 41.9, lng: 43.9 };
-
 export const GEORGIA_DEFAULT_ZOOM = 8;
 export const GEORGIA_MIN_ZOOM     = 6;
 export const GEORGIA_MAX_ZOOM     = 18;
+export const GEORGIA_BOUNDS = { north:43.6, south:41.0, east:46.7, west:39.9 } as const;
 
-export const GEORGIA_BOUNDS = {
-  north:  43.6,
-  south:  41.0,
-  east:   46.7,
-  west:   39.9,
-} as const;
-
-// \\u2500\\u2500\\u2500 Map tile provider \\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500
-
-/** CartoDB Dark Matter \\u2014 free, no API key, purpose-built for dark UI overlays. */
 export const MAP_TILE_URL    = "https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png";
-export const MAP_TILE_ATTR   = '&copy; <a href="https://www.openstreetmap.org/copyright">OSM</a> contributors &copy; <a href="https://carto.com/">CARTO</a>';
+export const MAP_TILE_ATTR   = '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> &copy; <a href="https://carto.com/">CARTO</a>';
 export const MAP_TILE_SUBDOM = "abcd";
 
-// \\u2500\\u2500\\u2500 Alert type display metadata \\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500
-
-export interface AlertMeta {
-  label:       string;
-  color:       string;
-  bgColor:     string;
-  borderColor: string;
-  description: string;
-}
+export interface AlertMeta { label:string; color:string; bgColor:string; borderColor:string; description:string; }
 
 export const ALERT_TYPE_META: Record<AlertType, AlertMeta> = {
-  gravel: {
-    label:       "Gravel Hazard",
-    color:       "#a78bfa",
-    bgColor:     "rgba(167,139,250,0.12)",
-    borderColor: "rgba(167,139,250,0.30)",
-    description: "Loose gravel across lane \\u2014 reduce speed below 50 km/h",
-  },
-  camera: {
-    label:       "Speed Camera",
-    color:       "#3b82f6",
-    bgColor:     "rgba(59,130,246,0.12)",
-    borderColor: "rgba(59,130,246,0.30)",
-    description: "Fixed speed enforcement camera",
-  },
-  work: {
-    label:       "Roadworks",
-    color:       "#f59e0b",
-    bgColor:     "rgba(245,158,11,0.12)",
-    borderColor: "rgba(245,158,11,0.30)",
-    description: "Active road construction \\u2014 lane closures possible",
-  },
-  danger: {
-    label:       "Danger Zone",
-    color:       "#ef4444",
-    bgColor:     "rgba(239,68,68,0.12)",
-    borderColor: "rgba(239,68,68,0.30)",
-    description: "High-risk section \\u2014 hairpins, unstable surface, or landslide risk",
-  },
+  gravel: { label:KA.alertGravel, color:"#a78bfa", bgColor:"rgba(167,139,250,0.12)", borderColor:"rgba(167,139,250,0.30)", description:KA.alertGravelDesc },
+  camera: { label:KA.alertCamera, color:"#3b82f6", bgColor:"rgba(59,130,246,0.12)",  borderColor:"rgba(59,130,246,0.30)",  description:KA.alertCameraDesc },
+  work:   { label:KA.alertWork,   color:"#f59e0b", bgColor:"rgba(245,158,11,0.12)",  borderColor:"rgba(245,158,11,0.30)",  description:KA.alertWorkDesc   },
+  danger: { label:KA.alertDanger, color:"#ef4444", bgColor:"rgba(239,68,68,0.12)",   borderColor:"rgba(239,68,68,0.30)",   description:KA.alertDangerDesc },
 };
 
-// \\u2500\\u2500\\u2500 Difficulty display metadata \\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500
-
-export interface DifficultyMeta {
-  label:   string;
-  color:   string;
-  bgColor: string;
-}
-
+export interface DifficultyMeta { label:string; color:string; bgColor:string; }
 export const DIFFICULTY_META: Record<DifficultyLevel, DifficultyMeta> = {
-  beginner:     { label: "Beginner",     color: "#22c55e", bgColor: "rgba(34,197,94,0.12)"   },
-  intermediate: { label: "Intermediate", color: "#f59e0b", bgColor: "rgba(245,158,11,0.12)"  },
-  advanced:     { label: "Advanced",     color: "#fb923c", bgColor: "rgba(251,146,60,0.12)"  },
-  extreme:      { label: "Extreme",      color: "#ef4444", bgColor: "rgba(239,68,68,0.12)"   },
+  beginner:     { label:KA.difficultyBeginner,     color:"#22c55e", bgColor:"rgba(34,197,94,0.12)"   },
+  intermediate: { label:KA.difficultyIntermediate, color:"#f59e0b", bgColor:"rgba(245,158,11,0.12)"  },
+  advanced:     { label:KA.difficultyAdvanced,     color:"#fb923c", bgColor:"rgba(251,146,60,0.12)"  },
+  extreme:      { label:KA.difficultyExtreme,      color:"#ef4444", bgColor:"rgba(239,68,68,0.12)"   },
 };
 
-// \\u2500\\u2500\\u2500 Asphalt quality display metadata \\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500
-
-export interface AsphaltQualityMeta {
-  label:   string;
-  color:   string;
-  bgColor: string;
-}
-
+export interface AsphaltQualityMeta { label:string; color:string; bgColor:string; }
 export const ASPHALT_QUALITY_META: Record<AsphaltQuality, AsphaltQualityMeta> = {
-  excellent: { label: "Excellent", color: "#22c55e", bgColor: "rgba(34,197,94,0.12)"   },
-  good:      { label: "Good",      color: "#84cc16", bgColor: "rgba(132,204,22,0.12)"  },
-  fair:      { label: "Fair",      color: "#f59e0b", bgColor: "rgba(245,158,11,0.12)"  },
-  poor:      { label: "Poor",      color: "#fb923c", bgColor: "rgba(251,146,60,0.12)"  },
-  unpaved:   { label: "Unpaved",   color: "#a78bfa", bgColor: "rgba(167,139,250,0.12)" },
+  excellent: { label:KA.qualityExcellent, color:"#22c55e", bgColor:"rgba(34,197,94,0.12)"   },
+  good:      { label:KA.qualityGood,      color:"#84cc16", bgColor:"rgba(132,204,22,0.12)"  },
+  fair:      { label:KA.qualityFair,      color:"#f59e0b", bgColor:"rgba(245,158,11,0.12)"  },
+  poor:      { label:KA.qualityPoor,      color:"#fb923c", bgColor:"rgba(251,146,60,0.12)"  },
+  unpaved:   { label:KA.qualityUnpaved,   color:"#a78bfa", bgColor:"rgba(167,139,250,0.12)" },
 };
 
-// \\u2500\\u2500\\u2500 Biker spot display metadata \\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500
-
-export interface SpotMeta {
-  label: string;
-  icon:  string;
-  color: string;
-}
-
+export interface SpotMeta { label:string; icon:string; color:string; }
 export const SPOT_TYPE_META: Record<SpotType, SpotMeta> = {
-  cafe:      { label: "Biker Caf\\u00e9", icon: "\\u2615", color: "#fb923c" },
-  fuel:      { label: "Fuel",            icon: "\\u26fd", color: "#ec4899" },
-  viewpoint: { label: "Viewpoint",       icon: "\\U0001f3d4\\ufe0f", color: "#22c55e" },
-  rest_area: { label: "Rest Area",       icon: "\\U0001f17f\\ufe0f", color: "#3b82f6" },
-  mechanic:  { label: "Mechanic",        icon: "\\U0001f527", color: "#a78bfa" },
-  hotel:     { label: "Hotel",           icon: "\\U0001f3e8", color: "#f59e0b" },
+  cafe:      { label:KA.spotCafe,      icon:"\u2615",          color:"#fb923c" },
+  fuel:      { label:KA.spotFuel,      icon:"\u26fd",          color:"#ec4899" },
+  viewpoint: { label:KA.spotViewpoint, icon:"\U0001f3d4\ufe0f", color:"#22c55e" },
+  rest_area: { label:KA.spotRestArea,  icon:"\U0001f17f\ufe0f", color:"#3b82f6" },
+  mechanic:  { label:KA.spotMechanic,  icon:"\U0001f527",       color:"#a78bfa" },
+  hotel:     { label:KA.spotHotel,     icon:"\U0001f3e8",       color:"#f59e0b" },
 };
 
-// \\u2500\\u2500\\u2500 Alert severity metadata \\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500
-
-export const ALERT_SEVERITY_META: Record<AlertSeverity, { label: string; color: string }> = {
-  low:    { label: "Low",    color: "#22c55e" },
-  medium: { label: "Medium", color: "#f59e0b" },
-  high:   { label: "High",   color: "#ef4444" },
+export const ALERT_SEVERITY_META: Record<AlertSeverity, { label:string; color:string }> = {
+  low:    { label:KA.severityLow,    color:"#22c55e" },
+  medium: { label:KA.severityMedium, color:"#f59e0b" },
+  high:   { label:KA.severityHigh,   color:"#ef4444" },
 };
-
-// \\u2500\\u2500\\u2500 Default filter state \\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500
 
 export const DEFAULT_FILTERS: FilterState = {
-  alertTypes:   ["gravel", "camera", "work", "danger"],
-  difficulties: ["beginner", "intermediate", "advanced", "extreme"],
-  spotTypes:    ["cafe", "fuel", "viewpoint", "rest_area", "mechanic", "hotel"],
-  showRoutes:   true,
-  showAlerts:   true,
-  showSpots:    true,
-  searchQuery:  "",
+  alertTypes:   ["gravel","camera","work","danger"],
+  difficulties: ["beginner","intermediate","advanced","extreme"],
+  spotTypes:    ["cafe","fuel","viewpoint","rest_area","mechanic","hotel"],
+  showRoutes:true, showAlerts:true, showSpots:true, searchQuery:"",
 };
-
-// \\u2500\\u2500\\u2500 UI layout \\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500
 
 export const SIDEBAR_WIDTH_PX = 320;
 """
 
-
-# ── src/lib/utils/index.ts ────────────────────────────────────────────────────
+# ── utils ─────────────────────────────────────────────────────────────────────
 
 FILES["src/lib/utils/index.ts"] = """\
 import type { AsphaltQuality, DifficultyLevel } from "@/lib/types";
 
-/**
- * Formats a route distance with consistent units.
- * Values < 1 km are shown in metres.
- */
 export function formatDistance(km: number): string {
-  if (km < 1)  return `${Math.round(km * 1_000)} m`;
-  if (km < 10) return `${km.toFixed(1)} km`;
-  return `${Math.round(km)} km`;
+  if (km < 1)  return `${Math.round(km * 1_000)} \u10db`;
+  if (km < 10) return `${km.toFixed(1)} \u10d9\u10db`;
+  return `${Math.round(km)} \u10d9\u10db`;
 }
 
-/**
- * Converts minutes to a human-readable duration.
- * 90 \\u2192 "1h 30min",  45 \\u2192 "45 min",  120 \\u2192 "2h"
- */
 export function formatDuration(minutes: number): string {
-  if (minutes < 60) return `${minutes} min`;
-  const h   = Math.floor(minutes / 60);
-  const min = minutes % 60;
-  return min === 0 ? `${h}h` : `${h}h ${min}min`;
+  if (minutes < 60) return `${minutes} \u10ec\u10e3\u10d7`;
+  const h = Math.floor(minutes / 60), min = minutes % 60;
+  return min === 0 ? `${h}\u10e1\u10d7` : `${h}\u10e1\u10d7 ${min}\u10ec\u10e3\u10d7`;
 }
 
-/**
- * Maps a DifficultyLevel to a Tailwind text-colour class.
- */
 export function getDifficultyColour(level: DifficultyLevel): string {
   const map: Record<DifficultyLevel, string> = {
-    beginner:     "text-green-400",
-    intermediate: "text-amber-400",
-    advanced:     "text-orange-400",
-    extreme:      "text-red-400",
+    beginner:"text-green-400", intermediate:"text-amber-400", advanced:"text-orange-400", extreme:"text-red-400",
   };
   return map[level];
 }
 
-/**
- * Returns a short human-readable label for an asphalt quality value.
- */
 export function getAsphaltQualityLabel(quality: AsphaltQuality): string {
   const labels: Record<AsphaltQuality, string> = {
-    excellent: "Excellent surface",
-    good:      "Good surface",
-    fair:      "Fair \\u2014 some wear",
-    poor:      "Poor \\u2014 caution",
-    unpaved:   "Unpaved / gravel",
+    excellent:"\u10e8\u10d4\u10e1\u10d0\u10dc\u10d8\u10e8\u10dc\u10d0\u10d5\u10d8 \u10d6\u10d4\u10d3\u10d0\u10DE\u10d8\u10e0\u10d8",
+    good:"\u10d9\u10d0\u10e0\u10d2\u10d8 \u10d6\u10d4\u10d3\u10d0\u10DE\u10d8\u10e0\u10d8",
+    fair:"\u10d3\u10d0\u10db\u10d0\u10d9\u10db\u10d0\u10e7\u10dd\u10e4\u10d8\u10da\u10d4\u10d1\u10d4\u10da\u10d8",
+    poor:"\u10ea\u10e3\u10d3\u10d8 \u2014 \u10e1\u10d8\u10e4\u10e0\u10d7\u10ee\u10d8\u10da\u10d4\u10d1\u10d0",
+    unpaved:"\u10d0\u10e1\u10e4\u10d0\u10da\u10e2\u10d8\u10e1 \u10d2\u10d0\u10e0\u10d4\u10e8\u10d4",
   };
   return labels[quality];
 }
 
-/**
- * Clamps a numeric value within [min, max].
- */
 export function clamp(value: number, min: number, max: number): number {
   return Math.min(Math.max(value, min), max);
 }
 
-/**
- * Returns a human-readable relative-time string for an ISO 8601 timestamp.
- * e.g. "Just now", "14m ago", "3h ago", "5d ago"
- */
 export function timeAgo(isoString: string): string {
-  const diff  = Date.now() - new Date(isoString).getTime();
-  const mins  = Math.floor(diff / 60_000);
-  const hours = Math.floor(diff / 3_600_000);
-  const days  = Math.floor(diff / 86_400_000);
-
-  if (mins  < 2)  return "Just now";
-  if (mins  < 60) return `${mins}m ago`;
-  if (hours < 24) return `${hours}h ago`;
-  return `${days}d ago`;
+  const diff = Date.now() - new Date(isoString).getTime();
+  const mins = Math.floor(diff / 60_000), hours = Math.floor(diff / 3_600_000), days = Math.floor(diff / 86_400_000);
+  if (mins  < 2)  return "\u10d0\u10ee\u10da\u10d0\u10ee\u10d0\u10dc\u10e1";
+  if (mins  < 60) return `${mins}\u10ec \u10ec\u10d8\u10dc \u10ec\u10d8\u10dc";`;
+  if (hours < 24) return `${hours}\u10e1\u10d7 \u10ec\u10d8\u10dc`;
+  return `${days}\u10d3\u10d8\u10e6\u10d8\u10e1 \u10ec\u10d8\u10dc`;
 }
 
-/**
- * Lightweight class-name merger \\u2014 filters out falsy values.
- * Usage: cn("base", condition && "extra", undefined)
- */
 export function cn(...classes: (string | false | null | undefined)[]): string {
   return classes.filter(Boolean).join(" ");
 }
 """
 
-
-# ── src/store/mockData.ts ─────────────────────────────────────────────────────
+# ══════════════════════════════════════════════════════════════════════════════
+#  MOCK DATA (Georgian)
+# ══════════════════════════════════════════════════════════════════════════════
 
 FILES["src/store/mockData.ts"] = """\
 import type { BikerSpot, RoadAlert, Route } from "@/lib/types";
 
-// \\u2500\\u2500\\u2500 Routes \\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500
-// All coordinates are WGS-84 decimal degrees, verified against OSM.
-// Elevation data sourced from SRTM 30m dataset.
-
 export const MOCK_ROUTES: Route[] = [
   {
-    id:             "r-001",
-    name:           "Georgian Military Highway",
-    description:
-      "The most iconic motorcycle road in the Caucasus. The S3 national highway climbs " +
-      "from Tbilisi\\u2019s suburbs to the 2,379\\u202fm Jvari Pass, passing Ananuri\\u2019s medieval fortress perched above " +
-      "the Jinvali reservoir, the ski resort town of Gudauri, and culminating at Stepantsminda " +
-      "(Kazbegi) with the Gergeti Trinity Church framed against Mount Kazbek (5,047\\u202fm).",
-    difficulty:     "advanced",
-    asphaltQuality: "excellent",
-    coordinates: [
-      { lat: 41.693, lng: 44.801 },
-      { lat: 41.844, lng: 44.720 },
-      { lat: 42.003, lng: 44.700 },
-      { lat: 42.178, lng: 44.671 },
-      { lat: 42.336, lng: 44.569 },
-      { lat: 42.473, lng: 44.487 },
-      { lat: 42.536, lng: 44.471 },
-      { lat: 42.597, lng: 44.531 },
-      { lat: 42.659, lng: 44.658 },
+    id:"r-001", name:"\u10e1\u10d0\u10e5\u10d0\u10e0\u10d7\u10d5\u10d4\u10da\u10dd\u10e1 \u10e1\u10d0\u10db\u10ee\u10d4\u10564\u10e0\u10dd \u10d2\u10d6\u10d0",
+    description:"\u10d9\u10d0\u10d5\u10d9\u10d0\u10e1\u10d8\u10d8\u10e1 \u10e7\u10d5\u10d4\u10da\u10d0\u10d6\u10d4 \u10d8\u10d9\u10dd\u10dc\u10e3\u10e0\u10d8 \u10e1\u10d0\u10d0\u10d5\u10e2\u10dd\u10db\u10dd\u10d1\u10d8\u10da\u10dd \u10d2\u10d6\u10d0. S3 \u10d4\u10e0\u10dd\u10d5\u10dc\u10e3\u10da\u10d8 \u10d2\u10d6\u10d0 \u10d0\u10d3\u10d8\u10e1 \u10d7\u10d1\u10d8\u10da\u10d8\u10e1\u10d8\u10e1 \u10d2\u10d0\u10e0\u10d4\u10e3\u10d1\u10dc\u10d4\u10d1\u10d8\u10d3\u10d0\u10dc 2 379 \u10db-\u10d8\u10d0\u10dc \u10ef\u10d5\u10e0\u10d8\u10e1 \u10e3\u10e6\u10d4\u10da\u10e2\u10d4\u10ee\u10d8\u10da\u10d0\u10db\u10d3\u10d4.",
+    difficulty:"advanced", asphaltQuality:"excellent",
+    coordinates:[
+      {lat:41.693,lng:44.801},{lat:41.844,lng:44.720},{lat:42.003,lng:44.700},
+      {lat:42.178,lng:44.671},{lat:42.336,lng:44.569},{lat:42.473,lng:44.487},
+      {lat:42.536,lng:44.471},{lat:42.597,lng:44.531},{lat:42.659,lng:44.658},
     ],
-    distanceKm:    148,
-    durationMin:   210,
-    elevationGain: 2379,
-    region:        "Mtskheta-Mtianeti",
-    tags:          ["mountain", "panoramic", "switchbacks", "historic", "unesco"],
-    likeCount:     1247,
-    rideCount:     5830,
+    distanceKm:148, durationMin:210, elevationGain:2379,
+    region:"\u10db\u10ea\u10ee\u10d4\u10d7\u10d0-\u10db\u10d7\u10d8\u10d0\u10dc\u10d4\u10d7\u10d8",
+    tags:["\u10db\u10d7\u10d0","\u10de\u10d0\u10dc\u10dd\u10e0\u10d0\u10db\u10d0","\u10e1\u10d4\u10e0\u10de\u10d0\u10dc\u10e2\u10d8\u10dc\u10d8","\u10d8\u10e1\u10e2\u10dd\u10e0\u10d8\u10e3\u10da\u10d8","\u10d8\u10e3\u10dc\u10d4\u10e1\u10d9\u10dd"],
+    likeCount:1247, rideCount:5830,
   },
   {
-    id:             "r-002",
-    name:           "Gombori Pass \\u2014 Kakheti Wine Road",
-    description:
-      "The back-road gateway to Georgia\\u2019s wine heartland. The Gombori range (1,620\\u202fm pass) " +
-      "separates Kartli from the Alazani valley \\u2014 a contrast of dense beech forests on the ascent " +
-      "and vast vineyard plains on the descent into Kakheti.",
-    difficulty:     "intermediate",
-    asphaltQuality: "good",
-    coordinates: [
-      { lat: 41.740, lng: 44.975 },
-      { lat: 41.753, lng: 45.098 },
-      { lat: 41.789, lng: 45.212 },
-      { lat: 41.801, lng: 45.280 },
-      { lat: 41.835, lng: 45.361 },
-      { lat: 41.924, lng: 45.481 },
-      { lat: 41.841, lng: 45.716 },
-      { lat: 41.612, lng: 45.571 },
+    id:"r-002", name:"\u10d2\u10dd\u10db\u10d1\u10dd\u10e0\u10d8\u10e1 \u10e3\u10e6\u10d4\u10da\u10e2\u10d4\u10ee\u10d8\u10da\u10d8 \u2014 \u10d9\u10d0\u10ee\u10d4\u10d7\u10d8\u10e1 \u10e6\u10d5\u10d8\u10dc\u10d8\u10e1 \u10d2\u10d6\u10d0",
+    description:"\u10d9\u10d0\u10ee\u10d4\u10d7\u10d8\u10e1 \u10e6\u10d5\u10d8\u10dc\u10d8\u10e1 \u10e1\u10d0\u10db\u10d4\u10e4\u10dd\u10e8\u10d8 \u10e8\u10d4\u10e1\u10d0\u10e1\u10d5\u10da\u10d4\u10da\u10d8 \u10d2\u10d5\u10d4\u10e0\u10d3\u10d8\u10d7\u10d8 \u10d2\u10d6\u10d0. \u10d2\u10dd\u10db\u10d1\u10dd\u10e0\u10d8\u10e1 \u10e5\u10d4\u10564\u10d8 (1 620 \u10db) \u10d2\u10d0\u10db\u10dd\u10e7\u10dd\u10e4\u10e1 \u10e5\u10d0\u10e0\u10d7\u10da\u10e1 \u10d0\u10da\u10d0\u10d6\u10dc\u10d8\u10e1 \u10d5\u10d4\u10da\u10d8\u10d3\u10d0\u10dc.",
+    difficulty:"intermediate", asphaltQuality:"good",
+    coordinates:[
+      {lat:41.740,lng:44.975},{lat:41.753,lng:45.098},{lat:41.789,lng:45.212},
+      {lat:41.801,lng:45.280},{lat:41.835,lng:45.361},{lat:41.924,lng:45.481},
+      {lat:41.841,lng:45.716},{lat:41.612,lng:45.571},
     ],
-    distanceKm:    102,
-    durationMin:   145,
-    elevationGain: 1621,
-    region:        "Kakheti",
-    tags:          ["mountain", "wine-country", "beech-forest", "panoramic", "weekend-ride"],
-    likeCount:     893,
-    rideCount:     3210,
+    distanceKm:102, durationMin:145, elevationGain:1621,
+    region:"\u10d9\u10d0\u10ee\u10d4\u10d7\u10d8",
+    tags:["\u10db\u10d7\u10d0","\u10e6\u10d5\u10d8\u10dc\u10dd","\u10e1\u10d0\u10e0\u10d7\u10e3\u10da\u10d0-\u10e2\u10e7\u10d4","\u10de\u10d0\u10dc\u10dd\u10e0\u10d0\u10db\u10d0"],
+    likeCount:893, rideCount:3210,
   },
   {
-    id:             "r-003",
-    name:           "Svaneti Road \\u2014 Enguri Gorge",
-    description:
-      "Georgia\\u2019s most dramatic and demanding route. The road to Mestia follows the Enguri River " +
-      "through an increasingly narrow gorge before climbing into Svaneti \\u2014 a region of medieval " +
-      "defensive towers and glaciated 4,000+\\u202fm peaks.",
-    difficulty:     "extreme",
-    asphaltQuality: "poor",
-    coordinates: [
-      { lat: 42.508, lng: 41.871 },
-      { lat: 42.574, lng: 42.045 },
-      { lat: 42.645, lng: 42.197 },
-      { lat: 42.706, lng: 42.396 },
-      { lat: 42.798, lng: 42.515 },
-      { lat: 42.878, lng: 42.594 },
-      { lat: 42.957, lng: 42.661 },
-      { lat: 43.031, lng: 42.732 },
+    id:"r-003", name:"\u10e1\u10d5\u10d0\u10dc\u10d4\u10d7\u10d8\u10e1 \u10d2\u10d6\u10d0 \u2014 \u10d4\u10dc\u10d2\u10e3\u10e0\u10d8\u10e1 \u10ee\u10d4\u10dd\u10d1\u10d0",
+    description:"\u10e1\u10d0\u10e5\u10d0\u10e0\u10d7\u10d5\u10d4\u10da\u10dd\u10e1 \u10e7\u10d5\u10d4\u10da\u10d0\u10d6\u10d4 \u10564\u10e0\u10d0\u10db\u10d0\u10e2\u10e3\u10da\u10d8 \u10d3\u10d0 \u10db\u10dd\u10db\u10d7\u10ee\u10dd\u10d5\u10dc\u10d8 \u10db\u10d0\u10e0\u10e8\u10e0\u10e3\u10e2\u10d8. \u10db\u10d4\u10e1\u10e2\u10d8\u10d8\u10e1\u10d0\u10d9\u10d4\u10dc \u10db\u10d8\u10db\u10d0\u10d5\u10d0\u10da\u10d8 \u10d2\u10d6\u10d0 \u10d4\u10dc\u10d2\u10e3\u10e0\u10d8\u10e1 \u10db\u10564\u10d8\u10dc\u10d0\u10e0\u10d8\u10e1 \u10d2\u10d0\u10e1\u10ec\u10d5\u10e0\u10d8\u10d5 \u10db\u10d8\u10d3\u10d8\u10e1 \u10e1\u10e3\u10da \u10e3\u10e4\u10e0\u10dd \u10d5\u10d8\u10ec\u10e0\u10dd \u10ee\u10d4\u10dd\u10d1\u10d0\u10e8\u10d8.",
+    difficulty:"extreme", asphaltQuality:"poor",
+    coordinates:[
+      {lat:42.508,lng:41.871},{lat:42.574,lng:42.045},{lat:42.645,lng:42.197},
+      {lat:42.706,lng:42.396},{lat:42.798,lng:42.515},{lat:42.878,lng:42.594},
+      {lat:42.957,lng:42.661},{lat:43.031,lng:42.732},
     ],
-    distanceKm:    132,
-    durationMin:   300,
-    elevationGain: 1890,
-    region:        "Samegrelo-Zemo Svaneti",
-    tags:          ["extreme", "gravel", "gorge", "alpine", "unesco", "adventure"],
-    likeCount:     2104,
-    rideCount:     1520,
+    distanceKm:132, durationMin:300, elevationGain:1890,
+    region:"\u10e1\u10d0\u10db\u10d4\u10d2\u10e0\u10d4\u10da\u10dd-\u10d6\u10d4\u10db\u10dd \u10e1\u10d5\u10d0\u10dc\u10d4\u10d7\u10d8",
+    tags:["\u10d4\u10e5\u10e1\u10e2\u10e0\u10d4\u10db\u10d0\u10da\u10e3\u10e0\u10d8","\u10ee\u10e0\u10d4\u10e8\u10d8","\u10ee\u10d4\u10dd\u10d1\u10d0","\u10d0\u10da\u10de\u10e3\u10e0\u10d8","\u10d8\u10e3\u10dc\u10d4\u10e1\u10d9\u10dd"],
+    likeCount:2104, rideCount:1520,
   },
   {
-    id:             "r-004",
-    name:           "Adjara Black Sea Coastal Loop",
-    description:
-      "Georgia\\u2019s most relaxed ride \\u2014 freshly paved coastal highway from Batumi heading north " +
-      "along the Black Sea. Subtropical vegetation, black-sand beaches, and palm-lined promenades.",
-    difficulty:     "beginner",
-    asphaltQuality: "excellent",
-    coordinates: [
-      { lat: 41.641, lng: 41.636 },
-      { lat: 41.668, lng: 41.672 },
-      { lat: 41.819, lng: 41.777 },
-      { lat: 41.896, lng: 41.813 },
-      { lat: 41.974, lng: 41.797 },
-      { lat: 42.090, lng: 41.712 },
-      { lat: 42.148, lng: 41.673 },
+    id:"r-004", name:"\u10d0\u10ed\u10d0\u10e0\u10d8\u10e1 \u10e8\u10d0\u10d5\u10d8 \u10d6\u10e6\u10d5\u10d8\u10e1 \u10e1\u10d0\u10dc\u10d0\u10de\u10d8\u10e0\u10dd \u10db\u10d0\u10e0\u10e8\u10e0\u10e3\u10e2\u10d8",
+    description:"\u10e1\u10d0\u10e5\u10d0\u10e0\u10d7\u10d5\u10d4\u10da\u10dd\u10e1 \u10e7\u10d5\u10d4\u10da\u10d0\u10d6\u10d4 \u10db\u10dd\u10564\u10e3\u10dc\u10d4\u10d1\u10e3\u10da\u10d8 \u10d2\u10d0\u10e1\u10d4\u10d8\u10e0\u10dc\u10d4\u10d1\u10d0 \u2014 \u10d0\u10ee\u10da\u10d0\u10564\u10d0\u10e1\u10e4\u10d0\u10da\u10e2\u10d4\u10d1\u10e3\u10da\u10d8 \u10e1\u10d0\u10dc\u10d0\u10de\u10d8\u10e0\u10dd \u10d2\u10d6\u10d0 \u10d1\u10d0\u10d7\u10e3\u10db\u10d8\u10d3\u10d0\u10dc \u10e9\u10e0\u10d3\u10d8\u10da\u10dd\u10d4\u10d7\u10d8\u10d7.",
+    difficulty:"beginner", asphaltQuality:"excellent",
+    coordinates:[
+      {lat:41.641,lng:41.636},{lat:41.668,lng:41.672},{lat:41.819,lng:41.777},
+      {lat:41.896,lng:41.813},{lat:41.974,lng:41.797},{lat:42.090,lng:41.712},
+      {lat:42.148,lng:41.673},
     ],
-    distanceKm:    68,
-    durationMin:   85,
-    elevationGain: 95,
-    region:        "Adjara / Guria",
-    tags:          ["coastal", "sea", "easy", "flat", "subtropical", "scenic"],
-    likeCount:     671,
-    rideCount:     2890,
+    distanceKm:68, durationMin:85, elevationGain:95,
+    region:"\u10d0\u10ed\u10d0\u10e0\u10d0 / \u10d2\u10e3\u10e0\u10d8\u10d0",
+    tags:["\u10e1\u10d0\u10dc\u10d0\u10de\u10d8\u10e0\u10dd","\u10d6\u10e6\u10d5\u10d0","\u10db\u10d0\u10e0\u10e2\u10d8\u10d5\u10d8","\u10d5\u10d0\u10d9\u10d4"],
+    likeCount:671, rideCount:2890,
   },
   {
-    id:             "r-005",
-    name:           "Borjomi Gorge \\u2014 Bakuriani Alpine",
-    description:
-      "The Borjomi gorge section is silky smooth asphalt through a narrow river canyon lined " +
-      "with mineral springs (Borjomi-Kharagauli National Park). After Borjomi town the road " +
-      "climbs steeply to Bakuriani ski resort on partially patched asphalt.",
-    difficulty:     "intermediate",
-    asphaltQuality: "fair",
-    coordinates: [
-      { lat: 41.983, lng: 44.112 },
-      { lat: 41.921, lng: 44.026 },
-      { lat: 41.840, lng: 43.537 },
-      { lat: 41.839, lng: 43.399 },
-      { lat: 41.855, lng: 43.333 },
-      { lat: 41.750, lng: 43.523 },
-      { lat: 41.749, lng: 43.523 },
+    id:"r-005", name:"\u10d1\u10dd\u10e0\u10ef\u10dd\u10db\u10d8\u10e1 \u10ee\u10d4\u10dd\u10d1\u10d0 \u2014 \u10d1\u10d0\u10d9\u10e3\u10e0\u10d8\u10d0\u10dc\u10d8\u10e1 \u10d0\u10da\u10de\u10e3\u10e0\u10d8",
+    description:"\u10dd\u10e0\u10d8 \u10d6\u10d4\u10d3\u10d0\u10DE\u10d8\u10e0\u10d8\u10e1 \u10d0\u10db\u10d1\u10d0\u10d5\u10d8: \u10d1\u10dd\u10e0\u10ef\u10dd\u10db\u10d8\u10e1 \u10ee\u10d4\u10dd\u10d1\u10d8\u10e1 \u10db\u10dd\u10dc\u10d0\u10d9\u10d5\u10d4\u10d7\u10d8 \u2014 \u10d5\u10d8\u10ec\u10e0\u10dd \u10d9\u10d0\u10dc\u10d8\u10dd\u10dc\u10d8 \u10db\u10d8\u10dc\u10d4\u10e0\u10d0\u10da\u10e3\u10e0\u10d8 \u10ec\u10e7\u10d0\u10e0\u10dd\u10d4\u10d1\u10d8\u10d7.",
+    difficulty:"intermediate", asphaltQuality:"fair",
+    coordinates:[
+      {lat:41.983,lng:44.112},{lat:41.921,lng:44.026},{lat:41.840,lng:43.537},
+      {lat:41.839,lng:43.399},{lat:41.855,lng:43.333},{lat:41.750,lng:43.523},
+      {lat:41.749,lng:43.523},
     ],
-    distanceKm:    88,
-    durationMin:   120,
-    elevationGain: 1340,
-    region:        "Samtskhe-Javakheti / Shida Kartli",
-    tags:          ["gorge", "spa", "alpine", "mineral-springs", "national-park"],
-    likeCount:     445,
-    rideCount:     1760,
+    distanceKm:88, durationMin:120, elevationGain:1340,
+    region:"\u10e1\u10d0\u10db\u10ea\u10ee\u10d4-\u10ef\u10d0\u10d5\u10d0\u10ee\u10d4\u10d7\u10d8 / \u10e8\u10d8\u10564\u10d0 \u10e5\u10d0\u10e0\u10d7\u10da\u10d8",
+    tags:["\u10ee\u10d4\u10dd\u10d1\u10d0","\u10e1\u10de\u10d0","\u10d0\u10da\u10de\u10e3\u10e0\u10d8","\u10d4\u10e0\u10dd\u10d5\u10dc\u10e3\u10da\u10d8-\u10de\u10d0\u10e0\u10d9\u10d8"],
+    likeCount:445, rideCount:1760,
   },
 ];
-
-// \\u2500\\u2500\\u2500 Road alerts \\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500
 
 export const MOCK_ALERTS: RoadAlert[] = [
-  {
-    id:          "a-001",
-    type:        "gravel",
-    lat:         42.503,
-    lng:         44.469,
-    description:
-      "Landslide debris across both lanes approx. 300\\u202fm below the Jvari Pass summit. " +
-      "Loose schist chips and gravel \\u2014 cornering grip severely reduced. Max 35 km/h.",
-    severity:    "high",
-    radius:      400,
-    verified:    true,
-    reportedAt:  new Date(Date.now() - 4  * 3_600_000).toISOString(),
-    expiresAt:   new Date(Date.now() + 72 * 3_600_000).toISOString(),
-  },
-  {
-    id:          "a-002",
-    type:        "camera",
-    lat:         41.786,
-    lng:         45.103,
-    description:
-      "Fixed radar camera on the Tbilisi\\u2013Kakheti highway (E60) at the Sagarejo bypass. " +
-      "Limit strictly enforced at 90 km/h. Camera active 24/7.",
-    severity:    "low",
-    radius:      150,
-    verified:    true,
-    reportedAt:  new Date(Date.now() - 30 * 86_400_000).toISOString(),
-    expiresAt:   null,
-  },
-  {
-    id:          "a-003",
-    type:        "work",
-    lat:         42.706,
-    lng:         42.395,
-    description:
-      "Bridge reinforcement works at the Enguri Dam access road. Single-lane alternating " +
-      "traffic controlled by flag operators. Expect 20\\u201340 min delays weekdays 08:00\\u201318:00.",
-    severity:    "medium",
-    radius:      1_200,
-    verified:    true,
-    reportedAt:  new Date(Date.now() - 5 * 86_400_000).toISOString(),
-    expiresAt:   new Date(Date.now() + 45 * 86_400_000).toISOString(),
-  },
-  {
-    id:          "a-004",
-    type:        "danger",
-    lat:         42.536,
-    lng:         44.471,
-    description:
-      "Jvari Pass summit \\u2014 extreme caution in wet/icy conditions. " +
-      "Series of blind hairpin bends at 2,379\\u202fm. Sheer drops on the north face with no armco barriers.",
-    severity:    "high",
-    radius:      800,
-    verified:    true,
-    reportedAt:  new Date(Date.now() - 60 * 86_400_000).toISOString(),
-    expiresAt:   null,
-  },
-  {
-    id:          "a-005",
-    type:        "gravel",
-    lat:         41.755,
-    lng:         43.530,
-    description:
-      "Gravel spread on the Borjomi\\u2013Bakuriani road between km 14\\u201318. " +
-      "Road maintenance trucks actively working \\u2014 expect loose stones thrown by vehicle traffic.",
-    severity:    "medium",
-    radius:      2_500,
-    verified:    false,
-    reportedAt:  new Date(Date.now() - 90 * 60_000).toISOString(),
-    expiresAt:   new Date(Date.now() + 48 * 3_600_000).toISOString(),
-  },
-  {
-    id:          "a-006",
-    type:        "work",
-    lat:         41.693,
-    lng:         44.880,
-    description:
-      "Tbilisi ring road resurfacing project \\u2014 right-hand lane closed outbound. " +
-      "Narrow contra-flow in operation. Standard car speed: 60 km/h.",
-    severity:    "low",
-    radius:      3_000,
-    verified:    true,
-    reportedAt:  new Date(Date.now() - 10 * 86_400_000).toISOString(),
-    expiresAt:   new Date(Date.now() + 21 * 86_400_000).toISOString(),
-  },
+  { id:"a-001", type:"gravel", lat:42.503, lng:44.469,
+    description:"\u10db\u10d4\u10ec\u10e7\u10e0\u10e3\u10da\u10d8 \u10dc\u10d0\u10e0\u10e9\u10d4\u10dc\u10d4\u10d1\u10d8 \u10dd\u10e0\u10d8\u10d5\u10d4 \u10d6\u10dd\u10da\u10e8\u10d8 \u10ef\u10d5\u10e0\u10d8\u10e1 \u10e3\u10e6\u10d4\u10da\u10e2\u10d4\u10ee\u10d8\u10da\u10d8\u10e1 \u10db\u10ec\u10d5\u10d4\u10e0\u10d5\u10d0\u10da\u10d8\u10d3\u10d0\u10dc \u10564\u10d0\u10ee\u10da\u10dd\u10d1\u10d8\u10d7 300 \u10db-\u10d6\u10d4. \u10db\u10d0\u10e5\u10e1. 35 \u10d9\u10db/\u10e1\u10d7.",
+    severity:"high", radius:400, verified:true,
+    reportedAt:new Date(Date.now()-4*3_600_000).toISOString(),
+    expiresAt:new Date(Date.now()+72*3_600_000).toISOString() },
+  { id:"a-002", type:"camera", lat:41.786, lng:45.103,
+    description:"\u10e4\u10d8\u10e5\u10e1\u10d8\u10e0\u10d4\u10d1\u10e3\u10da\u10d8 \u10e1\u10d8\u10e9\u10e5\u10d0\u10e0\u10d8\u10e1 \u10d9\u10d0\u10db\u10d4\u10e0\u10d0 \u10d7\u10d1\u10d8\u10da\u10d8\u10e1\u10d8-\u10d9\u10d0\u10ee\u10d4\u10d7\u10d8\u10e1 \u10d2\u10d6\u10d0\u10d6\u10d4 (E60), \u10e1\u10d0\u10d2\u10d0\u10e0\u10d4\u10ef\u10dd\u10e1 \u10d2\u10d5\u10d4\u10e0\u10d3\u10d8\u10e1 \u10d0\u10d5\u10da\u10d8\u10e1 \u10e8\u10d4\u10e1\u10d0\u10ee\u10d5\u10d4\u10d5\u10d6\u10d4. 90 \u10d9\u10db/\u10e1\u10d7, 24/7.",
+    severity:"low", radius:150, verified:true,
+    reportedAt:new Date(Date.now()-30*86_400_000).toISOString(), expiresAt:null },
+  { id:"a-003", type:"work", lat:42.706, lng:42.395,
+    description:"\u10ee\u10d8\u10564\u10d8\u10e1 \u10d2\u10d0\u10db\u10d0\u10d2\u10e0\u10d4\u10d1\u10d8\u10e1 \u10e1\u10d0\u10db\u10e3\u10e8\u10d0\u10dd\u10d4\u10d1\u10d8 \u10d4\u10dc\u10d2\u10e3\u10e0\u10d8\u10e1 \u10d9\u10d0\u10e8\u10ee\u10d0\u10da\u10d8\u10e1 \u10d2\u10d6\u10d0\u10d6\u10d4. \u10d4\u10e0\u10d7\u10d8 \u10d6\u10dd\u10da\u10d8, 20\u201340 \u10ec\u10e3\u10d7\u10d8\u10e1 \u10564\u10d0\u10d2\u10d5\u10d8\u10d0\u10dc\u10d4\u10d1\u10d0.",
+    severity:"medium", radius:1_200, verified:true,
+    reportedAt:new Date(Date.now()-5*86_400_000).toISOString(),
+    expiresAt:new Date(Date.now()+45*86_400_000).toISOString() },
+  { id:"a-004", type:"danger", lat:42.536, lng:44.471,
+    description:"\u10ef\u10d5\u10e0\u10d8\u10e1 \u10e3\u10e6\u10d4\u10da\u10e2\u10d4\u10ee\u10d8\u10da\u10d8 \u2014 \u10e3\u10d9\u10d8\u10564\u10e3\u10e0\u10d4\u10e1\u10d8 \u10e1\u10d8\u10e4\u10e0\u10d7\u10ee\u10d8\u10da\u10d4\u10d1\u10d0 \u10e1\u10d5\u10d4\u10da/\u10e7\u10d8\u10dc\u10d5\u10d8\u10d0\u10dc \u10de\u10d8\u10e0\u10dd\u10d1\u10d4\u10d1\u10e8\u10d8. \u10d1\u10e0\u10db\u10d0 \u10e1\u10d4\u10e0\u10de\u10d0\u10dc\u10e2\u10d8\u10dc\u10d4\u10d1\u10d8 2 379 \u10db \u10e1\u10d8\u10db\u10d0\u10e6\u10da\u10d4\u10d6\u10d4.",
+    severity:"high", radius:800, verified:true,
+    reportedAt:new Date(Date.now()-60*86_400_000).toISOString(), expiresAt:null },
+  { id:"a-005", type:"gravel", lat:41.755, lng:43.530,
+    description:"\u10ee\u10e0\u10d4\u10e8\u10d8 \u10d1\u10dd\u10e0\u10ef\u10dd\u10db\u10d8-\u10d1\u10d0\u10d9\u10e3\u10e0\u10d8\u10d0\u10dc\u10d8\u10e1 \u10d2\u10d6\u10d0\u10d6\u10d4, \u10d9\u10db 14\u201318 \u10e8\u10dd\u10e0\u10d8\u10e1. \u10e1\u10d0\u10e0\u10d4\u10db\u10dd\u10dc\u10e2\u10dd \u10e1\u10d0\u10e2\u10d5\u10d8\u10e0\u10d7\u10dd \u10d0\u10d5\u10e2\u10dd\u10db\u10dd\u10d1\u10d8\u10da\u10d4\u10d1\u10d8 \u10db\u10e3\u10e8\u10d0\u10dd\u10d1\u10d4\u10dc.",
+    severity:"medium", radius:2_500, verified:false,
+    reportedAt:new Date(Date.now()-90*60_000).toISOString(),
+    expiresAt:new Date(Date.now()+48*3_600_000).toISOString() },
+  { id:"a-006", type:"work", lat:41.693, lng:44.880,
+    description:"\u10d7\u10d1\u10d8\u10da\u10d8\u10e1\u10d8\u10e1 \u10d2\u10d5\u10d4\u10e0\u10d3\u10d8\u10e1 \u10d0\u10d5\u10da\u10d8\u10e1 \u10d2\u10d6\u10d8\u10e1 \u10d0\u10e1\u10e4\u10d0\u10da\u10e2\u10d8\u10e1 \u10e1\u10d0\u10db\u10e3\u10e8\u10d0\u10dd\u10d4\u10d1\u10d8 \u2014 \u10db\u10d0\u10e0\u10ef\u10d5\u10d4\u10dc\u10d0 \u10d6\u10dd\u10da\u10d8 \u10d2\u10d0\u10564\u10d0\u10d9\u10d4\u10e2\u10d8\u10da\u10d8\u10d0.",
+    severity:"low", radius:3_000, verified:true,
+    reportedAt:new Date(Date.now()-10*86_400_000).toISOString(),
+    expiresAt:new Date(Date.now()+21*86_400_000).toISOString() },
 ];
 
-// \\u2500\\u2500\\u2500 Biker spots \\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500
-
 export const MOCK_SPOTS: BikerSpot[] = [
-  { id: "s-001", name: "Iron Horse Tbilisi",         type: "cafe",      lat: 41.693, lng: 44.803, address: "14 Kostava St, Tbilisi 0108",                      phone: "+995 32 292 0014", rating: 4.9, verified: true  },
-  { id: "s-002", name: "Ananuri Summit Viewpoint",    type: "viewpoint", lat: 42.178, lng: 44.671, address: "Georgian Military Highway, km 72",                  phone: undefined,          rating: 4.7, verified: true  },
-  { id: "s-003", name: "Stepantsminda Riders Point",  type: "cafe",      lat: 42.657, lng: 44.654, address: "1 Kazbegi Central Sq., Stepantsminda",             phone: "+995 599 00 1234", rating: 4.8, verified: true  },
-  { id: "s-004", name: "Zugdidi Last Stop \\u2014 Fuel & Rest", type: "fuel", lat: 42.509, lng: 41.876, address: "Svaneti Highway, Zugdidi outskirts",    phone: undefined,          rating: 4.2, verified: true  },
-  { id: "s-005", name: "Signagi Panorama Terrace",    type: "viewpoint", lat: 41.612, lng: 45.571, address: "Old Town Signagi, Kakheti",                        phone: undefined,          rating: 4.9, verified: true  },
-  { id: "s-006", name: "Batumi Riders Hub",           type: "cafe",      lat: 41.641, lng: 41.636, address: "8 Ninoshvili St, Batumi 6000",                     phone: "+995 422 271 500", rating: 4.6, verified: true  },
-  { id: "s-007", name: "Gudauri Alpine Rest Area",    type: "rest_area", lat: 42.473, lng: 44.487, address: "Georgian Military Highway, km 133 (Gudauri)",      phone: undefined,          rating: 4.1, verified: true  },
-  { id: "s-008", name: "Borjomi Mineral Springs Stop",type: "rest_area", lat: 41.839, lng: 43.399, address: "Borjomi Central Park, Borjomi",                    phone: undefined,          rating: 4.5, verified: true  },
+  { id:"s-001", name:"Iron Horse \u10d7\u10d1\u10d8\u10da\u10d8\u10e1\u10d8",   type:"cafe",      lat:41.693, lng:44.803, address:"\u10d9\u10dd\u10e1\u10e2\u10d0\u10d5\u10d0\u10e1 \u10e5. 14, \u10d7\u10d1\u10d8\u10da\u10d8\u10e1\u10d8 0108", phone:"+995 32 292 0014", rating:4.9, verified:true },
+  { id:"s-002", name:"\u10d0\u10dc\u10d0\u10dc\u10e3\u10e0\u10d8\u10e1 \u10de\u10d0\u10dc\u10dd\u10e0\u10d0\u10db\u10d0",  type:"viewpoint", lat:42.178, lng:44.671, address:"\u10e1\u10d0\u10db\u10ee\u10d4\u10564\u10e0\u10dd \u10d2\u10d6\u10d0, \u10d9\u10db 72", phone:undefined, rating:4.7, verified:true },
+  { id:"s-003", name:"\u10e1\u10e2\u10d4\u10e4\u10d0\u10dc\u10ec\u10db\u10d8\u10dc\u10564\u10d8\u10e1 \u10d1\u10d8\u10d9\u10d4\u10e0-\u10de\u10dd\u10d8\u10dc\u10e2\u10d8", type:"cafe",      lat:42.657, lng:44.654, address:"\u10e7\u10d0\u10d6\u10d1\u10d4\u10d2\u10d8\u10e1 \u10ea. \u10db\u10dd\u10d4\u10564\u10d0\u10dc\u10d8 1, \u10e1\u10e2\u10d4\u10e4\u10d0\u10dc\u10ec\u10db\u10d8\u10dc\u10564\u10d0", phone:"+995 599 00 1234", rating:4.8, verified:true },
+  { id:"s-004", name:"\u10d6\u10e3\u10d2\u10564\u10d8\u10564\u10d8\u10e1 \u10d1\u10dd\u10da\u10dd \u10d2\u10d0\u10e9\u10d4\u10e0\u10d4\u10d1\u10d0", type:"fuel",      lat:42.509, lng:41.876, address:"\u10e1\u10d5\u10d0\u10dc\u10d4\u10d7\u10d8\u10e1 \u10d2\u10d6\u10d0, \u10d6\u10e3\u10d2\u10564\u10d8\u10564\u10d8\u10e1 \u10d2\u10d0\u10e0\u10d4\u10e3\u10d1\u10d0\u10dc\u10d8", phone:undefined, rating:4.2, verified:true },
+  { id:"s-005", name:"\u10e1\u10d8\u10d6\u10dc\u10d0\u10e1 \u10de\u10d0\u10dc\u10dd\u10e0\u10d0\u10db\u10e3\u10da\u10d8 \u10d0\u10d8\u10d5\u10d0\u10dc\u10d8",  type:"viewpoint", lat:41.612, lng:45.571, address:"\u10eb\u10d5\u10d4\u10da\u10d8 \u10e1\u10d8\u10d6\u10dc\u10d0\u10d2\u10d8, \u10d9\u10d0\u10ee\u10d4\u10d7\u10d8",   phone:undefined, rating:4.9, verified:true },
+  { id:"s-006", name:"\u10d1\u10d0\u10d7\u10e3\u10db\u10d8\u10e1 \u10d1\u10d8\u10d9\u10d4\u10e0-\u10f0\u10d0\u10d1\u10d8",   type:"cafe",      lat:41.641, lng:41.636, address:"\u10dc\u10d8\u10dc\u10dd\u10e8\u10d5\u10d8\u10da\u10d8\u10e1 \u10e5. 8, \u10d1\u10d0\u10d7\u10e3\u10db\u10d8 6000",   phone:"+995 422 271 500", rating:4.6, verified:true },
+  { id:"s-007", name:"\u10d2\u10e3\u10564\u10d0\u10e3\u10e0\u10d8\u10e1 \u10d0\u10da\u10de\u10e3\u10e0\u10d8 \u10564\u10d0\u10e1\u10d5\u10d4\u10dc\u10d4\u10d1\u10d8\u10e1 \u10d6\u10dd\u10dc\u10d0", type:"rest_area", lat:42.473, lng:44.487, address:"\u10e1\u10d0\u10db\u10ee\u10d4\u10564\u10e0\u10dd \u10d2\u10d6\u10d0, \u10d9\u10db 133 (\u10d2\u10e3\u10564\u10d0\u10e3\u10e0\u10d8)", phone:undefined, rating:4.1, verified:true },
+  { id:"s-008", name:"\u10d1\u10dd\u10e0\u10ef\u10dd\u10db\u10d8\u10e1 \u10db\u10d8\u10dc\u10d4\u10e0\u10d0\u10da\u10e3\u10e0\u10d8 \u10ec\u10e7\u10d0\u10e0\u10dd\u10d4\u10d1\u10d8\u10e1 \u10d2\u10d0\u10e9\u10d4\u10e0\u10d4\u10d1\u10d0", type:"rest_area", lat:41.839, lng:43.399, address:"\u10d1\u10dd\u10e0\u10ef\u10dd\u10db\u10d8\u10e1 \u10ea. \u10de\u10d0\u10e0\u10d9\u10d8, \u10d1\u10dd\u10e0\u10ef\u10dd\u10db\u10d8", phone:undefined, rating:4.5, verified:true },
 ];
 """
 
+# ══════════════════════════════════════════════════════════════════════════════
+#  AUTH FEATURE
+# ══════════════════════════════════════════════════════════════════════════════
 
-# ── src/features/filters/hooks/useRouteFilters.ts ─────────────────────────────
+FILES["src/features/auth/types.ts"] = """\
+export interface AuthUser {
+  id:string; name:string; email:string; motorcycleModel:string; joinedAt:string;
+}
+export type AuthModalTab = "login"|"register";
+export interface LoginCredentials    { email:string; password:string; }
+export interface RegisterCredentials { name:string; email:string; motorcycleModel:string; password:string; }
+export interface AuthContextValue {
+  user:AuthUser|null; isAuthenticated:boolean;
+  isModalOpen:boolean; modalTab:AuthModalTab;
+  openModal:(tab?:AuthModalTab)=>void; closeModal:()=>void;
+  login:(credentials:LoginCredentials)=>Promise<void>;
+  register:(credentials:RegisterCredentials)=>Promise<void>;
+  logout:()=>void;
+}
+"""
+
+FILES["src/features/auth/context/AuthContext.tsx"] = '''\
+"use client";
+import { createContext, useCallback, useContext, useState, type ReactNode } from "react";
+import type { AuthContextValue, AuthModalTab, AuthUser, LoginCredentials, RegisterCredentials } from "@/features/auth/types";
+
+const AuthContext = createContext<AuthContextValue|null>(null);
+
+export function AuthProvider({ children }: { children:ReactNode }): React.ReactElement {
+  const [user,        setUser]        = useState<AuthUser|null>(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [modalTab,    setModalTab]    = useState<AuthModalTab>("login");
+
+  const openModal  = useCallback((tab:AuthModalTab="login") => { setModalTab(tab); setIsModalOpen(true);  }, []);
+  const closeModal = useCallback(() => setIsModalOpen(false), []);
+
+  const login = useCallback(async ({ email }: LoginCredentials): Promise<void> => {
+    setUser({ id:`u-${Date.now()}`, name:email.split("@")[0]??"Biker", email, motorcycleModel:"", joinedAt:new Date().toISOString() });
+    setIsModalOpen(false);
+  }, []);
+
+  const register = useCallback(async (c: RegisterCredentials): Promise<void> => {
+    setUser({ id:`u-${Date.now()}`, name:c.name, email:c.email, motorcycleModel:c.motorcycleModel, joinedAt:new Date().toISOString() });
+    setIsModalOpen(false);
+  }, []);
+
+  const logout = useCallback(() => setUser(null), []);
+
+  return (
+    <AuthContext.Provider value={{ user, isAuthenticated:user!==null, isModalOpen, modalTab, openModal, closeModal, login, register, logout }}>
+      {children}
+    </AuthContext.Provider>
+  );
+}
+
+export function useAuth(): AuthContextValue {
+  const ctx = useContext(AuthContext);
+  if (!ctx) throw new Error("useAuth must be used inside <AuthProvider>");
+  return ctx;
+}
+'''
+
+FILES["src/features/auth/components/AuthModal.tsx"] = '''\
+"use client";
+import { useState, useEffect, useRef, type FormEvent, type ChangeEvent } from "react";
+import { X, Map, Mail, Lock, User, Bike, Eye, EyeOff } from "lucide-react";
+import { useAuth } from "@/features/auth/context/AuthContext";
+import { KA } from "@/lib/i18n/ka";
+import { cn } from "@/lib/utils";
+
+interface FieldProps {
+  label:string; type?:string; value:string;
+  onChange:(e:ChangeEvent<HTMLInputElement>)=>void;
+  placeholder:string; icon:React.ReactNode; autoComplete?:string;
+}
+
+function Field({ label, type="text", value, onChange, placeholder, icon, autoComplete }: FieldProps): React.ReactElement {
+  const [showPwd, setShowPwd] = useState(false);
+  const isPwd = type==="password";
+  return (
+    <div className="flex flex-col gap-1.5">
+      <label className="text-xs font-semibold text-zinc-400 tracking-wide">{label}</label>
+      <div className="relative flex items-center">
+        <span className="absolute left-3 text-zinc-500" aria-hidden="true">{icon}</span>
+        <input type={isPwd&&showPwd?"text":type} value={value} onChange={onChange} placeholder={placeholder}
+          autoComplete={autoComplete} required
+          className={cn("h-10 w-full rounded-xl bg-zinc-800/70 pl-9 pr-4 text-sm text-zinc-200",
+            "placeholder:text-zinc-600 border border-zinc-700",
+            "focus:outline-none focus:border-amber-500/60 focus:ring-2 focus:ring-amber-500/20 transition-all duration-150",
+            isPwd&&"pr-10")} />
+        {isPwd && (
+          <button type="button" aria-label="Toggle password" onClick={()=>setShowPwd(v=>!v)}
+            className="absolute right-3 text-zinc-500 hover:text-zinc-300 transition-colors">
+            {showPwd?<EyeOff size={15}/>:<Eye size={15}/>}
+          </button>
+        )}
+      </div>
+    </div>
+  );
+}
+
+export function AuthModal(): React.ReactElement|null {
+  const { isModalOpen, modalTab, openModal, closeModal, login, register } = useAuth();
+  const tab = modalTab;
+  const [email,setEmail]=useState(""); const [password,setPassword]=useState("");
+  const [name,setName]=useState(""); const [moto,setMoto]=useState("");
+  const [loading,setLoading]=useState(false); const [error,setError]=useState<string|null>(null);
+  const backdropRef = useRef<HTMLDivElement>(null);
+
+  useEffect(()=>{ if(!isModalOpen)return; const f=(e:KeyboardEvent)=>{if(e.key==="Escape")closeModal();}; document.addEventListener("keydown",f); return()=>document.removeEventListener("keydown",f); },[isModalOpen,closeModal]);
+  useEffect(()=>{ document.body.style.overflow=isModalOpen?"hidden":""; return()=>{document.body.style.overflow="";}; },[isModalOpen]);
+
+  if(!isModalOpen) return null;
+
+  const submit = (fn:()=>Promise<void>) => async (e:FormEvent)=>{ e.preventDefault(); setError(null); setLoading(true); try{await fn();}catch{setError("შეცდომა.");} finally{setLoading(false);} };
+
+  return (
+    <div ref={backdropRef} className="fixed inset-0 z-[60] flex items-center justify-center p-4"
+      style={{backgroundColor:"rgba(0,0,0,0.72)",backdropFilter:"blur(6px)"}}
+      onPointerDown={e=>{if(e.target===backdropRef.current)closeModal();}}
+      role="dialog" aria-modal="true" aria-label={tab==="login"?KA.authWelcomeBack:KA.authJoinCommunity}>
+      <div className={cn("relative w-full max-w-sm rounded-2xl overflow-hidden",
+        "bg-[var(--color-surface-card)] border border-[var(--color-surface-border)]",
+        "shadow-[0_24px_64px_rgba(0,0,0,0.7)] animate-fade-up")}>
+
+        <div className="relative flex flex-col items-center gap-2 px-6 pt-8 pb-6 bg-gradient-to-b from-amber-500/10 to-transparent">
+          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-amber-500 to-orange-500 shadow-[0_0_20px_rgba(245,158,11,0.5)]">
+            <Map size={18} className="text-zinc-900" strokeWidth={2.5}/>
+          </div>
+          <h2 className="text-base font-bold text-zinc-100">GeoMoto<span className="text-amber-400">Routes</span></h2>
+          <p className="text-xs text-zinc-500">{tab==="login"?KA.authWelcomeBack:KA.authJoinCommunity}</p>
+          <button type="button" aria-label={KA.authClose} onClick={closeModal}
+            className="absolute top-4 right-4 rounded-lg p-1.5 text-zinc-500 hover:bg-white/5 hover:text-zinc-300 transition-colors">
+            <X size={16}/>
+          </button>
+        </div>
+
+        <div className="flex mx-6 mb-5 rounded-xl overflow-hidden border border-[var(--color-surface-border)] bg-[var(--color-surface-overlay)]">
+          {(["login","register"] as const).map(t=>(
+            <button key={t} type="button" onClick={()=>{openModal(t);setError(null);}}
+              className={cn("flex-1 py-2 text-xs font-semibold transition-all duration-150",
+                tab===t?"bg-amber-500/20 text-amber-400 shadow-[inset_0_0_0_1px_rgba(245,158,11,0.25)]":"text-zinc-500 hover:text-zinc-300")}>
+              {t==="login"?KA.authTabLogin:KA.authTabRegister}
+            </button>
+          ))}
+        </div>
+
+        <div className="px-6 pb-6">
+          {error&&<div className="mb-4 rounded-lg bg-red-900/30 border border-red-500/30 px-3 py-2 text-xs text-red-400">{error}</div>}
+          {tab==="login"?(
+            <form onSubmit={submit(()=>login({email,password}))} className="flex flex-col gap-4">
+              <Field label={KA.authEmailLabel}    type="email"    value={email}    onChange={e=>setEmail(e.target.value)}    placeholder={KA.authEmailPlaceholder}    icon={<Mail size={15}/>} autoComplete="email"/>
+              <Field label={KA.authPasswordLabel} type="password" value={password} onChange={e=>setPassword(e.target.value)} placeholder={KA.authPasswordPlaceholder} icon={<Lock size={15}/>} autoComplete="current-password"/>
+              <div className="flex justify-end"><button type="button" className="text-[11px] text-zinc-600 hover:text-amber-400 transition-colors">{KA.authForgotPassword}</button></div>
+              <button type="submit" disabled={loading}
+                className={cn("h-10 w-full rounded-xl text-sm font-semibold text-zinc-900","bg-gradient-to-r from-amber-500 to-orange-500","hover:from-amber-400 hover:to-orange-400","shadow-[0_0_16px_rgba(245,158,11,0.35)]","transition-all duration-150 active:scale-[0.98]","disabled:opacity-60 disabled:cursor-not-allowed")}>
+                {loading?"…":KA.authLoginCTA}
+              </button>
+              <p className="text-center text-[11px] text-zinc-600">{KA.authSwitchToRegister}{" "}
+                <button type="button" onClick={()=>openModal("register")} className="text-amber-400 hover:underline">{KA.authTabRegister}</button>
+              </p>
+            </form>
+          ):(
+            <form onSubmit={submit(()=>register({name,email,motorcycleModel:moto,password}))} className="flex flex-col gap-4">
+              <Field label={KA.authNameLabel}     value={name}     onChange={e=>setName(e.target.value)}     placeholder={KA.authNamePlaceholder}     icon={<User size={15}/>} autoComplete="name"/>
+              <Field label={KA.authEmailLabel}    type="email"     value={email}    onChange={e=>setEmail(e.target.value)}    placeholder={KA.authEmailPlaceholder}    icon={<Mail size={15}/>} autoComplete="email"/>
+              <Field label={KA.authMotoLabel}     value={moto}     onChange={e=>setMoto(e.target.value)}     placeholder={KA.authMotoPlaceholder}     icon={<Bike size={15}/>} autoComplete="off"/>
+              <Field label={KA.authPasswordLabel} type="password"  value={password} onChange={e=>setPassword(e.target.value)} placeholder={KA.authPasswordPlaceholder} icon={<Lock size={15}/>} autoComplete="new-password"/>
+              <button type="submit" disabled={loading}
+                className={cn("h-10 w-full rounded-xl text-sm font-semibold text-zinc-900","bg-gradient-to-r from-amber-500 to-orange-500","hover:from-amber-400 hover:to-orange-400","shadow-[0_0_16px_rgba(245,158,11,0.35)]","transition-all duration-150 active:scale-[0.98]","disabled:opacity-60 disabled:cursor-not-allowed")}>
+                {loading?"…":KA.authRegisterCTA}
+              </button>
+              <p className="text-center text-[11px] text-zinc-600">{KA.authSwitchToLogin}{" "}
+                <button type="button" onClick={()=>openModal("login")} className="text-amber-400 hover:underline">{KA.authTabLogin}</button>
+              </p>
+            </form>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
+'''
+
+# ══════════════════════════════════════════════════════════════════════════════
+#  FILTER FEATURE
+# ══════════════════════════════════════════════════════════════════════════════
 
 FILES["src/features/filters/hooks/useRouteFilters.ts"] = '''\
 "use client";
-
 import { useState, useCallback, useMemo } from "react";
 import type { AlertType, DifficultyLevel, FilterState, SpotType } from "@/lib/types";
 import { DEFAULT_FILTERS } from "@/lib/constants";
 
 export interface UseRouteFiltersReturn {
-  filters:            FilterState;
-  toggleAlertType:    (type: AlertType)        => void;
-  toggleDifficulty:   (level: DifficultyLevel) => void;
-  toggleSpotType:     (type: SpotType)         => void;
-  toggleShowRoutes:   () => void;
-  toggleShowAlerts:   () => void;
-  toggleShowSpots:    () => void;
-  setSearchQuery:     (query: string)          => void;
-  resetFilters:       () => void;
-  activeFilterCount:  number;
+  filters:FilterState; toggleAlertType:(t:AlertType)=>void;
+  toggleDifficulty:(l:DifficultyLevel)=>void; toggleSpotType:(t:SpotType)=>void;
+  toggleShowRoutes:()=>void; toggleShowAlerts:()=>void; toggleShowSpots:()=>void;
+  setSearchQuery:(q:string)=>void; resetFilters:()=>void; activeFilterCount:number;
 }
 
-function toggleItem<T>(list: T[], item: T): T[] {
-  return list.includes(item) ? list.filter((x) => x !== item) : [...list, item];
-}
+const toggle = <T,>(list:T[], item:T):T[] => list.includes(item)?list.filter(x=>x!==item):[...list,item];
 
 export function useRouteFilters(): UseRouteFiltersReturn {
   const [filters, setFilters] = useState<FilterState>(DEFAULT_FILTERS);
-
-  const toggleAlertType = useCallback((type: AlertType) => {
-    setFilters((prev) => ({ ...prev, alertTypes: toggleItem(prev.alertTypes, type) }));
-  }, []);
-
-  const toggleDifficulty = useCallback((level: DifficultyLevel) => {
-    setFilters((prev) => ({ ...prev, difficulties: toggleItem(prev.difficulties, level) }));
-  }, []);
-
-  const toggleSpotType = useCallback((type: SpotType) => {
-    setFilters((prev) => ({ ...prev, spotTypes: toggleItem(prev.spotTypes, type) }));
-  }, []);
-
-  const toggleShowRoutes = useCallback(() => {
-    setFilters((prev) => ({ ...prev, showRoutes: !prev.showRoutes }));
-  }, []);
-
-  const toggleShowAlerts = useCallback(() => {
-    setFilters((prev) => ({ ...prev, showAlerts: !prev.showAlerts }));
-  }, []);
-
-  const toggleShowSpots = useCallback(() => {
-    setFilters((prev) => ({ ...prev, showSpots: !prev.showSpots }));
-  }, []);
-
-  const setSearchQuery = useCallback((query: string) => {
-    setFilters((prev) => ({ ...prev, searchQuery: query }));
-  }, []);
-
-  const resetFilters = useCallback(() => setFilters(DEFAULT_FILTERS), []);
-
-  const activeFilterCount = useMemo<number>(() => {
-    let count = 0;
-    if (!filters.showRoutes) count++;
-    if (!filters.showAlerts) count++;
-    if (!filters.showSpots)  count++;
-    if (filters.alertTypes.length   !== DEFAULT_FILTERS.alertTypes.length)   count++;
-    if (filters.difficulties.length !== DEFAULT_FILTERS.difficulties.length) count++;
-    if (filters.spotTypes.length    !== DEFAULT_FILTERS.spotTypes.length)    count++;
-    if (filters.searchQuery.trim()) count++;
-    return count;
-  }, [filters]);
-
-  return {
-    filters, toggleAlertType, toggleDifficulty, toggleSpotType,
-    toggleShowRoutes, toggleShowAlerts, toggleShowSpots,
-    setSearchQuery, resetFilters, activeFilterCount,
-  };
+  const toggleAlertType  = useCallback((t:AlertType) => setFilters(p=>({...p,alertTypes:toggle(p.alertTypes,t)})),[]);
+  const toggleDifficulty = useCallback((l:DifficultyLevel) => setFilters(p=>({...p,difficulties:toggle(p.difficulties,l)})),[]);
+  const toggleSpotType   = useCallback((t:SpotType) => setFilters(p=>({...p,spotTypes:toggle(p.spotTypes,t)})),[]);
+  const toggleShowRoutes = useCallback(() => setFilters(p=>({...p,showRoutes:!p.showRoutes})),[]);
+  const toggleShowAlerts = useCallback(() => setFilters(p=>({...p,showAlerts:!p.showAlerts})),[]);
+  const toggleShowSpots  = useCallback(() => setFilters(p=>({...p,showSpots:!p.showSpots})),[]);
+  const setSearchQuery   = useCallback((q:string) => setFilters(p=>({...p,searchQuery:q})),[]);
+  const resetFilters     = useCallback(() => setFilters(DEFAULT_FILTERS),[]);
+  const activeFilterCount = useMemo(()=>{
+    let c=0;
+    if(!filters.showRoutes)c++; if(!filters.showAlerts)c++; if(!filters.showSpots)c++;
+    if(filters.alertTypes.length!==DEFAULT_FILTERS.alertTypes.length)c++;
+    if(filters.difficulties.length!==DEFAULT_FILTERS.difficulties.length)c++;
+    if(filters.spotTypes.length!==DEFAULT_FILTERS.spotTypes.length)c++;
+    if(filters.searchQuery.trim())c++;
+    return c;
+  },[filters]);
+  return { filters,toggleAlertType,toggleDifficulty,toggleSpotType,toggleShowRoutes,toggleShowAlerts,toggleShowSpots,setSearchQuery,resetFilters,activeFilterCount };
 }
 '''
-
-
-# ── src/features/map/hooks/useMapState.ts ────────────────────────────────────
-
-FILES["src/features/map/hooks/useMapState.ts"] = '''\
-"use client";
-
-import { useState, useCallback, useRef } from "react";
-import type { Map as LeafletMapInstance } from "leaflet";
-import type { Coordinate, MapViewState } from "@/lib/types";
-import { GEORGIA_CENTER, GEORGIA_DEFAULT_ZOOM } from "@/lib/constants";
-
-export interface UseMapStateReturn {
-  mapState:   MapViewState;
-  mapRef:     React.MutableRefObject<LeafletMapInstance | null>;
-  onMapReady: (map: LeafletMapInstance) => void;
-  flyTo:      (center: Coordinate, zoom?: number) => void;
-  resetView:  () => void;
-}
-
-export function useMapState(): UseMapStateReturn {
-  const mapRef = useRef<LeafletMapInstance | null>(null);
-
-  const [mapState, setMapState] = useState<MapViewState>({
-    center:  GEORGIA_CENTER,
-    zoom:    GEORGIA_DEFAULT_ZOOM,
-    bounds:  null,
-    isReady: false,
-  });
-
-  const onMapReady = useCallback((map: LeafletMapInstance) => {
-    mapRef.current = map;
-    setMapState((prev) => ({ ...prev, isReady: true }));
-  }, []);
-
-  const flyTo = useCallback((center: Coordinate, zoom: number = GEORGIA_DEFAULT_ZOOM) => {
-    if (mapRef.current) {
-      mapRef.current.flyTo([center.lat, center.lng], zoom, { animate: true, duration: 1.2 });
-    }
-    setMapState((prev) => ({ ...prev, center, zoom }));
-  }, []);
-
-  const resetView = useCallback(() => flyTo(GEORGIA_CENTER, GEORGIA_DEFAULT_ZOOM), [flyTo]);
-
-  return { mapState, mapRef, onMapReady, flyTo, resetView };
-}
-'''
-
-
-# ── src/features/map/hooks/useMapBounds.ts ───────────────────────────────────
-
-FILES["src/features/map/hooks/useMapBounds.ts"] = '''\
-"use client";
-
-import { useState, useCallback } from "react";
-import type { LeafletEvent } from "leaflet";
-import type { BoundingBox } from "@/lib/types";
-
-export interface UseMapBoundsReturn {
-  bounds:         BoundingBox | null;
-  onBoundsChange: (event: LeafletEvent) => void;
-}
-
-export function useMapBounds(): UseMapBoundsReturn {
-  const [bounds, setBounds] = useState<BoundingBox | null>(null);
-
-  const onBoundsChange = useCallback((event: LeafletEvent) => {
-    type B = { getNorth: () => number; getSouth: () => number; getEast: () => number; getWest: () => number };
-    const b = (event.target as { getBounds: () => B }).getBounds();
-    setBounds({ north: b.getNorth(), south: b.getSouth(), east: b.getEast(), west: b.getWest() });
-  }, []);
-
-  return { bounds, onBoundsChange };
-}
-'''
-
-
-# ── src/features/filters/components/FilterToggleChip.tsx ─────────────────────
 
 FILES["src/features/filters/components/FilterToggleChip.tsx"] = '''\
 "use client";
-
 import { Check } from "lucide-react";
 import { cn } from "@/lib/utils";
 
-interface FilterToggleChipProps {
-  label:   string;
-  active:  boolean;
-  color:   string;
-  bgColor: string;
-  onClick: () => void;
-  icon?:   string;
-}
+interface FilterToggleChipProps { label:string; active:boolean; color:string; bgColor:string; onClick:()=>void; icon?:string; }
 
 export function FilterToggleChip({ label, active, color, bgColor, onClick, icon }: FilterToggleChipProps): React.ReactElement {
   return (
-    <button
-      type="button"
-      role="checkbox"
-      aria-checked={active}
-      onClick={onClick}
-      className={cn(
-        "flex items-center gap-2 rounded-lg px-3 py-2 text-xs font-medium w-full text-left transition-all duration-150",
+    <button type="button" role="checkbox" aria-checked={active} onClick={onClick}
+      className={cn("flex items-center gap-2 rounded-lg px-3 py-2 text-xs font-medium w-full text-left transition-all duration-150",
         "border focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400/50",
-        active ? "text-zinc-100 shadow-sm" : "text-zinc-500 border-transparent hover:text-zinc-300 hover:bg-white/[0.03]"
-      )}
-      style={active ? { backgroundColor: bgColor, borderColor: `${color}40`, color } : { backgroundColor: "transparent" }}
-    >
-      <span className="shrink-0 h-2 w-2 rounded-full" style={{ backgroundColor: color }} aria-hidden="true" />
-      {icon && <span aria-hidden="true">{icon}</span>}
+        active?"text-zinc-100 shadow-sm":"text-zinc-500 border-transparent hover:text-zinc-300 hover:bg-white/[0.03]")}
+      style={active?{backgroundColor:bgColor,borderColor:`${color}40`,color}:{backgroundColor:"transparent"}}>
+      <span className="shrink-0 h-2 w-2 rounded-full" style={{backgroundColor:color}} aria-hidden="true"/>
+      {icon&&<span aria-hidden="true">{icon}</span>}
       <span className="flex-1">{label}</span>
-      {active && <Check size={12} strokeWidth={3} className="shrink-0" aria-hidden="true" />}
+      {active&&<Check size={12} strokeWidth={3} className="shrink-0" aria-hidden="true"/>}
     </button>
   );
 }
 '''
 
-
-# ── src/features/filters/components/LayerToggleRow.tsx ───────────────────────
-
 FILES["src/features/filters/components/LayerToggleRow.tsx"] = '''\
 "use client";
-
 import type { ReactNode } from "react";
 import { cn } from "@/lib/utils";
 
-interface LayerToggleRowProps {
-  label:    string;
-  active:   boolean;
-  icon:     ReactNode;
-  color:    string;
-  onToggle: () => void;
-  count?:   number;
-}
+interface LayerToggleRowProps { label:string; active:boolean; icon:ReactNode; color:string; onToggle:()=>void; count?:number; }
 
 export function LayerToggleRow({ label, active, icon, color, onToggle, count }: LayerToggleRowProps): React.ReactElement {
   return (
     <div className="flex items-center gap-3 px-1 py-2">
-      <span className="shrink-0" style={{ color }} aria-hidden="true">{icon}</span>
+      <span className="shrink-0" style={{color}} aria-hidden="true">{icon}</span>
       <span className="flex-1 text-sm text-zinc-300">{label}</span>
-      {count !== undefined && <span className="text-xs text-zinc-600">{count}</span>}
-      <button
-        type="button"
-        role="switch"
-        aria-checked={active}
-        aria-label={`Toggle ${label} layer`}
-        onClick={onToggle}
-        className={cn(
-          "relative inline-flex h-5 w-9 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200",
-          "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400/50",
-          active ? "bg-amber-500" : "bg-zinc-700"
-        )}
-      >
-        <span
-          aria-hidden="true"
-          className={cn(
-            "pointer-events-none inline-block h-4 w-4 rounded-full bg-white shadow transform transition-transform duration-200",
-            active ? "translate-x-4" : "translate-x-0"
-          )}
-        />
+      {count!==undefined&&<span className="text-xs text-zinc-600">{count}</span>}
+      <button type="button" role="switch" aria-checked={active} aria-label={`Toggle ${label}`} onClick={onToggle}
+        className={cn("relative inline-flex h-5 w-9 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200",
+          "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400/50",active?"bg-amber-500":"bg-zinc-700")}>
+        <span aria-hidden="true" className={cn("pointer-events-none inline-block h-4 w-4 rounded-full bg-white shadow transform transition-transform duration-200",active?"translate-x-4":"translate-x-0")}/>
       </button>
     </div>
   );
 }
 '''
 
-
-# ── src/features/filters/components/SidebarSection.tsx ───────────────────────
-
 FILES["src/features/filters/components/SidebarSection.tsx"] = '''\
 "use client";
-
 import { ChevronDown } from "lucide-react";
 import { useState, type ReactNode } from "react";
 import { cn } from "@/lib/utils";
 
-interface SidebarSectionProps {
-  title:        string;
-  icon:         ReactNode;
-  children:     ReactNode;
-  defaultOpen?: boolean;
-  badge?:       number;
-}
+interface SidebarSectionProps { title:string; icon:ReactNode; children:ReactNode; defaultOpen?:boolean; badge?:number; }
 
-export function SidebarSection({ title, icon, children, defaultOpen = true, badge }: SidebarSectionProps): React.ReactElement {
+export function SidebarSection({ title, icon, children, defaultOpen=true, badge }: SidebarSectionProps): React.ReactElement {
   const [open, setOpen] = useState(defaultOpen);
-
   return (
     <div className="border-b border-[var(--color-surface-border)]">
-      <button
-        type="button"
-        onClick={() => setOpen((v) => !v)}
-        className={cn(
-          "flex w-full items-center gap-2.5 px-4 py-3 text-left transition-colors duration-150",
-          "hover:bg-white/[0.02] focus-visible:outline-none focus-visible:ring-inset focus-visible:ring-1 focus-visible:ring-amber-400/40"
-        )}
-        aria-expanded={open}
-      >
+      <button type="button" onClick={()=>setOpen(v=>!v)} aria-expanded={open}
+        className={cn("flex w-full items-center gap-2.5 px-4 py-3 text-left transition-colors duration-150",
+          "hover:bg-white/[0.02] focus-visible:outline-none focus-visible:ring-inset focus-visible:ring-1 focus-visible:ring-amber-400/40")}>
         <span className="text-zinc-500" aria-hidden="true">{icon}</span>
         <span className="flex-1 text-xs font-semibold uppercase tracking-widest text-zinc-400">{title}</span>
-        {badge !== undefined && badge > 0 && (
-          <span className="rounded-full bg-amber-500/20 px-1.5 py-0.5 text-[10px] font-bold text-amber-400" aria-label={`${badge} active`}>
-            {badge}
-          </span>
-        )}
-        <ChevronDown size={14} className={cn("shrink-0 text-zinc-600 transition-transform duration-200", open ? "rotate-180" : "rotate-0")} aria-hidden="true" />
+        {badge!==undefined&&badge>0&&<span className="rounded-full bg-amber-500/20 px-1.5 py-0.5 text-[10px] font-bold text-amber-400" aria-label={`${badge} active`}>{badge}</span>}
+        <ChevronDown size={14} className={cn("shrink-0 text-zinc-600 transition-transform duration-200",open?"rotate-180":"rotate-0")} aria-hidden="true"/>
       </button>
-      {open && <div className="px-3 pb-3 space-y-0.5 animate-fade-up">{children}</div>}
+      {open&&<div className="px-3 pb-3 space-y-0.5 animate-fade-up">{children}</div>}
     </div>
   );
 }
 '''
 
-
-# ── src/features/filters/components/Sidebar.tsx ──────────────────────────────
-
 FILES["src/features/filters/components/Sidebar.tsx"] = '''\
 "use client";
-
 import { Route, TriangleAlert, Coffee, Mountain, Map, X, RotateCcw, Navigation } from "lucide-react";
 import type { ReactElement } from "react";
 import type { AlertType, DifficultyLevel, FilterState, SpotType } from "@/lib/types";
 import { ALERT_TYPE_META, DIFFICULTY_META, SPOT_TYPE_META } from "@/lib/constants";
+import { KA } from "@/lib/i18n/ka";
 import { SidebarSection }   from "./SidebarSection";
 import { FilterToggleChip } from "./FilterToggleChip";
 import { LayerToggleRow }   from "./LayerToggleRow";
 import { cn } from "@/lib/utils";
 
 interface SidebarProps {
-  isOpen:             boolean;
-  filters:            FilterState;
-  activeFilterCount:  number;
-  onClose:            () => void;
-  onToggleAlertType:  (type: AlertType)        => void;
-  onToggleDifficulty: (level: DifficultyLevel) => void;
-  onToggleSpotType:   (type: SpotType)         => void;
-  onToggleRoutes:     () => void;
-  onToggleAlerts:     () => void;
-  onToggleSpots:      () => void;
-  onResetFilters:     () => void;
+  isOpen:boolean; filters:FilterState; activeFilterCount:number; onClose:()=>void;
+  onToggleAlertType:(t:AlertType)=>void; onToggleDifficulty:(l:DifficultyLevel)=>void;
+  onToggleSpotType:(t:SpotType)=>void; onToggleRoutes:()=>void;
+  onToggleAlerts:()=>void; onToggleSpots:()=>void; onResetFilters:()=>void;
 }
 
-export function Sidebar({
-  isOpen, filters, activeFilterCount, onClose,
-  onToggleAlertType, onToggleDifficulty, onToggleSpotType,
-  onToggleRoutes, onToggleAlerts, onToggleSpots, onResetFilters,
-}: SidebarProps): ReactElement {
+export function Sidebar({ isOpen, filters, activeFilterCount, onClose, onToggleAlertType, onToggleDifficulty, onToggleSpotType, onToggleRoutes, onToggleAlerts, onToggleSpots, onResetFilters }: SidebarProps): ReactElement {
   const alertTypes   = Object.keys(ALERT_TYPE_META)  as AlertType[];
   const difficulties = Object.keys(DIFFICULTY_META)  as DifficultyLevel[];
   const spotTypes    = Object.keys(SPOT_TYPE_META)   as SpotType[];
-
+  const routes = [
+    {id:"r-001",name:"\u10e1\u10d0\u10db\u10ee\u10d4\u10564\u10e0\u10dd \u10d2\u10d6\u10d0",        region:"\u10db\u10ea\u10ee\u10d4\u10d7\u10d0-\u10db\u10d7\u10d8\u10d0\u10dc\u10d4\u10d7\u10d8", km:148, diff:"\u10e0\u10d7\u10e3\u10da\u10d8"},
+    {id:"r-002",name:"\u10d2\u10dd\u10db\u10d1\u10dd\u10e0\u10d8\u10e1 \u10e3\u10e6\u10d4\u10da\u10e2\u10d4\u10ee\u10d8\u10da\u10d8", region:"\u10d9\u10d0\u10ee\u10d4\u10d7\u10d8",           km:102, diff:"\u10e1\u10d0\u10e8\u10e3\u10d0\u10da\u10dd"},
+    {id:"r-003",name:"\u10e1\u10d5\u10d0\u10dc\u10d4\u10d7\u10d8\u10e1 \u10d2\u10d6\u10d0",          region:"\u10e1\u10d5\u10d0\u10dc\u10d4\u10d7\u10d8",          km:132, diff:"\u10d4\u10e5\u10e1\u10e2\u10e0\u10d4\u10db."},
+    {id:"r-004",name:"\u10d0\u10ed\u10d0\u10e0\u10d8\u10e1 \u10e1\u10d0\u10dc\u10d0\u10de\u10d8\u10e0\u10dd",        region:"\u10d0\u10ed\u10d0\u10e0\u10d0",            km:68,  diff:"\u10db\u10d0\u10e0\u10e2\u10d8\u10d5\u10d8"},
+    {id:"r-005",name:"\u10d1\u10dd\u10e0\u10ef\u10dd\u10db\u10d8\u10e1 \u10ee\u10d4\u10dd\u10d1\u10d0",        region:"\u10e1\u10d0\u10db\u10ea\u10ee\u10d4-\u10ef\u10d0\u10d5\u10d0\u10ee\u10d4\u10d7\u10d8",  km:88,  diff:"\u10e1\u10d0\u10e8\u10e3\u10d0\u10da\u10dd"},
+  ];
   return (
     <>
-      {isOpen && (
-        <div className="fixed inset-0 z-30 bg-black/50 backdrop-blur-sm md:hidden" aria-hidden="true" onClick={onClose} />
-      )}
-
-      <aside
-        role="complementary"
-        aria-label="Route and map filters"
-        className={cn(
-          "fixed left-0 top-14 z-40 h-[calc(100dvh-3.5rem)] w-80 flex flex-col",
+      {isOpen&&<div className="fixed inset-0 z-30 bg-black/50 backdrop-blur-sm md:hidden" aria-hidden="true" onClick={onClose}/>}
+      <aside role="complementary" aria-label={KA.filters}
+        className={cn("fixed left-0 top-14 z-40 h-[calc(100dvh-3.5rem)] w-80 flex flex-col",
           "bg-[var(--color-surface-overlay)] border-r border-[var(--color-surface-border)]",
           "transition-transform duration-300 ease-in-out",
-          isOpen ? "translate-x-0 animate-slide-in-left" : "-translate-x-full"
-        )}
-      >
+          isOpen?"translate-x-0 animate-slide-in-left":"-translate-x-full")}>
+
         <div className="flex h-12 shrink-0 items-center justify-between border-b border-[var(--color-surface-border)] px-4">
           <div className="flex items-center gap-2">
-            <Map size={15} className="text-amber-400" />
-            <span className="text-sm font-semibold text-zinc-200">Filters</span>
-            {activeFilterCount > 0 && (
-              <span className="rounded-full bg-amber-500/20 px-2 py-0.5 text-[10px] font-bold text-amber-400">
-                {activeFilterCount} active
-              </span>
-            )}
+            <Map size={15} className="text-amber-400"/>
+            <span className="text-sm font-semibold text-zinc-200">{KA.filters}</span>
+            {activeFilterCount>0&&<span className="rounded-full bg-amber-500/20 px-2 py-0.5 text-[10px] font-bold text-amber-400">{activeFilterCount} {KA.activeCount}</span>}
           </div>
           <div className="flex items-center gap-1">
-            {activeFilterCount > 0 && (
-              <button type="button" onClick={onResetFilters} title="Reset all filters"
-                className="flex items-center gap-1.5 rounded-lg px-2 py-1.5 text-[11px] font-medium text-zinc-500 hover:bg-white/5 hover:text-amber-400 transition-colors">
-                <RotateCcw size={11} /> Reset
-              </button>
-            )}
-            <button type="button" aria-label="Close filters" onClick={onClose}
-              className="rounded-lg p-1.5 text-zinc-500 hover:bg-white/5 hover:text-zinc-300 transition-colors md:hidden">
-              <X size={16} />
-            </button>
+            {activeFilterCount>0&&<button type="button" onClick={onResetFilters} title={KA.resetFilters} className="flex items-center gap-1.5 rounded-lg px-2 py-1.5 text-[11px] font-medium text-zinc-500 hover:bg-white/5 hover:text-amber-400 transition-colors"><RotateCcw size={11}/>{KA.resetFilters}</button>}
+            <button type="button" aria-label={KA.close} onClick={onClose} className="rounded-lg p-1.5 text-zinc-500 hover:bg-white/5 hover:text-zinc-300 transition-colors md:hidden"><X size={16}/></button>
           </div>
         </div>
 
         <div className="flex-1 overflow-y-auto overscroll-contain">
-          <SidebarSection title="Map Layers" icon={<Map size={14} />} defaultOpen={true}>
-            <LayerToggleRow label="Routes"      active={filters.showRoutes} icon={<Navigation size={16} />}   color="#f59e0b" onToggle={onToggleRoutes} />
-            <LayerToggleRow label="Road Alerts" active={filters.showAlerts} icon={<TriangleAlert size={16} />} color="#ef4444" onToggle={onToggleAlerts} />
-            <LayerToggleRow label="Biker Spots" active={filters.showSpots}  icon={<Coffee size={16} />}        color="#fb923c" onToggle={onToggleSpots} />
+          <SidebarSection title={KA.mapLayers} icon={<Map size={14}/>} defaultOpen={true}>
+            <LayerToggleRow label={KA.routes}     active={filters.showRoutes} icon={<Navigation size={16}/>}   color="#f59e0b" onToggle={onToggleRoutes}/>
+            <LayerToggleRow label={KA.roadAlerts} active={filters.showAlerts} icon={<TriangleAlert size={16}/>} color="#ef4444" onToggle={onToggleAlerts}/>
+            <LayerToggleRow label={KA.bikerSpots} active={filters.showSpots}  icon={<Coffee size={16}/>}        color="#fb923c" onToggle={onToggleSpots}/>
           </SidebarSection>
 
-          <SidebarSection title="Road Alerts" icon={<TriangleAlert size={14} />} defaultOpen={true} badge={filters.alertTypes.length}>
-            {alertTypes.map((type) => (
-              <FilterToggleChip key={type} label={ALERT_TYPE_META[type].label} active={filters.alertTypes.includes(type)}
-                color={ALERT_TYPE_META[type].color} bgColor={ALERT_TYPE_META[type].bgColor} onClick={() => onToggleAlertType(type)} />
-            ))}
+          <SidebarSection title={KA.roadAlertsSection} icon={<TriangleAlert size={14}/>} defaultOpen={true} badge={filters.alertTypes.length}>
+            {alertTypes.map(t=><FilterToggleChip key={t} label={ALERT_TYPE_META[t].label} active={filters.alertTypes.includes(t)} color={ALERT_TYPE_META[t].color} bgColor={ALERT_TYPE_META[t].bgColor} onClick={()=>onToggleAlertType(t)}/>)}
           </SidebarSection>
 
-          <SidebarSection title="Difficulty" icon={<Mountain size={14} />} defaultOpen={false} badge={filters.difficulties.length}>
-            {difficulties.map((level) => (
-              <FilterToggleChip key={level} label={DIFFICULTY_META[level].label} active={filters.difficulties.includes(level)}
-                color={DIFFICULTY_META[level].color} bgColor={DIFFICULTY_META[level].bgColor} onClick={() => onToggleDifficulty(level)} />
-            ))}
+          <SidebarSection title={KA.difficulty} icon={<Mountain size={14}/>} defaultOpen={false} badge={filters.difficulties.length}>
+            {difficulties.map(l=><FilterToggleChip key={l} label={DIFFICULTY_META[l].label} active={filters.difficulties.includes(l)} color={DIFFICULTY_META[l].color} bgColor={DIFFICULTY_META[l].bgColor} onClick={()=>onToggleDifficulty(l)}/>)}
           </SidebarSection>
 
-          <SidebarSection title="Spots & Services" icon={<Coffee size={14} />} defaultOpen={false} badge={filters.spotTypes.length}>
-            {spotTypes.map((type) => (
-              <FilterToggleChip key={type} label={SPOT_TYPE_META[type].label} active={filters.spotTypes.includes(type)}
-                color={SPOT_TYPE_META[type].color} bgColor="rgba(255,255,255,0.05)" icon={SPOT_TYPE_META[type].icon} onClick={() => onToggleSpotType(type)} />
-            ))}
+          <SidebarSection title={KA.spotsServices} icon={<Coffee size={14}/>} defaultOpen={false} badge={filters.spotTypes.length}>
+            {spotTypes.map(t=><FilterToggleChip key={t} label={SPOT_TYPE_META[t].label} active={filters.spotTypes.includes(t)} color={SPOT_TYPE_META[t].color} bgColor="rgba(255,255,255,0.05)" icon={SPOT_TYPE_META[t].icon} onClick={()=>onToggleSpotType(t)}/>)}
           </SidebarSection>
 
-          <SidebarSection title="Featured Routes" icon={<Route size={14} />} defaultOpen={true}>
-            {[
-              { id: "r-001", name: "Military Highway",    region: "Mtskheta-Mtianeti",    km: 148, diff: "Advanced"  },
-              { id: "r-002", name: "Gombori Pass",         region: "Kakheti",              km: 102, diff: "Intermed." },
-              { id: "r-003", name: "Svaneti Road",         region: "Svaneti",              km: 132, diff: "Extreme"   },
-              { id: "r-004", name: "Adjara Coastal Loop",  region: "Adjara",               km: 68,  diff: "Beginner"  },
-              { id: "r-005", name: "Borjomi Gorge",        region: "Samtskhe-Javakheti",   km: 88,  diff: "Intermed." },
-            ].map((route) => (
-              <button type="button" key={route.id}
-                className="w-full flex items-start gap-3 rounded-lg px-3 py-2.5 text-left transition-colors hover:bg-white/[0.04] group">
-                <span className="mt-0.5 shrink-0 h-6 w-6 rounded-md flex items-center justify-center bg-amber-500/10" aria-hidden="true">
-                  <Navigation size={13} className="text-amber-400" />
-                </span>
+          <SidebarSection title={KA.featuredRoutes} icon={<Route size={14}/>} defaultOpen={true}>
+            {routes.map(r=>(
+              <button type="button" key={r.id} className="w-full flex items-start gap-3 rounded-lg px-3 py-2.5 text-left transition-colors hover:bg-white/[0.04] group">
+                <span className="mt-0.5 shrink-0 h-6 w-6 rounded-md flex items-center justify-center bg-amber-500/10" aria-hidden="true"><Navigation size={13} className="text-amber-400"/></span>
                 <span className="min-w-0 flex-1">
-                  <span className="block text-xs font-medium text-zinc-200 group-hover:text-zinc-100 truncate">{route.name}</span>
+                  <span className="block text-xs font-medium text-zinc-200 group-hover:text-zinc-100 truncate">{r.name}</span>
                   <span className="flex items-center gap-2 mt-0.5">
-                    <span className="text-[11px] text-zinc-600">{route.region}</span>
-                    <span className="text-[11px] text-zinc-700" aria-hidden="true">\\u00b7</span>
-                    <span className="text-[11px] text-zinc-600">{route.km} km</span>
+                    <span className="text-[11px] text-zinc-600">{r.region}</span>
+                    <span className="text-[11px] text-zinc-700" aria-hidden="true">\u00b7</span>
+                    <span className="text-[11px] text-zinc-600">{r.km} {KA.kmSuffix}</span>
                   </span>
                 </span>
-                <span className="shrink-0 text-[10px] font-medium text-amber-500/70 pt-0.5">{route.diff}</span>
+                <span className="shrink-0 text-[10px] font-medium text-amber-500/70 pt-0.5">{r.diff}</span>
               </button>
             ))}
           </SidebarSection>
         </div>
 
         <div className="shrink-0 border-t border-[var(--color-surface-border)] px-4 py-3">
-          <p className="text-[11px] text-zinc-600 leading-relaxed">
-            Covers <span className="text-zinc-500 font-medium">all 9 regions</span> of Georgia.
-            Community-verified data updated in real time.
-          </p>
+          <p className="text-[11px] text-zinc-600 leading-relaxed">{KA.sidebarFooter}{" "}<span className="text-zinc-500 font-medium">{KA.allNineRegions}</span>.{" "}{KA.communityVerified}</p>
         </div>
       </aside>
     </>
@@ -1447,111 +1047,129 @@ export function Sidebar({
 }
 '''
 
+# ══════════════════════════════════════════════════════════════════════════════
+#  MAP FEATURE
+# ══════════════════════════════════════════════════════════════════════════════
 
-# ── src/features/map/components/MapSkeleton.tsx ───────────────────────────────
+FILES["src/features/map/hooks/useMapState.ts"] = '''\
+"use client";
+import { useState, useCallback, useRef } from "react";
+import type { Map as LM } from "leaflet";
+import type { Coordinate, MapViewState } from "@/lib/types";
+import { GEORGIA_CENTER, GEORGIA_DEFAULT_ZOOM } from "@/lib/constants";
+
+export function useMapState() {
+  const mapRef = useRef<LM|null>(null);
+  const [mapState, setMapState] = useState<MapViewState>({ center:GEORGIA_CENTER, zoom:GEORGIA_DEFAULT_ZOOM, bounds:null, isReady:false });
+  const onMapReady = useCallback((map:LM)=>{ mapRef.current=map; setMapState(p=>({...p,isReady:true})); },[]);
+  const flyTo = useCallback((center:Coordinate, zoom=GEORGIA_DEFAULT_ZOOM)=>{
+    if(mapRef.current) mapRef.current.flyTo([center.lat,center.lng],zoom,{animate:true,duration:1.2});
+    setMapState(p=>({...p,center,zoom}));
+  },[]);
+  const resetView = useCallback(()=>flyTo(GEORGIA_CENTER,GEORGIA_DEFAULT_ZOOM),[flyTo]);
+  return { mapState, mapRef, onMapReady, flyTo, resetView };
+}
+'''
+
+FILES["src/features/map/hooks/useMapBounds.ts"] = '''\
+"use client";
+import { useState, useCallback } from "react";
+import type { LeafletEvent } from "leaflet";
+import type { BoundingBox } from "@/lib/types";
+
+export function useMapBounds() {
+  const [bounds, setBounds] = useState<BoundingBox|null>(null);
+  const onBoundsChange = useCallback((e:LeafletEvent)=>{
+    type B={getNorth:()=>number;getSouth:()=>number;getEast:()=>number;getWest:()=>number;};
+    const b=(e.target as {getBounds:()=>B}).getBounds();
+    setBounds({north:b.getNorth(),south:b.getSouth(),east:b.getEast(),west:b.getWest()});
+  },[]);
+  return { bounds, onBoundsChange };
+}
+'''
+
+FILES["src/features/map/hooks/useUserAlerts.ts"] = '''\
+"use client";
+import { useState, useCallback } from "react";
+import type { RoadAlert } from "@/lib/types";
+
+export function useUserAlerts() {
+  const [userAlerts, setUserAlerts] = useState<RoadAlert[]>([]);
+  const addUserAlert = useCallback((alert:RoadAlert)=>setUserAlerts(p=>[alert,...p]),[]);
+  return { userAlerts, addUserAlert };
+}
+'''
 
 FILES["src/features/map/components/MapSkeleton.tsx"] = '''\
 import { SkeletonBlock } from "@/components/ui/SkeletonBlock";
+import { KA } from "@/lib/i18n/ka";
 
 export function MapSkeleton(): React.ReactElement {
   return (
     <div className="relative flex h-full w-full items-center justify-center overflow-hidden"
-      style={{ backgroundColor: "var(--color-surface-base)" }}
-      aria-label="Map loading" aria-busy="true">
-
+      style={{backgroundColor:"var(--color-surface-base)"}} aria-label={KA.mapInitialising} aria-busy="true">
       <div className="absolute inset-0 opacity-20" aria-hidden="true">
-        {Array.from({ length: 8 }).map((_, i) => (
-          <div key={`h-${i}`} className="absolute left-0 right-0 border-t border-zinc-800" style={{ top: `${(i + 1) * 12.5}%` }} />
+        {Array.from({length:8}).map((_,i)=>(
+          <div key={`h-${i}`} className="absolute left-0 right-0 border-t border-zinc-800" style={{top:`${(i+1)*12.5}%`}}/>
         ))}
-        {Array.from({ length: 8 }).map((_, i) => (
-          <div key={`v-${i}`} className="absolute top-0 bottom-0 border-l border-zinc-800" style={{ left: `${(i + 1) * 12.5}%` }} />
+        {Array.from({length:8}).map((_,i)=>(
+          <div key={`v-${i}`} className="absolute top-0 bottom-0 border-l border-zinc-800" style={{left:`${(i+1)*12.5}%`}}/>
         ))}
       </div>
-
       <div className="relative flex flex-col items-center gap-4 rounded-2xl border border-[var(--color-surface-border)] bg-[var(--color-surface-card)] px-10 py-8 shadow-2xl">
-        <div className="flex gap-3">
-          <SkeletonBlock className="h-3 w-24" />
-          <SkeletonBlock className="h-3 w-16" />
-        </div>
-        <SkeletonBlock className="h-3 w-32" />
+        <div className="flex gap-3"><SkeletonBlock className="h-3 w-24"/><SkeletonBlock className="h-3 w-16"/></div>
+        <SkeletonBlock className="h-3 w-32"/>
         <div className="mt-2 flex h-12 w-12 items-center justify-center rounded-full bg-amber-500/10">
           <svg className="h-6 w-6 animate-spin text-amber-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" aria-hidden="true">
-            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z" />
+            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"/>
+            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"/>
           </svg>
         </div>
-        <p className="text-sm font-medium text-zinc-400">Initialising map\\u2026</p>
-        <p className="text-xs text-zinc-600">Loading Georgian road network</p>
+        <p className="text-sm font-medium text-zinc-400">{KA.mapInitialising}</p>
+        <p className="text-xs text-zinc-600">{KA.mapLoadingNet}</p>
       </div>
     </div>
   );
 }
 '''
-
-
-# ── src/features/map/components/MapControls.tsx ───────────────────────────────
 
 FILES["src/features/map/components/MapControls.tsx"] = '''\
 "use client";
-
 import { ZoomIn, ZoomOut, Compass } from "lucide-react";
 import { useMap } from "react-leaflet";
 
-interface MapControlsProps {
-  onResetView: () => void;
-}
-
-export function MapControls({ onResetView }: MapControlsProps): React.ReactElement {
+export function MapControls({ onResetView }: { onResetView:()=>void }): React.ReactElement {
   const map = useMap();
-
+  const btnCls = "flex h-9 w-9 items-center justify-center rounded-xl bg-[var(--color-surface-card)] text-zinc-300 shadow-lg border border-[var(--color-surface-border)] hover:text-amber-400 hover:border-amber-500/30 transition-all duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400/40";
   return (
-    <div className="absolute bottom-6 right-4 z-[400] flex flex-col gap-1.5" style={{ pointerEvents: "auto" }}>
-      <button type="button" aria-label="Zoom in" onClick={() => map.zoomIn()}
-        className="flex h-9 w-9 items-center justify-center rounded-xl bg-[var(--color-surface-card)] text-zinc-300 shadow-lg border border-[var(--color-surface-border)] hover:text-amber-400 hover:border-amber-500/30 transition-all duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400/40">
-        <ZoomIn size={16} />
-      </button>
-      <button type="button" aria-label="Zoom out" onClick={() => map.zoomOut()}
-        className="flex h-9 w-9 items-center justify-center rounded-xl bg-[var(--color-surface-card)] text-zinc-300 shadow-lg border border-[var(--color-surface-border)] hover:text-amber-400 hover:border-amber-500/30 transition-all duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400/40">
-        <ZoomOut size={16} />
-      </button>
-      <div className="h-px bg-[var(--color-surface-border)] mx-1" aria-hidden="true" />
-      <button type="button" aria-label="Reset map view to Georgia" onClick={onResetView} title="Reset to Georgia overview"
-        className="flex h-9 w-9 items-center justify-center rounded-xl bg-[var(--color-surface-card)] text-zinc-400 shadow-lg border border-[var(--color-surface-border)] hover:text-amber-400 hover:border-amber-500/30 transition-all duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400/40">
-        <Compass size={16} />
-      </button>
+    <div className="absolute bottom-6 right-4 z-[400] flex flex-col gap-1.5" style={{pointerEvents:"auto"}}>
+      <button type="button" aria-label="Zoom in"  onClick={()=>map.zoomIn()}  className={btnCls}><ZoomIn  size={16}/></button>
+      <button type="button" aria-label="Zoom out" onClick={()=>map.zoomOut()} className={btnCls}><ZoomOut size={16}/></button>
+      <div className="h-px bg-[var(--color-surface-border)] mx-1" aria-hidden="true"/>
+      <button type="button" aria-label="Reset view" onClick={onResetView} title="Reset to Georgia" className={btnCls}><Compass size={16}/></button>
     </div>
   );
 }
 '''
 
-
-# ── src/features/map/components/MapOverlayStats.tsx ──────────────────────────
-
 FILES["src/features/map/components/MapOverlayStats.tsx"] = '''\
 "use client";
-
 import { Navigation, TriangleAlert, Coffee } from "lucide-react";
+import { KA } from "@/lib/i18n/ka";
 
-interface MapOverlayStatsProps {
-  routeCount: number;
-  alertCount: number;
-  spotCount:  number;
-}
-
-export function MapOverlayStats({ routeCount, alertCount, spotCount }: MapOverlayStatsProps): React.ReactElement {
-  const items = [
-    { icon: <Navigation size={12} />,    count: routeCount, label: "routes", color: "#f59e0b" },
-    { icon: <TriangleAlert size={12} />, count: alertCount, label: "alerts", color: "#ef4444" },
-    { icon: <Coffee size={12} />,        count: spotCount,  label: "spots",  color: "#fb923c" },
+export function MapOverlayStats({ routeCount, alertCount, spotCount }: { routeCount:number; alertCount:number; spotCount:number }): React.ReactElement {
+  const items=[
+    {icon:<Navigation size={12}/>,    count:routeCount, label:KA.statRoutes, color:"#f59e0b"},
+    {icon:<TriangleAlert size={12}/>, count:alertCount, label:KA.statAlerts, color:"#ef4444"},
+    {icon:<Coffee size={12}/>,        count:spotCount,  label:KA.statSpots,  color:"#fb923c"},
   ];
-
   return (
     <div className="absolute bottom-6 left-4 z-[400] flex items-center gap-1 rounded-full border border-[var(--color-surface-border)] bg-[var(--color-surface-card)]/90 px-3 py-1.5 backdrop-blur-sm shadow-lg"
       aria-live="polite" aria-label="Visible map entities">
-      {items.map(({ icon, count, label, color }, idx) => (
+      {items.map(({icon,count,label,color},i)=>(
         <span key={label} className="flex items-center gap-1.5">
-          {idx > 0 && <span className="h-3 w-px bg-[var(--color-surface-border)]" aria-hidden="true" />}
-          <span style={{ color }} aria-hidden="true">{icon}</span>
+          {i>0&&<span className="h-3 w-px bg-[var(--color-surface-border)]" aria-hidden="true"/>}
+          <span style={{color}} aria-hidden="true">{icon}</span>
           <span className="text-[11px] font-semibold text-zinc-300">{count}</span>
           <span className="text-[11px] text-zinc-600 hidden sm:inline">{label}</span>
         </span>
@@ -1561,74 +1179,45 @@ export function MapOverlayStats({ routeCount, alertCount, spotCount }: MapOverla
 }
 '''
 
-
-# ── src/features/map/components/AlertMarker.tsx ───────────────────────────────
-
 FILES["src/features/map/components/AlertMarker.tsx"] = '''\
 "use client";
-
 import { Marker, Popup, Circle } from "react-leaflet";
 import L from "leaflet";
 import { renderToStaticMarkup } from "react-dom/server";
 import type { RoadAlert } from "@/lib/types";
 import { ALERT_TYPE_META, ALERT_SEVERITY_META } from "@/lib/constants";
+import { KA } from "@/lib/i18n/ka";
 import { timeAgo } from "@/lib/utils";
 
-interface AlertMarkerProps {
-  alert: RoadAlert;
-}
-
-function createAlertIcon(color: string, bgColor: string, severity: RoadAlert["severity"]): L.DivIcon {
-  const isPulsing = severity === "high";
-  const svgMarkup = renderToStaticMarkup(
+function createAlertIcon(color:string, bgColor:string, severity:RoadAlert["severity"]): L.DivIcon {
+  const svg = renderToStaticMarkup(
     <svg xmlns="http://www.w3.org/2000/svg" width="32" height="38" viewBox="0 0 32 38">
-      <defs>
-        <filter id="ds" x="-40%" y="-30%" width="180%" height="180%">
-          <feDropShadow dx="0" dy="3" stdDeviation="3" floodColor="rgba(0,0,0,0.55)" />
-        </filter>
-      </defs>
-      <path d="M16 2C9.4 2 4 7.4 4 14c0 8.5 12 24 12 24s12-15.5 12-24C28 7.4 22.6 2 16 2z"
-        fill={bgColor.replace("0.12", "0.88")} stroke={color} strokeWidth="1.5" filter="url(#ds)" />
-      <circle cx="16" cy="14" r="5.5" fill={color} opacity="0.95" />
+      <defs><filter id="ds" x="-40%" y="-30%" width="180%" height="180%"><feDropShadow dx="0" dy="3" stdDeviation="3" floodColor="rgba(0,0,0,0.55)"/></filter></defs>
+      <path d="M16 2C9.4 2 4 7.4 4 14c0 8.5 12 24 12 24s12-15.5 12-24C28 7.4 22.6 2 16 2z" fill={bgColor.replace("0.12","0.88")} stroke={color} strokeWidth="1.5" filter="url(#ds)"/>
+      <circle cx="16" cy="14" r="5.5" fill={color} opacity="0.95"/>
     </svg>
   );
-  return L.divIcon({
-    html:        `<div ${isPulsing ? \'class="animate-pulse-glow"\' : ""}>${svgMarkup}</div>`,
-    className:   "",
-    iconSize:    [32, 38],
-    iconAnchor:  [16, 38],
-    popupAnchor: [0, -40],
-  });
+  return L.divIcon({ html:`<div ${severity==="high"?\'class="animate-pulse-glow"\':""} >${svg}</div>`, className:"", iconSize:[32,38], iconAnchor:[16,38], popupAnchor:[0,-40] });
 }
 
-export function AlertMarker({ alert }: AlertMarkerProps): React.ReactElement {
-  const typeMeta     = ALERT_TYPE_META[alert.type];
-  const severityMeta = ALERT_SEVERITY_META[alert.severity];
-  const icon         = createAlertIcon(typeMeta.color, typeMeta.bgColor, alert.severity);
-
+export function AlertMarker({ alert }: { alert:RoadAlert }): React.ReactElement {
+  const tm=ALERT_TYPE_META[alert.type], sm=ALERT_SEVERITY_META[alert.severity];
+  const icon=createAlertIcon(tm.color,tm.bgColor,alert.severity);
   return (
     <>
-      {alert.radius > 0 && (
-        <Circle center={[alert.lat, alert.lng]} radius={alert.radius}
-          pathOptions={{ color: typeMeta.color, fillColor: typeMeta.color, fillOpacity: 0.06, weight: 1, dashArray: "5 5" }} />
-      )}
-      <Marker position={[alert.lat, alert.lng]} icon={icon}>
+      {alert.radius>0&&<Circle center={[alert.lat,alert.lng]} radius={alert.radius} pathOptions={{color:tm.color,fillColor:tm.color,fillOpacity:0.06,weight:1,dashArray:"5 5"}}/>}
+      <Marker position={[alert.lat,alert.lng]} icon={icon}>
         <Popup>
           <article className="min-w-[210px] max-w-[270px]">
             <header className="flex items-center gap-2 mb-2.5">
-              <span className="inline-flex h-5 w-5 shrink-0 items-center justify-center rounded-full"
-                style={{ backgroundColor: typeMeta.bgColor.replace("0.12", "0.22"), color: typeMeta.color }} aria-hidden="true">\\u25cf</span>
-              <span className="text-[11px] font-semibold uppercase tracking-wider" style={{ color: typeMeta.color }}>{typeMeta.label}</span>
-              <span className="ml-auto rounded-full px-2 py-0.5 text-[10px] font-bold"
-                style={{ backgroundColor: `${severityMeta.color}20`, color: severityMeta.color }}>{severityMeta.label}</span>
+              <span className="inline-flex h-5 w-5 shrink-0 items-center justify-center rounded-full" style={{backgroundColor:tm.bgColor.replace("0.12","0.22"),color:tm.color}} aria-hidden="true">\u25cf</span>
+              <span className="text-[11px] font-semibold uppercase tracking-wider" style={{color:tm.color}}>{tm.label}</span>
+              <span className="ml-auto rounded-full px-2 py-0.5 text-[10px] font-bold" style={{backgroundColor:`${sm.color}20`,color:sm.color}}>{sm.label}</span>
             </header>
             <p className="text-xs leading-relaxed text-zinc-300 mb-3">{alert.description}</p>
             <footer className="flex items-center justify-between border-t border-zinc-700/50 pt-2">
               <span className="text-[11px] text-zinc-600">{timeAgo(alert.reportedAt)}</span>
-              {alert.verified
-                ? <span className="text-[11px] font-medium text-green-400">\\u2713 Verified</span>
-                : <span className="text-[11px] text-zinc-600">Community report</span>
-              }
+              {alert.verified?<span className="text-[11px] font-medium text-green-400">{KA.verified}</span>:<span className="text-[11px] text-zinc-600">{KA.communityReport}</span>}
             </footer>
           </article>
         </Popup>
@@ -1638,54 +1227,37 @@ export function AlertMarker({ alert }: AlertMarkerProps): React.ReactElement {
 }
 '''
 
-
-# ── src/features/map/components/RoutePolyline.tsx ────────────────────────────
-
 FILES["src/features/map/components/RoutePolyline.tsx"] = '''\
 "use client";
-
 import { Polyline, Popup } from "react-leaflet";
 import type { Route } from "@/lib/types";
 import { DIFFICULTY_META, ASPHALT_QUALITY_META } from "@/lib/constants";
+import { KA } from "@/lib/i18n/ka";
 import { formatDistance, formatDuration } from "@/lib/utils";
 
-interface RoutePolylineProps {
-  route: Route;
-}
-
-export function RoutePolyline({ route }: RoutePolylineProps): React.ReactElement {
-  const diffMeta    = DIFFICULTY_META[route.difficulty];
-  const qualityMeta = ASPHALT_QUALITY_META[route.asphaltQuality];
-
-  if (route.coordinates.length < 2) return <></>;
-
-  const positions = route.coordinates.map((c) => [c.lat, c.lng] as [number, number]);
-
+export function RoutePolyline({ route }: { route:Route }): React.ReactElement {
+  const dm=DIFFICULTY_META[route.difficulty], qm=ASPHALT_QUALITY_META[route.asphaltQuality];
+  if(route.coordinates.length<2) return <></>;
+  const positions=route.coordinates.map(c=>[c.lat,c.lng] as [number,number]);
   return (
-    <Polyline positions={positions} pathOptions={{ color: diffMeta.color, weight: 5, opacity: 0.85, lineCap: "round", lineJoin: "round" }}>
+    <Polyline positions={positions} pathOptions={{color:dm.color,weight:5,opacity:0.85,lineCap:"round",lineJoin:"round"}}>
       <Popup>
         <article className="min-w-[230px] max-w-[290px]">
           <header className="mb-2">
             <h3 className="text-sm font-bold leading-tight text-zinc-100">{route.name}</h3>
-            <p className="text-[11px] mt-0.5" style={{ color: qualityMeta.color }}>{qualityMeta.label} surface</p>
+            <p className="text-[11px] mt-0.5" style={{color:qm.color}}>{qm.label} \u2014 {KA.surface}</p>
           </header>
           <p className="text-xs leading-relaxed text-zinc-400 mb-3 line-clamp-3">{route.description}</p>
           <div className="grid grid-cols-3 gap-1.5 mb-3">
-            {[
-              { label: "Distance", value: formatDistance(route.distanceKm)  },
-              { label: "Duration", value: formatDuration(route.durationMin) },
-              { label: "Climb",    value: `${route.elevationGain} m`        },
-            ].map(({ label, value }) => (
-              <div key={label} className="flex flex-col items-center rounded-lg py-2 px-1" style={{ backgroundColor: "var(--color-surface-raised)" }}>
+            {[{label:KA.distance,value:formatDistance(route.distanceKm)},{label:KA.duration,value:formatDuration(route.durationMin)},{label:KA.climb,value:`${route.elevationGain} \u10db`}].map(({label,value})=>(
+              <div key={label} className="flex flex-col items-center rounded-lg py-2 px-1" style={{backgroundColor:"var(--color-surface-raised)"}}>
                 <span className="text-xs font-semibold text-zinc-200">{value}</span>
                 <span className="text-[10px] text-zinc-600 mt-0.5">{label}</span>
               </div>
             ))}
           </div>
           <div className="flex items-center justify-between">
-            <span className="rounded-full px-2.5 py-0.5 text-[11px] font-semibold" style={{ backgroundColor: diffMeta.bgColor, color: diffMeta.color }}>
-              {diffMeta.label}
-            </span>
+            <span className="rounded-full px-2.5 py-0.5 text-[11px] font-semibold" style={{backgroundColor:dm.bgColor,color:dm.color}}>{dm.label}</span>
             <span className="text-[11px] text-zinc-600">{route.region}</span>
           </div>
         </article>
@@ -1695,64 +1267,39 @@ export function RoutePolyline({ route }: RoutePolylineProps): React.ReactElement
 }
 '''
 
-
-# ── src/features/map/components/SpotMarker.tsx ───────────────────────────────
-
 FILES["src/features/map/components/SpotMarker.tsx"] = '''\
 "use client";
-
 import { Marker, Popup } from "react-leaflet";
 import L from "leaflet";
 import { renderToStaticMarkup } from "react-dom/server";
 import type { BikerSpot } from "@/lib/types";
 import { SPOT_TYPE_META } from "@/lib/constants";
+import { KA } from "@/lib/i18n/ka";
 
-interface SpotMarkerProps {
-  spot: BikerSpot;
+function createSpotIcon(emoji:string, color:string): L.DivIcon {
+  const html=renderToStaticMarkup(<div style={{width:"36px",height:"36px",borderRadius:"50%",backgroundColor:"#1e2433",border:`2.5px solid ${color}`,display:"flex",alignItems:"center",justifyContent:"center",fontSize:"16px",lineHeight:"1",boxShadow:`0 0 0 4px ${color}25,0 4px 14px rgba(0,0,0,0.55)`}}>{emoji}</div>);
+  return L.divIcon({html,className:"",iconSize:[36,36],iconAnchor:[18,18],popupAnchor:[0,-22]});
 }
 
-function createSpotIcon(emoji: string, color: string): L.DivIcon {
-  const html = renderToStaticMarkup(
-    <div style={{ width: "36px", height: "36px", borderRadius: "50%", backgroundColor: "#1e2433",
-      border: `2.5px solid ${color}`, display: "flex", alignItems: "center", justifyContent: "center",
-      fontSize: "16px", lineHeight: "1", boxShadow: `0 0 0 4px ${color}25, 0 4px 14px rgba(0,0,0,0.55)` }}>
-      {emoji}
-    </div>
-  );
-  return L.divIcon({ html, className: "", iconSize: [36, 36], iconAnchor: [18, 18], popupAnchor: [0, -22] });
-}
+const stars=(r:number)=>"\u2605".repeat(Math.round(r))+"\u2606".repeat(Math.max(0,5-Math.round(r)));
 
-function buildStarString(rating: number): string {
-  const full = Math.round(rating);
-  return "\\u2605".repeat(full) + "\\u2606".repeat(Math.max(0, 5 - full));
-}
-
-export function SpotMarker({ spot }: SpotMarkerProps): React.ReactElement {
-  const meta = SPOT_TYPE_META[spot.type];
-  const icon = createSpotIcon(meta.icon, meta.color);
-
+export function SpotMarker({ spot }: { spot:BikerSpot }): React.ReactElement {
+  const meta=SPOT_TYPE_META[spot.type], icon=createSpotIcon(meta.icon,meta.color);
   return (
-    <Marker position={[spot.lat, spot.lng]} icon={icon}>
+    <Marker position={[spot.lat,spot.lng]} icon={icon}>
       <Popup>
         <article className="min-w-[200px] max-w-[260px]">
           <header className="flex items-start gap-2.5 mb-2">
             <span className="text-2xl leading-none" aria-hidden="true">{meta.icon}</span>
             <div className="min-w-0">
               <h3 className="text-sm font-bold leading-tight text-zinc-100 truncate">{spot.name}</h3>
-              <p className="text-[11px] mt-0.5" style={{ color: meta.color }}>{meta.label}</p>
+              <p className="text-[11px] mt-0.5" style={{color:meta.color}}>{meta.label}</p>
             </div>
-            {spot.verified && <span className="ml-auto shrink-0 text-[10px] font-medium text-green-400 mt-0.5" title="Community verified">\\u2713</span>}
+            {spot.verified&&<span className="ml-auto shrink-0 text-[10px] font-medium text-green-400 mt-0.5" title={KA.verified}>\u2713</span>}
           </header>
-          {spot.rating !== undefined && (
-            <div className="flex items-center gap-2 mb-2">
-              <span className="text-xs tracking-widest" style={{ color: meta.color }} aria-label={`${spot.rating} out of 5`}>
-                {buildStarString(spot.rating)}
-              </span>
-              <span className="text-[11px] text-zinc-500">{spot.rating.toFixed(1)}</span>
-            </div>
-          )}
-          {spot.address && <p className="text-[11px] text-zinc-500 mb-1 truncate">{spot.address}</p>}
-          {spot.phone   && <p className="text-[11px] text-zinc-500">{spot.phone}</p>}
+          {spot.rating!==undefined&&<div className="flex items-center gap-2 mb-2"><span className="text-xs tracking-widest" style={{color:meta.color}} aria-label={`${spot.rating} \u2014 5-\u10d3\u10d0\u10dc`}>{stars(spot.rating)}</span><span className="text-[11px] text-zinc-500">{spot.rating.toFixed(1)}</span></div>}
+          {spot.address&&<p className="text-[11px] text-zinc-500 mb-1 truncate">{spot.address}</p>}
+          {spot.phone&&<p className="text-[11px] text-zinc-500">{spot.phone}</p>}
         </article>
       </Popup>
     </Marker>
@@ -1760,247 +1307,250 @@ export function SpotMarker({ spot }: SpotMarkerProps): React.ReactElement {
 }
 '''
 
+FILES["src/features/map/components/AddAlertDialog.tsx"] = '''\
+"use client";
+import { useState, useEffect, useRef, type FormEvent } from "react";
+import { X, TriangleAlert, Camera, Construction, Flame, MapPin } from "lucide-react";
+import type { AlertType, RoadAlert } from "@/lib/types";
+import { ALERT_TYPE_META } from "@/lib/constants";
+import { KA } from "@/lib/i18n/ka";
+import { cn } from "@/lib/utils";
 
-# ── src/features/map/components/LeafletMap.tsx ───────────────────────────────
+const TYPE_ICONS: Record<AlertType, React.ReactNode> = {
+  gravel:<TriangleAlert size={16}/>, camera:<Camera size={16}/>, work:<Construction size={16}/>, danger:<Flame size={16}/>,
+};
+const TYPE_LABELS: Record<AlertType, string> = {
+  gravel:KA.alertGravel, camera:KA.alertCamera, work:KA.alertWork, danger:KA.alertDanger,
+};
+
+function TypeChip({ alertType, selected, onSelect }: { alertType:AlertType; selected:boolean; onSelect:()=>void }): React.ReactElement {
+  const meta=ALERT_TYPE_META[alertType];
+  return (
+    <button type="button" onClick={onSelect} aria-pressed={selected}
+      className={cn("flex flex-col items-center gap-1.5 rounded-xl px-3 py-2.5","border text-xs font-medium transition-all duration-150","focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400/50",
+        selected?"border-current shadow-sm":"border-[var(--color-surface-border)] text-zinc-500 hover:text-zinc-300 hover:border-zinc-600")}
+      style={selected?{backgroundColor:meta.bgColor,color:meta.color,borderColor:`${meta.color}50`}:{}}>
+      <span aria-hidden="true">{TYPE_ICONS[alertType]}</span>
+      <span className="text-[10px] leading-tight text-center">{TYPE_LABELS[alertType]}</span>
+    </button>
+  );
+}
+
+export function AddAlertDialog({ lat, lng, onSubmit, onClose }: { lat:number; lng:number; onSubmit:(a:RoadAlert)=>void; onClose:()=>void }): React.ReactElement {
+  const [selType, setSelType] = useState<AlertType>("gravel");
+  const [desc,    setDesc]    = useState("");
+  const backdropRef = useRef<HTMLDivElement>(null);
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
+
+  useEffect(()=>{ textareaRef.current?.focus(); },[]);
+  useEffect(()=>{ const f=(e:KeyboardEvent)=>{ if(e.key==="Escape")onClose(); }; document.addEventListener("keydown",f); return()=>document.removeEventListener("keydown",f); },[onClose]);
+
+  const handleSubmit=(e:FormEvent)=>{ e.preventDefault(); if(!desc.trim())return;
+    onSubmit({ id:`user-${Date.now()}`, type:selType, lat, lng, description:desc.trim(), severity:"medium", radius:300, verified:false, reportedAt:new Date().toISOString(), expiresAt:null });
+  };
+
+  return (
+    <div ref={backdropRef} className="fixed inset-0 z-[55] flex items-end justify-center sm:items-center p-4"
+      style={{backgroundColor:"rgba(0,0,0,0.65)",backdropFilter:"blur(4px)"}}
+      onPointerDown={e=>{if(e.target===backdropRef.current)onClose();}}
+      role="dialog" aria-modal="true" aria-label={KA.addAlertTitle}>
+      <div className={cn("w-full max-w-sm rounded-2xl overflow-hidden","bg-[var(--color-surface-card)] border border-[var(--color-surface-border)]","shadow-[0_24px_64px_rgba(0,0,0,0.7)] animate-fade-up")}>
+        <div className="flex items-center justify-between px-5 pt-5 pb-4 border-b border-[var(--color-surface-border)]">
+          <div className="flex items-center gap-2.5">
+            <div className="flex h-8 w-8 items-center justify-center rounded-lg" style={{backgroundColor:"rgba(239,68,68,0.15)",color:"#ef4444"}} aria-hidden="true"><TriangleAlert size={16}/></div>
+            <div>
+              <h2 className="text-sm font-bold text-zinc-100">{KA.addAlertTitle}</h2>
+              <div className="flex items-center gap-1 mt-0.5"><MapPin size={10} className="text-zinc-600" aria-hidden="true"/><span className="text-[10px] font-mono text-zinc-600">{lat.toFixed(4)}, {lng.toFixed(4)}</span></div>
+            </div>
+          </div>
+          <button type="button" aria-label={KA.close} onClick={onClose} className="rounded-lg p-1.5 text-zinc-500 hover:bg-white/5 hover:text-zinc-300 transition-colors"><X size={16}/></button>
+        </div>
+        <form onSubmit={handleSubmit} className="px-5 py-4 flex flex-col gap-5">
+          <div>
+            <p className="text-xs font-semibold text-zinc-400 mb-2.5">{KA.addAlertTypeLabel}</p>
+            <div className="grid grid-cols-4 gap-2">
+              {(["gravel","camera","work","danger"] as AlertType[]).map(t=><TypeChip key={t} alertType={t} selected={selType===t} onSelect={()=>setSelType(t)}/>)}
+            </div>
+          </div>
+          <div className="flex flex-col gap-1.5">
+            <label htmlFor="alert-desc" className="text-xs font-semibold text-zinc-400">{KA.addAlertDescLabel}</label>
+            <textarea id="alert-desc" ref={textareaRef} value={desc} onChange={e=>setDesc(e.target.value)}
+              placeholder={KA.addAlertDescPlaceholder} rows={3} required
+              className={cn("w-full rounded-xl bg-zinc-800/70 border border-zinc-700","px-3 py-2.5 text-sm text-zinc-200 placeholder:text-zinc-600 resize-none","focus:outline-none focus:border-amber-500/60 focus:ring-2 focus:ring-amber-500/20 transition-all duration-150")}/>
+          </div>
+          <div className="flex gap-2">
+            <button type="button" onClick={onClose} className={cn("flex-1 h-10 rounded-xl text-sm font-medium","bg-zinc-800 text-zinc-400 hover:bg-zinc-700 hover:text-zinc-200","border border-[var(--color-surface-border)] transition-colors duration-150")}>{KA.addAlertCancel}</button>
+            <button type="submit" disabled={!desc.trim()} className={cn("flex-[2] h-10 rounded-xl text-sm font-semibold text-zinc-900","bg-gradient-to-r from-amber-500 to-orange-500","hover:from-amber-400 hover:to-orange-400","shadow-[0_0_12px_rgba(245,158,11,0.3)]","transition-all duration-150 active:scale-[0.98]","disabled:opacity-40 disabled:cursor-not-allowed")}>{KA.addAlertSubmit}</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  );
+}
+'''
 
 FILES["src/features/map/components/LeafletMap.tsx"] = '''\
 "use client";
-
 import { useEffect } from "react";
 import { MapContainer, TileLayer, useMap, useMapEvents } from "react-leaflet";
-import type { Map as LeafletMapInstance, LeafletEvent } from "leaflet";
-import type { FilterState } from "@/lib/types";
+import type { Map as LM, LeafletEvent, LeafletMouseEvent } from "leaflet";
+import type { FilterState, RoadAlert } from "@/lib/types";
 import { GEORGIA_CENTER, GEORGIA_DEFAULT_ZOOM, GEORGIA_MIN_ZOOM, GEORGIA_MAX_ZOOM, MAP_TILE_URL, MAP_TILE_ATTR, MAP_TILE_SUBDOM } from "@/lib/constants";
 import { MOCK_ALERTS, MOCK_ROUTES, MOCK_SPOTS } from "@/store/mockData";
-import { AlertMarker }   from "./AlertMarker";
-import { RoutePolyline } from "./RoutePolyline";
-import { SpotMarker }    from "./SpotMarker";
-import { MapControls }   from "./MapControls";
+import { AlertMarker } from "./AlertMarker"; import { RoutePolyline } from "./RoutePolyline";
+import { SpotMarker }  from "./SpotMarker";  import { MapControls }  from "./MapControls";
 
-interface MapEventBridgeProps {
-  onReady:        (map: LeafletMapInstance) => void;
-  onBoundsChange: (event: LeafletEvent)     => void;
-}
-
-function MapEventBridge({ onReady, onBoundsChange }: MapEventBridgeProps): null {
-  const map = useMap() as LeafletMapInstance;
-  useEffect(() => { onReady(map); }, [map, onReady]);
-  useMapEvents({ moveend: onBoundsChange, zoomend: onBoundsChange });
+function MapEventBridge({ onReady, onBoundsChange, onMapClick }: { onReady:(m:LM)=>void; onBoundsChange:(e:LeafletEvent)=>void; onMapClick:(lat:number,lng:number)=>void }): null {
+  const map=useMap() as LM;
+  useEffect(()=>{ onReady(map); },[map,onReady]);
+  useMapEvents({ moveend:onBoundsChange, zoomend:onBoundsChange, click:(e:LeafletMouseEvent)=>onMapClick(e.latlng.lat,e.latlng.lng) });
   return null;
 }
 
-interface LeafletMapProps {
-  filters:        FilterState;
-  onMapReady:     (map: LeafletMapInstance) => void;
-  onBoundsChange: (event: LeafletEvent)     => void;
-  onResetView:    () => void;
-}
+interface LeafletMapProps { filters:FilterState; userAlerts:RoadAlert[]; onMapReady:(m:LM)=>void; onBoundsChange:(e:LeafletEvent)=>void; onResetView:()=>void; onMapClick:(lat:number,lng:number)=>void; }
 
-export function LeafletMap({ filters, onMapReady, onBoundsChange, onResetView }: LeafletMapProps): React.ReactElement {
-  const visibleRoutes = filters.showRoutes ? MOCK_ROUTES.filter((r) => filters.difficulties.includes(r.difficulty)) : [];
-  const visibleAlerts = filters.showAlerts ? MOCK_ALERTS.filter((a) => filters.alertTypes.includes(a.type))        : [];
-  const visibleSpots  = filters.showSpots  ? MOCK_SPOTS.filter((s)  => filters.spotTypes.includes(s.type))         : [];
-
+export function LeafletMap({ filters, userAlerts, onMapReady, onBoundsChange, onResetView, onMapClick }: LeafletMapProps): React.ReactElement {
+  const vRoutes = filters.showRoutes ? MOCK_ROUTES.filter(r=>filters.difficulties.includes(r.difficulty)) : [];
+  const vAlerts = filters.showAlerts ? MOCK_ALERTS.filter(a=>filters.alertTypes.includes(a.type))        : [];
+  const vSpots  = filters.showSpots  ? MOCK_SPOTS.filter(s=>filters.spotTypes.includes(s.type))          : [];
   return (
-    <MapContainer center={[GEORGIA_CENTER.lat, GEORGIA_CENTER.lng]} zoom={GEORGIA_DEFAULT_ZOOM}
-      minZoom={GEORGIA_MIN_ZOOM} maxZoom={GEORGIA_MAX_ZOOM} zoomControl={false} scrollWheelZoom={true}
-      style={{ height: "100%", width: "100%" }} className="z-0">
-      <TileLayer url={MAP_TILE_URL} attribution={MAP_TILE_ATTR} subdomains={MAP_TILE_SUBDOM} maxZoom={GEORGIA_MAX_ZOOM} />
-      <MapEventBridge onReady={onMapReady} onBoundsChange={onBoundsChange} />
-      <MapControls onResetView={onResetView} />
-      {visibleRoutes.map((route) => <RoutePolyline key={route.id} route={route} />)}
-      {visibleAlerts.map((alert) => <AlertMarker   key={alert.id} alert={alert} />)}
-      {visibleSpots.map((spot)   => <SpotMarker    key={spot.id}  spot={spot}  />)}
+    <MapContainer center={[GEORGIA_CENTER.lat,GEORGIA_CENTER.lng]} zoom={GEORGIA_DEFAULT_ZOOM} minZoom={GEORGIA_MIN_ZOOM} maxZoom={GEORGIA_MAX_ZOOM} zoomControl={false} scrollWheelZoom style={{height:"100%",width:"100%"}} className="z-0">
+      <TileLayer url={MAP_TILE_URL} attribution={MAP_TILE_ATTR} subdomains={MAP_TILE_SUBDOM} maxZoom={GEORGIA_MAX_ZOOM}/>
+      <MapEventBridge onReady={onMapReady} onBoundsChange={onBoundsChange} onMapClick={onMapClick}/>
+      <MapControls onResetView={onResetView}/>
+      {vRoutes.map(r=><RoutePolyline key={r.id} route={r}/>)}
+      {[...vAlerts,...userAlerts].map(a=><AlertMarker key={a.id} alert={a}/>)}
+      {vSpots.map(s=><SpotMarker key={s.id} spot={s}/>)}
     </MapContainer>
   );
 }
 '''
 
-
-# ── src/features/map/components/MapView.tsx ──────────────────────────────────
-
 FILES["src/features/map/components/MapView.tsx"] = '''\
 "use client";
-
 import dynamic from "next/dynamic";
-import { Suspense } from "react";
-import type { Map as LeafletMapInstance, LeafletEvent } from "leaflet";
-import type { FilterState } from "@/lib/types";
-import { MapSkeleton }     from "./MapSkeleton";
-import { MapOverlayStats } from "./MapOverlayStats";
+import { Suspense, useCallback, useState } from "react";
+import type { Map as LM, LeafletEvent } from "leaflet";
+import type { FilterState, RoadAlert } from "@/lib/types";
+import { useAuth }        from "@/features/auth/context/AuthContext";
+import { useUserAlerts }  from "@/features/map/hooks/useUserAlerts";
+import { AddAlertDialog } from "./AddAlertDialog";
+import { MapSkeleton }    from "./MapSkeleton";
+import { MapOverlayStats }from "./MapOverlayStats";
+import { KA }             from "@/lib/i18n/ka";
+import { cn }             from "@/lib/utils";
 import { MOCK_ALERTS, MOCK_ROUTES, MOCK_SPOTS } from "@/store/mockData";
 
-const LeafletMap = dynamic(
-  () => import("./LeafletMap").then((mod) => ({ default: mod.LeafletMap })),
-  { ssr: false, loading: () => <MapSkeleton /> }
-);
+const LeafletMap = dynamic(()=>import("./LeafletMap").then(m=>({default:m.LeafletMap})),{ssr:false,loading:()=><MapSkeleton/>});
 
-interface MapViewProps {
-  filters:        FilterState;
-  onMapReady:     (map: LeafletMapInstance) => void;
-  onBoundsChange: (event: LeafletEvent)     => void;
-  onResetView:    () => void;
-  isMapReady:     boolean;
+function AuthPromptToast({ onLogin, onDismiss }: { onLogin:()=>void; onDismiss:()=>void }): React.ReactElement {
+  return (
+    <div className="absolute bottom-20 left-1/2 -translate-x-1/2 z-[450] animate-fade-up" role="status" aria-live="polite">
+      <div className="flex items-center gap-3 rounded-2xl border border-[var(--color-surface-border)] bg-[var(--color-surface-card)] px-4 py-3 shadow-2xl">
+        <p className="text-xs text-zinc-400">{KA.addAlertLoginRequired}</p>
+        <button type="button" onClick={onLogin} className="shrink-0 rounded-lg bg-amber-500/20 px-3 py-1.5 text-xs font-semibold text-amber-400 hover:bg-amber-500/30 transition-colors">{KA.login}</button>
+        <button type="button" onClick={onDismiss} aria-label={KA.close} className="shrink-0 text-zinc-600 hover:text-zinc-400 text-lg leading-none transition-colors">\u00d7</button>
+      </div>
+    </div>
+  );
 }
 
+interface MapViewProps { filters:FilterState; onMapReady:(m:LM)=>void; onBoundsChange:(e:LeafletEvent)=>void; onResetView:()=>void; isMapReady:boolean; }
+
 export function MapView({ filters, onMapReady, onBoundsChange, onResetView, isMapReady }: MapViewProps): React.ReactElement {
-  const visibleRouteCount = filters.showRoutes ? MOCK_ROUTES.filter((r) => filters.difficulties.includes(r.difficulty)).length : 0;
-  const visibleAlertCount = filters.showAlerts ? MOCK_ALERTS.filter((a) => filters.alertTypes.includes(a.type)).length         : 0;
-  const visibleSpotCount  = filters.showSpots  ? MOCK_SPOTS.filter((s)  => filters.spotTypes.includes(s.type)).length          : 0;
+  const { isAuthenticated, openModal } = useAuth();
+  const { userAlerts, addUserAlert }   = useUserAlerts();
+  const [pendingCoords, setPending]    = useState<{lat:number;lng:number}|null>(null);
+  const [showPrompt,    setShowPrompt] = useState(false);
+
+  const handleMapClick = useCallback((lat:number,lng:number)=>{
+    if(isAuthenticated){ setPending({lat,lng}); setShowPrompt(false); }
+    else { setShowPrompt(true); }
+  },[isAuthenticated]);
+
+  const handleAlertSubmit = useCallback((alert:RoadAlert)=>{ addUserAlert(alert); setPending(null); },[addUserAlert]);
+
+  const vRouteCount = filters.showRoutes ? MOCK_ROUTES.filter(r=>filters.difficulties.includes(r.difficulty)).length : 0;
+  const vAlertCount = filters.showAlerts ? MOCK_ALERTS.filter(a=>filters.alertTypes.includes(a.type)).length+userAlerts.length : userAlerts.length;
+  const vSpotCount  = filters.showSpots  ? MOCK_SPOTS.filter(s=>filters.spotTypes.includes(s.type)).length : 0;
 
   return (
-    <main className="relative flex-1 overflow-hidden" aria-label="Interactive map of Georgian motorcycle routes">
-      <Suspense fallback={<MapSkeleton />}>
-        <LeafletMap filters={filters} onMapReady={onMapReady} onBoundsChange={onBoundsChange} onResetView={onResetView} />
+    <main className="relative flex-1 overflow-hidden" aria-label={KA.mapAriaLabel}>
+      <Suspense fallback={<MapSkeleton/>}>
+        <LeafletMap filters={filters} userAlerts={userAlerts} onMapReady={onMapReady} onBoundsChange={onBoundsChange} onResetView={onResetView} onMapClick={handleMapClick}/>
       </Suspense>
-      {isMapReady && <MapOverlayStats routeCount={visibleRouteCount} alertCount={visibleAlertCount} spotCount={visibleSpotCount} />}
+      {isMapReady&&<MapOverlayStats routeCount={vRouteCount} alertCount={vAlertCount} spotCount={vSpotCount}/>}
+      {pendingCoords&&<AddAlertDialog lat={pendingCoords.lat} lng={pendingCoords.lng} onSubmit={handleAlertSubmit} onClose={()=>setPending(null)}/>}
+      {showPrompt&&<AuthPromptToast onLogin={()=>{setShowPrompt(false);openModal("login");}} onDismiss={()=>setShowPrompt(false)}/>}
     </main>
   );
 }
 '''
 
-
-# ── src/components/ui/Badge.tsx ───────────────────────────────────────────────
+# ══════════════════════════════════════════════════════════════════════════════
+#  SHARED UI COMPONENTS
+# ══════════════════════════════════════════════════════════════════════════════
 
 FILES["src/components/ui/Badge.tsx"] = '''\
 import { cn } from "@/lib/utils";
-
-interface BadgeProps {
-  label:      string;
-  color?:     string;
-  bgColor?:   string;
-  className?: string;
-}
-
+interface BadgeProps { label:string; color?:string; bgColor?:string; className?:string; }
 export function Badge({ label, color, bgColor, className }: BadgeProps): React.ReactElement {
-  return (
-    <span
-      className={cn("inline-flex items-center rounded-full px-2.5 py-0.5 text-[11px] font-semibold tracking-wide", className)}
-      style={{
-        color:           color   ?? "var(--color-text-secondary)",
-        backgroundColor: bgColor ?? "var(--color-surface-raised)",
-        border:          `1px solid ${color ? `${color}40` : "var(--color-surface-border)"}`,
-      }}
-    >
-      {label}
-    </span>
-  );
+  return <span className={cn("inline-flex items-center rounded-full px-2.5 py-0.5 text-[11px] font-semibold tracking-wide",className)} style={{color:color??"var(--color-text-secondary)",backgroundColor:bgColor??"var(--color-surface-raised)",border:`1px solid ${color?`${color}40`:"var(--color-surface-border)"}`}}>{label}</span>;
 }
 '''
-
-
-# ── src/components/ui/SkeletonBlock.tsx ───────────────────────────────────────
 
 FILES["src/components/ui/SkeletonBlock.tsx"] = '''\
 import { cn } from "@/lib/utils";
-
-interface SkeletonBlockProps {
-  className?: string;
-  rounded?:   "sm" | "md" | "lg" | "full";
-}
-
-const radiusMap = { sm: "rounded", md: "rounded-md", lg: "rounded-xl", full: "rounded-full" };
-
-export function SkeletonBlock({ className, rounded = "md" }: SkeletonBlockProps): React.ReactElement {
-  return <div className={cn("animate-shimmer", radiusMap[rounded], className)} aria-hidden="true" />;
+interface SkeletonBlockProps { className?:string; rounded?:"sm"|"md"|"lg"|"full"; }
+const r={sm:"rounded",md:"rounded-md",lg:"rounded-xl",full:"rounded-full"};
+export function SkeletonBlock({ className, rounded="md" }: SkeletonBlockProps): React.ReactElement {
+  return <div className={cn("animate-shimmer",r[rounded],className)} aria-hidden="true"/>;
 }
 '''
-
-
-# ── src/components/ui/IconButton.tsx ─────────────────────────────────────────
 
 FILES["src/components/ui/IconButton.tsx"] = '''\
 import type { ButtonHTMLAttributes, ReactElement } from "react";
 import { cn } from "@/lib/utils";
-
-interface IconButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
-  icon:    ReactElement;
-  label:   string;
-  active?: boolean;
-  badge?:  number;
-  size?:   "sm" | "md" | "lg";
-}
-
-const sizeMap = { sm: "h-8 w-8 text-sm", md: "h-9 w-9 text-base", lg: "h-11 w-11 text-lg" };
-
-export function IconButton({ icon, label, active = false, badge, size = "md", className, ...rest }: IconButtonProps): ReactElement {
+interface IconButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> { icon:ReactElement; label:string; active?:boolean; badge?:number; size?:"sm"|"md"|"lg"; }
+const sizes={sm:"h-8 w-8 text-sm",md:"h-9 w-9 text-base",lg:"h-11 w-11 text-lg"};
+export function IconButton({ icon, label, active=false, badge, size="md", className, ...rest }: IconButtonProps): ReactElement {
   return (
     <button type="button" aria-label={label} title={label}
-      className={cn(
-        "relative inline-flex items-center justify-center rounded-lg transition-all duration-150",
-        "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400/60",
-        sizeMap[size],
-        active ? "bg-amber-500/20 text-amber-400 shadow-[inset_0_0_0_1px_rgba(245,158,11,0.3)]"
-               : "text-zinc-400 hover:bg-white/5 hover:text-zinc-200",
-        className
-      )}
-      {...rest}
-    >
+      className={cn("relative inline-flex items-center justify-center rounded-lg transition-all duration-150","focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400/60",sizes[size],active?"bg-amber-500/20 text-amber-400 shadow-[inset_0_0_0_1px_rgba(245,158,11,0.3)]":"text-zinc-400 hover:bg-white/5 hover:text-zinc-200",className)} {...rest}>
       {icon}
-      {badge !== undefined && badge > 0 && (
-        <span aria-label={`${badge} active filters`}
-          className="absolute -top-0.5 -right-0.5 flex h-4 w-4 items-center justify-center rounded-full bg-amber-500 text-[9px] font-bold text-zinc-900">
-          {badge > 9 ? "9+" : badge}
-        </span>
-      )}
+      {badge!==undefined&&badge>0&&<span aria-label={`${badge} active`} className="absolute -top-0.5 -right-0.5 flex h-4 w-4 items-center justify-center rounded-full bg-amber-500 text-[9px] font-bold text-zinc-900">{badge>9?"9+":badge}</span>}
     </button>
   );
 }
 '''
 
-
-# ── src/components/ui/ErrorBoundary.tsx ───────────────────────────────────────
-
 FILES["src/components/ui/ErrorBoundary.tsx"] = '''\
 "use client";
-
 import { Component, type ErrorInfo, type ReactNode } from "react";
 import { AlertTriangle, RefreshCw } from "lucide-react";
-
-interface Props  { children: ReactNode; fallback?: ReactNode; context?: string; }
-interface State  { hasError: boolean; errorMessage: string; }
-
-export class ErrorBoundary extends Component<Props, State> {
-  constructor(props: Props) {
-    super(props);
-    this.state = { hasError: false, errorMessage: "" };
-  }
-
-  static getDerivedStateFromError(error: Error): State {
-    return { hasError: true, errorMessage: error.message };
-  }
-
-  override componentDidCatch(error: Error, info: ErrorInfo): void {
-    console.error(`[ErrorBoundary] ${this.props.context ?? "unknown"}:`, error, info);
-  }
-
-  private handleReset = (): void => this.setState({ hasError: false, errorMessage: "" });
-
-  override render(): ReactNode {
-    if (!this.state.hasError) return this.props.children;
-    if (this.props.fallback)  return this.props.fallback;
-
+import { KA } from "@/lib/i18n/ka";
+interface Props  { children:ReactNode; fallback?:ReactNode; context?:string; }
+interface State  { hasError:boolean; errorMessage:string; }
+export class ErrorBoundary extends Component<Props,State> {
+  constructor(props:Props) { super(props); this.state={hasError:false,errorMessage:""}; }
+  static getDerivedStateFromError(e:Error):State { return {hasError:true,errorMessage:e.message}; }
+  override componentDidCatch(e:Error,i:ErrorInfo):void { console.error(`[ErrorBoundary] ${this.props.context??"unknown"}:`,e,i); }
+  private handleReset=():void=>this.setState({hasError:false,errorMessage:""});
+  override render():ReactNode {
+    if(!this.state.hasError) return this.props.children;
+    if(this.props.fallback)  return this.props.fallback;
     return (
-      <div role="alert" className="flex h-full w-full flex-col items-center justify-center gap-4 p-8"
-        style={{ backgroundColor: "var(--color-surface-base)" }}>
-        <div className="flex h-14 w-14 items-center justify-center rounded-2xl"
-          style={{ backgroundColor: "rgba(239,68,68,0.1)", border: "1px solid rgba(239,68,68,0.2)" }}>
-          <AlertTriangle size={24} className="text-red-400" />
+      <div role="alert" className="flex h-full w-full flex-col items-center justify-center gap-4 p-8" style={{backgroundColor:"var(--color-surface-base)"}}>
+        <div className="flex h-14 w-14 items-center justify-center rounded-2xl" style={{backgroundColor:"rgba(239,68,68,0.1)",border:"1px solid rgba(239,68,68,0.2)"}}>
+          <AlertTriangle size={24} className="text-red-400"/>
         </div>
         <div className="text-center">
-          <h2 className="text-base font-semibold text-zinc-200">Something went wrong</h2>
-          <p className="mt-1 text-sm text-zinc-500">
-            {this.props.context ? `The ${this.props.context} failed to load.` : "An unexpected error occurred."}
-          </p>
-          {this.state.errorMessage && (
-            <p className="mt-2 rounded-lg bg-red-900/20 px-3 py-1.5 font-mono text-xs text-red-400">
-              {this.state.errorMessage}
-            </p>
-          )}
+          <h2 className="text-base font-semibold text-zinc-200">{KA.errorTitle}</h2>
+          <p className="mt-1 text-sm text-zinc-500">{this.props.context==="map"?KA.errorMapFailed:KA.errorGeneric}</p>
+          {this.state.errorMessage&&<p className="mt-2 rounded-lg bg-red-900/20 px-3 py-1.5 font-mono text-xs text-red-400">{this.state.errorMessage}</p>}
         </div>
-        <button type="button" onClick={this.handleReset}
-          className="flex items-center gap-2 rounded-xl bg-zinc-800 px-4 py-2 text-sm font-medium text-zinc-300 hover:bg-zinc-700 hover:text-zinc-100 transition-colors">
-          <RefreshCw size={14} /> Try again
+        <button type="button" onClick={this.handleReset} className="flex items-center gap-2 rounded-xl bg-zinc-800 px-4 py-2 text-sm font-medium text-zinc-300 hover:bg-zinc-700 hover:text-zinc-100 transition-colors">
+          <RefreshCw size={14}/>{KA.errorRetry}
         </button>
       </div>
     );
@@ -2008,212 +1558,192 @@ export class ErrorBoundary extends Component<Props, State> {
 }
 '''
 
-
-# ── src/components/layout/TopBar.tsx ─────────────────────────────────────────
+# ══════════════════════════════════════════════════════════════════════════════
+#  LAYOUT COMPONENTS
+# ══════════════════════════════════════════════════════════════════════════════
 
 FILES["src/components/layout/TopBar.tsx"] = '''\
 "use client";
-
-import { Search, Bell, Layers, Map, ChevronDown, Wifi, WifiOff } from "lucide-react";
+import { Search, Bell, Layers, Map, ChevronDown, Wifi, WifiOff, LogIn, UserCircle, LogOut, ChevronRight } from "lucide-react";
 import { useState, useRef, useEffect } from "react";
+import { useAuth } from "@/features/auth/context/AuthContext";
 import { IconButton } from "@/components/ui/IconButton";
+import { KA } from "@/lib/i18n/ka";
 import { cn } from "@/lib/utils";
 
-interface TopBarProps {
-  searchQuery:      string;
-  onSearchChange:   (value: string) => void;
-  activeAlertCount: number;
-  onSidebarToggle?: () => void;
-  sidebarOpen:      boolean;
-}
+interface TopBarProps { searchQuery:string; onSearchChange:(v:string)=>void; activeAlertCount:number; onSidebarToggle?:()=>void; sidebarOpen:boolean; }
 
 export function TopBar({ searchQuery, onSearchChange, activeAlertCount, onSidebarToggle, sidebarOpen }: TopBarProps): React.ReactElement {
-  const [searchFocused, setSearchFocused] = useState(false);
-  const [notifOpen,     setNotifOpen]     = useState(false);
-  const [isOnline,      setIsOnline]      = useState(true);
-  const notifRef = useRef<HTMLDivElement>(null);
+  const { user, isAuthenticated, openModal, logout } = useAuth();
+  const [sFoc, setSFoc]   = useState(false);
+  const [notif,setNotif]  = useState(false);
+  const [prof, setProf]   = useState(false);
+  const [online,setOnline]= useState(true);
+  const notifRef=useRef<HTMLDivElement>(null), profRef=useRef<HTMLDivElement>(null);
 
-  useEffect(() => {
-    const on  = () => setIsOnline(true);
-    const off = () => setIsOnline(false);
-    window.addEventListener("online",  on);
-    window.addEventListener("offline", off);
-    return () => { window.removeEventListener("online", on); window.removeEventListener("offline", off); };
-  }, []);
+  useEffect(()=>{
+    const on=()=>setOnline(true), off=()=>setOnline(false);
+    window.addEventListener("online",on); window.addEventListener("offline",off);
+    return()=>{ window.removeEventListener("online",on); window.removeEventListener("offline",off); };
+  },[]);
 
-  useEffect(() => {
-    const handler = (e: PointerEvent) => {
-      if (notifRef.current && !notifRef.current.contains(e.target as Node)) setNotifOpen(false);
+  useEffect(()=>{
+    const h=(e:PointerEvent)=>{
+      if(notifRef.current&&!notifRef.current.contains(e.target as Node)) setNotif(false);
+      if(profRef.current&&!profRef.current.contains(e.target as Node))  setProf(false);
     };
-    if (notifOpen) document.addEventListener("pointerdown", handler);
-    return () => document.removeEventListener("pointerdown", handler);
-  }, [notifOpen]);
+    document.addEventListener("pointerdown",h);
+    return()=>document.removeEventListener("pointerdown",h);
+  },[]);
 
   return (
-    <header className={cn(
-      "fixed inset-x-0 top-0 z-50 h-14 flex items-center gap-3 px-4 md:px-6",
-      "backdrop-blur-xl backdrop-saturate-150 bg-[var(--glass-bg)] border-b border-[var(--glass-border)]",
-      "shadow-[0_1px_0_0_rgba(255,255,255,0.04)]"
-    )}>
-      <button type="button" onClick={onSidebarToggle} className="flex shrink-0 items-center gap-2.5 group" aria-label="Toggle sidebar">
-        <span className={cn(
-          "flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-amber-500 to-orange-500",
-          "shadow-[0_0_16px_rgba(245,158,11,0.4)] group-hover:shadow-[0_0_20px_rgba(245,158,11,0.6)] transition-shadow duration-200"
-        )} aria-hidden="true">
-          <Map size={16} className="text-zinc-900" strokeWidth={2.5} />
+    <header className={cn("fixed inset-x-0 top-0 z-50 h-14 flex items-center gap-3 px-4 md:px-6","backdrop-blur-xl backdrop-saturate-150 bg-[var(--glass-bg)] border-b border-[var(--glass-border)]","shadow-[0_1px_0_0_rgba(255,255,255,0.04)]")}>
+
+      <button type="button" onClick={onSidebarToggle} className="flex shrink-0 items-center gap-2.5 group" aria-label={KA.toggleSidebar}>
+        <span className={cn("flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-amber-500 to-orange-500","shadow-[0_0_16px_rgba(245,158,11,0.4)] group-hover:shadow-[0_0_20px_rgba(245,158,11,0.6)] transition-shadow duration-200")} aria-hidden="true">
+          <Map size={16} className="text-zinc-900" strokeWidth={2.5}/>
         </span>
         <span className="hidden sm:flex flex-col leading-none">
           <span className="text-sm font-bold tracking-tight text-zinc-100">GeoMoto<span className="text-amber-400">Routes</span></span>
-          <span className="text-[10px] font-medium tracking-widest text-zinc-500 uppercase">Georgia</span>
+          <span className="text-[10px] font-medium tracking-widest text-zinc-500 uppercase">{KA.appSubtitle}</span>
         </span>
-        <ChevronDown size={14} className={cn("hidden md:block text-zinc-500 transition-transform duration-200", sidebarOpen ? "rotate-0" : "-rotate-90")} />
+        <ChevronDown size={14} className={cn("hidden md:block text-zinc-500 transition-transform duration-200",sidebarOpen?"rotate-0":"-rotate-90")}/>
       </button>
 
-      <div className={cn("relative flex flex-1 max-w-sm items-center rounded-xl border transition-all duration-200",
-        searchFocused ? "border-amber-500/50 shadow-[0_0_0_3px_rgba(245,158,11,0.12)]" : "border-[var(--glass-border)] hover:border-zinc-600/60")}>
-        <Search size={15} className={cn("absolute left-3 shrink-0 transition-colors duration-150", searchFocused ? "text-amber-400" : "text-zinc-500")} />
-        <input type="search" placeholder="Search routes, regions, spots\\u2026" value={searchQuery}
-          onChange={(e) => onSearchChange(e.target.value)}
-          onFocus={() => setSearchFocused(true)} onBlur={() => setSearchFocused(false)}
-          className="h-9 w-full rounded-xl pl-9 pr-4 bg-white/[0.04] text-sm text-zinc-200 placeholder:text-zinc-600 focus:outline-none" />
-        {searchQuery && (
-          <button type="button" aria-label="Clear search" onClick={() => onSearchChange("")}
-            className="absolute right-3 text-zinc-500 hover:text-zinc-300 transition-colors">\\u00d7</button>
-        )}
+      <div className={cn("relative flex flex-1 max-w-sm items-center rounded-xl border transition-all duration-200",sFoc?"border-amber-500/50 shadow-[0_0_0_3px_rgba(245,158,11,0.12)]":"border-[var(--glass-border)] hover:border-zinc-600/60")}>
+        <Search size={15} className={cn("absolute left-3 shrink-0 transition-colors duration-150",sFoc?"text-amber-400":"text-zinc-500")}/>
+        <input type="search" placeholder={KA.searchPlaceholder} value={searchQuery} onChange={e=>onSearchChange(e.target.value)}
+          onFocus={()=>setSFoc(true)} onBlur={()=>setSFoc(false)}
+          className="h-9 w-full rounded-xl pl-9 pr-4 bg-white/[0.04] text-sm text-zinc-200 placeholder:text-zinc-600 focus:outline-none"/>
+        {searchQuery&&<button type="button" aria-label={KA.clearSearch} onClick={()=>onSearchChange("")} className="absolute right-3 text-zinc-500 hover:text-zinc-300 transition-colors">\u00d7</button>}
       </div>
 
       <div className="ml-auto flex items-center gap-1">
         <div className="hidden sm:flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[11px] font-medium"
-          style={{ backgroundColor: isOnline ? "rgba(34,197,94,0.1)" : "rgba(239,68,68,0.1)",
-                   color:           isOnline ? "#22c55e"             : "#ef4444",
-                   border:          `1px solid ${isOnline ? "rgba(34,197,94,0.25)" : "rgba(239,68,68,0.25)"}` }}
-          title={isOnline ? "Connected" : "Offline \\u2014 map cached"}>
-          {isOnline ? <Wifi size={11} strokeWidth={2.5} /> : <WifiOff size={11} strokeWidth={2.5} />}
-          <span className="hidden lg:inline">{isOnline ? "Live" : "Offline"}</span>
+          style={{backgroundColor:online?"rgba(34,197,94,0.1)":"rgba(239,68,68,0.1)",color:online?"#22c55e":"#ef4444",border:`1px solid ${online?"rgba(34,197,94,0.25)":"rgba(239,68,68,0.25)"}`}} title={online?KA.online:KA.offline}>
+          {online?<Wifi size={11} strokeWidth={2.5}/>:<WifiOff size={11} strokeWidth={2.5}/>}
+          <span className="hidden lg:inline">{online?KA.online:KA.offline}</span>
         </div>
 
-        <IconButton icon={<Layers size={16} />} label="Map layers" size="md" className="ml-1" />
+        <IconButton icon={<Layers size={16}/>} label={KA.mapLayersLabel} size="md" className="ml-1"/>
 
         <div ref={notifRef} className="relative">
-          <IconButton icon={<Bell size={16} />} label="Active road alerts" badge={activeAlertCount}
-            active={notifOpen} size="md" onClick={() => setNotifOpen((v) => !v)} />
-          {notifOpen && (
-            <div className={cn("absolute right-0 top-full mt-2 w-72 z-50 animate-fade-up",
-              "rounded-2xl border border-[var(--color-surface-border)] bg-[var(--color-surface-card)]",
-              "shadow-[0_16px_48px_rgba(0,0,0,0.6)] overflow-hidden")}>
-              <div className="flex items-center justify-between px-4 py-3 border-b border-[var(--color-surface-border)]">
-                <span className="text-sm font-semibold text-zinc-200">Active Alerts</span>
-                <span className="rounded-full bg-amber-500/20 px-2 py-0.5 text-[11px] font-bold text-amber-400">{activeAlertCount}</span>
-              </div>
+          <IconButton icon={<Bell size={16}/>} label={KA.activeAlerts} badge={activeAlertCount} active={notif} size="md" onClick={()=>setNotif(v=>!v)}/>
+          {notif&&(
+            <div className={cn("absolute right-0 top-full mt-2 w-72 z-50 animate-fade-up","rounded-2xl border border-[var(--color-surface-border)] bg-[var(--color-surface-card)]","shadow-[0_16px_48px_rgba(0,0,0,0.6)] overflow-hidden")}>
+              <div className="flex items-center justify-between px-4 py-3 border-b border-[var(--color-surface-border)]"><span className="text-sm font-semibold text-zinc-200">{KA.activeAlerts}</span><span className="rounded-full bg-amber-500/20 px-2 py-0.5 text-[11px] font-bold text-amber-400">{activeAlertCount}</span></div>
               <ul className="max-h-64 overflow-y-auto divide-y divide-[var(--color-surface-border)]">
-                {activeAlertCount === 0
-                  ? <li className="px-4 py-6 text-center text-sm text-zinc-500">No active alerts on your route</li>
-                  : <li className="px-4 py-3">
-                      <p className="text-xs font-medium text-amber-400">Gravel Hazard</p>
-                      <p className="mt-0.5 text-xs text-zinc-400">Jvari Pass \\u2014 Reduce speed</p>
-                    </li>
-                }
+                {activeAlertCount===0?<li className="px-4 py-6 text-center text-sm text-zinc-500">{KA.noAlerts}</li>:<li className="px-4 py-3"><p className="text-xs font-medium text-amber-400">\u10ee\u10e0\u10d4\u10e8\u10d8 \u2014 \u10ef\u10d5\u10e0\u10d8\u10e1 \u10e3\u10e6\u10d4\u10da\u10e2\u10d4\u10ee\u10d8\u10da\u10d8</p><p className="mt-0.5 text-xs text-zinc-400">\u10e1\u10d8\u10e9\u10e5\u10d0\u10e0\u10d4 \u10e8\u10d4\u10d0\u10db\u10ea\u10d8\u10e0\u10d4\u10d7 35 \u10d9\u10db/\u10e1\u10d7-\u10db\u10d3\u10d4</p></li>}
               </ul>
             </div>
           )}
         </div>
+
+        {isAuthenticated&&user?(
+          <div ref={profRef} className="relative ml-1">
+            <button type="button" onClick={()=>setProf(v=>!v)} aria-label={KA.myProfile}
+              className={cn("flex items-center gap-2 rounded-xl h-9 pl-2 pr-3 border transition-all duration-150",prof?"bg-amber-500/15 border-amber-500/30 text-amber-400":"border-[var(--color-surface-border)] text-zinc-300 hover:bg-white/[0.04] hover:text-zinc-100")}>
+              <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-[11px] font-bold text-zinc-900" style={{background:"linear-gradient(135deg,#f59e0b,#fb923c)"}} aria-hidden="true">{user.name.charAt(0).toUpperCase()}</span>
+              <span className="hidden md:block text-xs font-medium max-w-[80px] truncate">{user.name}</span>
+              <ChevronRight size={12} className={cn("text-zinc-600 transition-transform duration-150",prof?"rotate-90":"rotate-0")}/>
+            </button>
+            {prof&&(
+              <div className={cn("absolute right-0 top-full mt-2 w-52 z-50 animate-fade-up","rounded-2xl border border-[var(--color-surface-border)] bg-[var(--color-surface-card)]","shadow-[0_16px_48px_rgba(0,0,0,0.6)] overflow-hidden")}>
+                <div className="px-4 py-3 border-b border-[var(--color-surface-border)]">
+                  <p className="text-sm font-semibold text-zinc-100 truncate">{user.name}</p>
+                  <p className="text-[11px] text-zinc-500 truncate mt-0.5">{user.email}</p>
+                  {user.motorcycleModel&&<p className="text-[11px] text-amber-500/80 mt-0.5 truncate">\U0001f3cd {user.motorcycleModel}</p>}
+                </div>
+                <button type="button" onClick={()=>{logout();setProf(false);}} className="flex w-full items-center gap-2.5 px-4 py-3 text-sm text-zinc-400 hover:bg-white/[0.04] hover:text-red-400 transition-colors">
+                  <LogOut size={15}/>{KA.logout}
+                </button>
+              </div>
+            )}
+          </div>
+        ):(
+          <>
+            <button type="button" onClick={()=>openModal("login")}
+              className={cn("ml-1 hidden sm:flex items-center gap-1.5 rounded-xl h-9 px-3","bg-amber-500/15 border border-amber-500/25 text-amber-400","hover:bg-amber-500/25 hover:border-amber-500/40","text-xs font-semibold transition-all duration-150","focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400/50")}>
+              <LogIn size={14} strokeWidth={2.5}/>{KA.login}
+            </button>
+            <IconButton icon={<UserCircle size={18}/>} label={KA.login} size="md" className="sm:hidden" onClick={()=>openModal("login")}/>
+          </>
+        )}
       </div>
     </header>
   );
 }
 '''
 
-
-# ── src/components/layout/DashboardLayout.tsx ────────────────────────────────
-
 FILES["src/components/layout/DashboardLayout.tsx"] = '''\
 "use client";
-
 import { useState, useCallback } from "react";
 import { SlidersHorizontal } from "lucide-react";
-import { TopBar }          from "./TopBar";
-import { Sidebar }         from "@/features/filters/components/Sidebar";
-import { MapView }         from "@/features/map/components/MapView";
-import { useRouteFilters } from "@/features/filters/hooks/useRouteFilters";
-import { useMapState }     from "@/features/map/hooks/useMapState";
-import { useMapBounds }    from "@/features/map/hooks/useMapBounds";
-import { IconButton }      from "@/components/ui/IconButton";
-import { ErrorBoundary }   from "@/components/ui/ErrorBoundary";
-import { cn } from "@/lib/utils";
-import { MOCK_ALERTS } from "@/store/mockData";
+import { AuthProvider }     from "@/features/auth/context/AuthContext";
+import { AuthModal }        from "@/features/auth/components/AuthModal";
+import { TopBar }           from "./TopBar";
+import { Sidebar }          from "@/features/filters/components/Sidebar";
+import { MapView }          from "@/features/map/components/MapView";
+import { useRouteFilters }  from "@/features/filters/hooks/useRouteFilters";
+import { useMapState }      from "@/features/map/hooks/useMapState";
+import { useMapBounds }     from "@/features/map/hooks/useMapBounds";
+import { IconButton }       from "@/components/ui/IconButton";
+import { ErrorBoundary }    from "@/components/ui/ErrorBoundary";
+import { KA }               from "@/lib/i18n/ka";
+import { cn }               from "@/lib/utils";
+import { MOCK_ALERTS }      from "@/store/mockData";
 
-export function DashboardLayout(): React.ReactElement {
+function DashboardInner(): React.ReactElement {
   const [sidebarOpen, setSidebarOpen] = useState(true);
-
-  const {
-    filters, toggleAlertType, toggleDifficulty, toggleSpotType,
-    toggleShowRoutes, toggleShowAlerts, toggleShowSpots,
-    setSearchQuery, resetFilters, activeFilterCount,
-  } = useRouteFilters();
-
+  const { filters, toggleAlertType, toggleDifficulty, toggleSpotType, toggleShowRoutes, toggleShowAlerts, toggleShowSpots, setSearchQuery, resetFilters, activeFilterCount } = useRouteFilters();
   const { mapState, onMapReady, resetView } = useMapState();
   const { onBoundsChange } = useMapBounds();
-
-  const toggleSidebar = useCallback(() => setSidebarOpen((v) => !v), []);
-  const closeSidebar  = useCallback(() => setSidebarOpen(false),     []);
-
-  const activeAlertCount = filters.showAlerts
-    ? MOCK_ALERTS.filter((a) => filters.alertTypes.includes(a.type)).length
-    : 0;
+  const toggleSidebar = useCallback(()=>setSidebarOpen(v=>!v),[]);
+  const closeSidebar  = useCallback(()=>setSidebarOpen(false),[]);
+  const activeAlertCount = filters.showAlerts ? MOCK_ALERTS.filter(a=>filters.alertTypes.includes(a.type)).length : 0;
 
   return (
     <div className="flex h-dvh w-full flex-col overflow-hidden bg-[var(--color-surface-base)]">
-      <TopBar searchQuery={filters.searchQuery} onSearchChange={setSearchQuery}
-        activeAlertCount={activeAlertCount} onSidebarToggle={toggleSidebar} sidebarOpen={sidebarOpen} />
+      <TopBar searchQuery={filters.searchQuery} onSearchChange={setSearchQuery} activeAlertCount={activeAlertCount} onSidebarToggle={toggleSidebar} sidebarOpen={sidebarOpen}/>
 
       <div className="relative flex flex-1 overflow-hidden pt-14">
-        <Sidebar
-          isOpen={sidebarOpen} filters={filters} activeFilterCount={activeFilterCount}
-          onClose={closeSidebar} onToggleAlertType={toggleAlertType}
-          onToggleDifficulty={toggleDifficulty} onToggleSpotType={toggleSpotType}
-          onToggleRoutes={toggleShowRoutes} onToggleAlerts={toggleShowAlerts}
-          onToggleSpots={toggleShowSpots} onResetFilters={resetFilters}
-        />
+        <Sidebar isOpen={sidebarOpen} filters={filters} activeFilterCount={activeFilterCount} onClose={closeSidebar}
+          onToggleAlertType={toggleAlertType} onToggleDifficulty={toggleDifficulty} onToggleSpotType={toggleSpotType}
+          onToggleRoutes={toggleShowRoutes} onToggleAlerts={toggleShowAlerts} onToggleSpots={toggleShowSpots} onResetFilters={resetFilters}/>
 
-        <div className={cn("flex-1 transition-[margin] duration-300 ease-in-out", sidebarOpen ? "md:ml-80" : "ml-0")}>
+        <div className={cn("flex-1 transition-[margin] duration-300 ease-in-out",sidebarOpen?"md:ml-80":"ml-0")}>
           <ErrorBoundary context="map">
-            <MapView filters={filters} onMapReady={onMapReady} onBoundsChange={onBoundsChange}
-              onResetView={resetView} isMapReady={mapState.isReady} />
+            <MapView filters={filters} onMapReady={onMapReady} onBoundsChange={onBoundsChange} onResetView={resetView} isMapReady={mapState.isReady}/>
           </ErrorBoundary>
         </div>
 
         <div className="absolute bottom-6 left-1/2 -translate-x-1/2 z-[450] md:hidden">
           <button type="button" onClick={toggleSidebar}
-            className={cn(
-              "flex items-center gap-2 rounded-full px-5 py-2.5",
-              "bg-amber-500 text-zinc-900 font-semibold text-sm shadow-xl",
-              "hover:bg-amber-400 active:scale-95 transition-all duration-150",
-              "shadow-[0_0_24px_rgba(245,158,11,0.45)]",
-              "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400/60"
-            )}>
-            <SlidersHorizontal size={16} strokeWidth={2.5} />
-            Filters
-            {activeFilterCount > 0 && (
-              <span className="rounded-full bg-zinc-900/40 px-1.5 py-0.5 text-[10px] font-bold">{activeFilterCount}</span>
-            )}
+            className={cn("flex items-center gap-2 rounded-full px-5 py-2.5","bg-amber-500 text-zinc-900 font-semibold text-sm shadow-xl","hover:bg-amber-400 active:scale-95 transition-all duration-150","shadow-[0_0_24px_rgba(245,158,11,0.45)]","focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400/60")}>
+            <SlidersHorizontal size={16} strokeWidth={2.5}/>{KA.filters}
+            {activeFilterCount>0&&<span className="rounded-full bg-zinc-900/40 px-1.5 py-0.5 text-[10px] font-bold">{activeFilterCount}</span>}
           </button>
         </div>
 
-        {!sidebarOpen && (
+        {!sidebarOpen&&(
           <div className="absolute left-3 top-3 z-[450] hidden md:block animate-fade-up">
-            <IconButton icon={<SlidersHorizontal size={16} />} label="Open filters" badge={activeFilterCount}
-              active={false} onClick={toggleSidebar}
-              className="bg-[var(--color-surface-card)] border border-[var(--color-surface-border)] shadow-lg" />
+            <IconButton icon={<SlidersHorizontal size={16}/>} label={KA.openFilters} badge={activeFilterCount} active={false} onClick={toggleSidebar} className="bg-[var(--color-surface-card)] border border-[var(--color-surface-border)] shadow-lg"/>
           </div>
         )}
       </div>
+      <AuthModal/>
     </div>
   );
 }
+
+export function DashboardLayout(): React.ReactElement {
+  return <AuthProvider><DashboardInner/></AuthProvider>;
+}
 '''
 
-
-# ─── Writer ───────────────────────────────────────────────────────────────────
+# ══════════════════════════════════════════════════════════════════════════════
+#  WRITER
+# ══════════════════════════════════════════════════════════════════════════════
 
 def write_files() -> None:
     created_dirs:  list[str] = []
@@ -2236,11 +1766,10 @@ def write_files() -> None:
             fh.write(content)
         created_files.append(rel_path)
 
-    # ── Summary ───────────────────────────────────────────────────────────────
-    width = 60
+    width = 62
     print()
     print("=" * width)
-    print("  GeoMotoRoutes — project scaffold complete")
+    print("  GeoMotoRoutes \u2014 project scaffold complete (Phases 1\u20133)")
     print("=" * width)
     print(f"\n  Root      : {os.path.abspath(ROOT)}")
     print(f"  Dirs      : {len(created_dirs)} created")
@@ -2248,10 +1777,10 @@ def write_files() -> None:
     if skipped_files:
         print(f"  Skipped   : {len(skipped_files)} (already exist)")
         for f in skipped_files:
-            print(f"    - {f}")
+            print(f"    \u2013 {f}")
 
     print(textwrap.dedent(f"""
-  ─────────────────────────────────────────────────────────
+  \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500
   Next steps:
 
     cd {ROOT}
@@ -2259,7 +1788,7 @@ def write_files() -> None:
     npm run dev
 
   Then open  http://localhost:3000
-  ─────────────────────────────────────────────────────────
+  \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500
 """))
 
 
