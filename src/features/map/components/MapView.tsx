@@ -4,13 +4,13 @@ import dynamic from "next/dynamic";
 import { Suspense } from "react";
 import type { Map as LeafletMapInstance, LeafletEvent } from "leaflet";
 import type { FilterState } from "@/lib/types";
-import { MapSkeleton } from "./MapSkeleton";
-import { MapOverlayStats } from "./MapOverlayStats";
+import { MapSkeleton }      from "./MapSkeleton";
+import { MapOverlayStats }  from "./MapOverlayStats";
 import { MOCK_ALERTS, MOCK_ROUTES, MOCK_SPOTS } from "@/store/mockData";
 
 /**
- * Dynamic import with ssr:false ensures Leaflet never runs during server-side
- * rendering — Leaflet directly accesses `window` and `document` at import time.
+ * Leaflet accesses `window` at import time — this dynamic import with ssr:false
+ * ensures it never runs during server-side rendering.
  */
 const LeafletMap = dynamic(
   () => import("./LeafletMap").then((mod) => ({ default: mod.LeafletMap })),
@@ -23,7 +23,7 @@ const LeafletMap = dynamic(
 interface MapViewProps {
   filters:        FilterState;
   onMapReady:     (map: LeafletMapInstance) => void;
-  onBoundsChange: (event: LeafletEvent) => void;
+  onBoundsChange: (event: LeafletEvent)     => void;
   onResetView:    () => void;
   isMapReady:     boolean;
 }
@@ -35,15 +35,14 @@ export function MapView({
   onResetView,
   isMapReady,
 }: MapViewProps): React.ReactElement {
-  // Count visible entities for the stats overlay
   const visibleRouteCount = filters.showRoutes
     ? MOCK_ROUTES.filter((r) => filters.difficulties.includes(r.difficulty)).length
     : 0;
   const visibleAlertCount = filters.showAlerts
-    ? MOCK_ALERTS.filter((a) => filters.alertCategories.includes(a.category)).length
+    ? MOCK_ALERTS.filter((a) => filters.alertTypes.includes(a.type)).length
     : 0;
-  const visibleSpotCount  = filters.showSpots
-    ? MOCK_SPOTS.filter((s) => filters.spotCategories.includes(s.category)).length
+  const visibleSpotCount = filters.showSpots
+    ? MOCK_SPOTS.filter((s) => filters.spotTypes.includes(s.type)).length
     : 0;
 
   return (
@@ -60,7 +59,6 @@ export function MapView({
         />
       </Suspense>
 
-      {/* Stats overlay — bottom-left, above Leaflet controls */}
       {isMapReady && (
         <MapOverlayStats
           routeCount={visibleRouteCount}

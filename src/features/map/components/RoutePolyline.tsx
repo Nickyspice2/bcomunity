@@ -2,54 +2,57 @@
 
 import { Polyline, Popup } from "react-leaflet";
 import type { Route } from "@/lib/types";
-import { DIFFICULTY_META } from "@/lib/constants";
+import { DIFFICULTY_META, ASPHALT_QUALITY_META } from "@/lib/constants";
 import { formatDistance, formatDuration } from "@/lib/utils";
 
 interface RoutePolylineProps {
   route: Route;
 }
 
-/** Converts our domain colour to a slightly more opaque version for the route line */
-function toRouteColor(hexColor: string): string {
-  return hexColor;
-}
-
 export function RoutePolyline({ route }: RoutePolylineProps): React.ReactElement {
-  const diffMeta  = DIFFICULTY_META[route.difficulty];
-  const positions = route.waypoints.map(
-    (wp) => [wp.lat, wp.lng] as [number, number]
-  );
+  const diffMeta    = DIFFICULTY_META[route.difficulty];
+  const qualityMeta = ASPHALT_QUALITY_META[route.asphaltQuality];
 
-  if (positions.length < 2) return <></>;
+  // Route needs at least two waypoints to form a valid line
+  if (route.coordinates.length < 2) return <></>;
+
+  const positions = route.coordinates.map(
+    (c) => [c.lat, c.lng] as [number, number]
+  );
 
   return (
     <Polyline
       positions={positions}
       pathOptions={{
-        color:   toRouteColor(diffMeta.color),
-        weight:  5,
-        opacity: 0.85,
-        // Glow effect via multiple overlapping lines would require a custom layer
-        // Here we use a clean single-line with good contrast
+        color:    diffMeta.color,
+        weight:   5,
+        opacity:  0.85,
         lineCap:  "round",
         lineJoin: "round",
       }}
     >
       <Popup>
-        <article className="min-w-[220px] max-w-[280px]">
-          <h3 className="text-sm font-bold text-zinc-100 leading-tight mb-1">
-            {route.name}
-          </h3>
+        <article className="min-w-[230px] max-w-[290px]">
+          {/* Route name + quality badge */}
+          <header className="mb-2">
+            <h3 className="text-sm font-bold leading-tight text-zinc-100">
+              {route.name}
+            </h3>
+            <p className="text-[11px] mt-0.5" style={{ color: qualityMeta.color }}>
+              {qualityMeta.label} surface
+            </p>
+          </header>
 
-          <p className="text-xs text-zinc-400 leading-relaxed mb-3 line-clamp-2">
+          <p className="text-xs leading-relaxed text-zinc-400 mb-3 line-clamp-3">
             {route.description}
           </p>
 
-          <div className="grid grid-cols-3 gap-2 mb-3">
+          {/* Stats grid */}
+          <div className="grid grid-cols-3 gap-1.5 mb-3">
             {[
-              { label: "Distance", value: formatDistance(route.distanceKm) },
-              { label: "Duration", value: formatDuration(route.durationMin) },
-              { label: "Climb",    value: `${route.elevationGain}m` },
+              { label: "Distance", value: formatDistance(route.distanceKm)   },
+              { label: "Duration", value: formatDuration(route.durationMin)  },
+              { label: "Climb",    value: `${route.elevationGain} m`         },
             ].map(({ label, value }) => (
               <div
                 key={label}
@@ -62,6 +65,7 @@ export function RoutePolyline({ route }: RoutePolylineProps): React.ReactElement
             ))}
           </div>
 
+          {/* Difficulty + region */}
           <div className="flex items-center justify-between">
             <span
               className="rounded-full px-2.5 py-0.5 text-[11px] font-semibold"

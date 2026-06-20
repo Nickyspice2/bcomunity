@@ -11,25 +11,25 @@ import {
   Navigation,
 } from "lucide-react";
 import type { ReactElement } from "react";
-import type { FilterState, AlertCategory, DifficultyLevel, SpotCategory } from "@/lib/types";
-import { ALERT_CATEGORY_META, DIFFICULTY_META, SPOT_CATEGORY_META } from "@/lib/constants";
-import { SidebarSection }    from "./SidebarSection";
-import { FilterToggleChip }  from "./FilterToggleChip";
-import { LayerToggleRow }    from "./LayerToggleRow";
+import type { AlertType, DifficultyLevel, FilterState, SpotType } from "@/lib/types";
+import { ALERT_TYPE_META, DIFFICULTY_META, SPOT_TYPE_META } from "@/lib/constants";
+import { SidebarSection }   from "./SidebarSection";
+import { FilterToggleChip } from "./FilterToggleChip";
+import { LayerToggleRow }   from "./LayerToggleRow";
 import { cn } from "@/lib/utils";
 
 interface SidebarProps {
-  isOpen:              boolean;
-  filters:             FilterState;
-  activeFilterCount:   number;
-  onClose:             () => void;
-  onToggleAlertCat:    (c: AlertCategory)  => void;
-  onToggleDifficulty:  (d: DifficultyLevel) => void;
-  onToggleSpotCat:     (c: SpotCategory)   => void;
-  onToggleRoutes:      () => void;
-  onToggleAlerts:      () => void;
-  onToggleSpots:       () => void;
-  onResetFilters:      () => void;
+  isOpen:             boolean;
+  filters:            FilterState;
+  activeFilterCount:  number;
+  onClose:            () => void;
+  onToggleAlertType:  (type: AlertType)        => void;
+  onToggleDifficulty: (level: DifficultyLevel) => void;
+  onToggleSpotType:   (type: SpotType)         => void;
+  onToggleRoutes:     () => void;
+  onToggleAlerts:     () => void;
+  onToggleSpots:      () => void;
+  onResetFilters:     () => void;
 }
 
 export function Sidebar({
@@ -37,21 +37,21 @@ export function Sidebar({
   filters,
   activeFilterCount,
   onClose,
-  onToggleAlertCat,
+  onToggleAlertType,
   onToggleDifficulty,
-  onToggleSpotCat,
+  onToggleSpotType,
   onToggleRoutes,
   onToggleAlerts,
   onToggleSpots,
   onResetFilters,
 }: SidebarProps): ReactElement {
-  const alertCategories = Object.keys(ALERT_CATEGORY_META) as AlertCategory[];
-  const difficulties    = Object.keys(DIFFICULTY_META)     as DifficultyLevel[];
-  const spotCategories  = Object.keys(SPOT_CATEGORY_META)  as SpotCategory[];
+  const alertTypes    = Object.keys(ALERT_TYPE_META)   as AlertType[];
+  const difficulties  = Object.keys(DIFFICULTY_META)   as DifficultyLevel[];
+  const spotTypes     = Object.keys(SPOT_TYPE_META)    as SpotType[];
 
   return (
     <>
-      {/* Backdrop — mobile only */}
+      {/* Mobile backdrop */}
       {isOpen && (
         <div
           className="fixed inset-0 z-30 bg-black/50 backdrop-blur-sm md:hidden"
@@ -60,17 +60,14 @@ export function Sidebar({
         />
       )}
 
-      {/* Sidebar panel */}
       <aside
         role="complementary"
         aria-label="Route and map filters"
         className={cn(
           "fixed left-0 top-14 z-40 h-[calc(100dvh-3.5rem)]",
           "w-80 flex flex-col",
-          // Surface
           "bg-[var(--color-surface-overlay)]",
           "border-r border-[var(--color-surface-border)]",
-          // Slide animation
           "transition-transform duration-300 ease-in-out",
           isOpen ? "translate-x-0 animate-slide-in-left" : "-translate-x-full"
         )}
@@ -110,15 +107,11 @@ export function Sidebar({
           </div>
         </div>
 
-        {/* ── Scrollable content ── */}
+        {/* ── Scrollable body ── */}
         <div className="flex-1 overflow-y-auto overscroll-contain">
 
-          {/* Map Layer Toggles */}
-          <SidebarSection
-            title="Map Layers"
-            icon={<Map size={14} />}
-            defaultOpen={true}
-          >
+          {/* Layer visibility toggles */}
+          <SidebarSection title="Map Layers" icon={<Map size={14} />} defaultOpen={true}>
             <LayerToggleRow
               label="Routes"
               active={filters.showRoutes}
@@ -142,30 +135,30 @@ export function Sidebar({
             />
           </SidebarSection>
 
-          {/* Road Condition Alerts */}
+          {/* Road alert type filters */}
           <SidebarSection
             title="Road Alerts"
             icon={<TriangleAlert size={14} />}
             defaultOpen={true}
-            badge={filters.alertCategories.length}
+            badge={filters.alertTypes.length}
           >
-            {alertCategories.map((cat) => {
-              const meta   = ALERT_CATEGORY_META[cat];
-              const active = filters.alertCategories.includes(cat);
+            {alertTypes.map((type) => {
+              const meta   = ALERT_TYPE_META[type];
+              const active = filters.alertTypes.includes(type);
               return (
                 <FilterToggleChip
-                  key={cat}
+                  key={type}
                   label={meta.label}
                   active={active}
                   color={meta.color}
                   bgColor={meta.bgColor}
-                  onClick={() => onToggleAlertCat(cat)}
+                  onClick={() => onToggleAlertType(type)}
                 />
               );
             })}
           </SidebarSection>
 
-          {/* Route Difficulty */}
+          {/* Route difficulty filters */}
           <SidebarSection
             title="Difficulty"
             icon={<Mountain size={14} />}
@@ -188,45 +181,42 @@ export function Sidebar({
             })}
           </SidebarSection>
 
-          {/* Biker Spots */}
+          {/* Biker spot type filters */}
           <SidebarSection
             title="Spots & Services"
             icon={<Coffee size={14} />}
             defaultOpen={false}
-            badge={filters.spotCategories.length}
+            badge={filters.spotTypes.length}
           >
-            {spotCategories.map((cat) => {
-              const meta   = SPOT_CATEGORY_META[cat];
-              const active = filters.spotCategories.includes(cat);
+            {spotTypes.map((type) => {
+              const meta   = SPOT_TYPE_META[type];
+              const active = filters.spotTypes.includes(type);
               return (
                 <FilterToggleChip
-                  key={cat}
+                  key={type}
                   label={meta.label}
                   active={active}
                   color={meta.color}
-                  bgColor="rgba(255,255,255,0.06)"
+                  bgColor="rgba(255,255,255,0.05)"
                   icon={meta.icon}
-                  onClick={() => onToggleSpotCat(cat)}
+                  onClick={() => onToggleSpotType(type)}
                 />
               );
             })}
           </SidebarSection>
 
-          {/* Route quick-access */}
-          <SidebarSection
-            title="Featured Routes"
-            icon={<Route size={14} />}
-            defaultOpen={true}
-          >
+          {/* Featured routes quick list */}
+          <SidebarSection title="Featured Routes" icon={<Route size={14} />} defaultOpen={true}>
             {[
-              { name: "Military Highway",   region: "Mtskheta-Mtianeti", km: 148, diff: "Advanced"  },
-              { name: "Kakheti Wine Road",  region: "Kakheti",           km: 93,  diff: "Beginner"  },
-              { name: "Svaneti Challenge",  region: "Svaneti",           km: 214, diff: "Extreme"   },
-              { name: "Adjara Coast Sweep", region: "Adjara",            km: 76,  diff: "Intermed." },
+              { id: "r-001", name: "Military Highway",   region: "Mtskheta-Mtianeti", km: 148, diff: "Advanced"  },
+              { id: "r-002", name: "Gombori Pass",        region: "Kakheti",           km: 102, diff: "Intermed." },
+              { id: "r-003", name: "Svaneti Road",        region: "Svaneti",           km: 132, diff: "Extreme"   },
+              { id: "r-004", name: "Adjara Coastal Loop", region: "Adjara",            km: 68,  diff: "Beginner"  },
+              { id: "r-005", name: "Borjomi Gorge",       region: "Samtskhe-Javakheti",km: 88,  diff: "Intermed." },
             ].map((route) => (
               <button
                 type="button"
-                key={route.name}
+                key={route.id}
                 className="w-full flex items-start gap-3 rounded-lg px-3 py-2.5 text-left transition-colors hover:bg-white/[0.04] group"
               >
                 <span
@@ -241,7 +231,7 @@ export function Sidebar({
                   </span>
                   <span className="flex items-center gap-2 mt-0.5">
                     <span className="text-[11px] text-zinc-600">{route.region}</span>
-                    <span className="text-[11px] text-zinc-700">·</span>
+                    <span className="text-[11px] text-zinc-700" aria-hidden="true">·</span>
                     <span className="text-[11px] text-zinc-600">{route.km} km</span>
                   </span>
                 </span>
@@ -253,12 +243,12 @@ export function Sidebar({
           </SidebarSection>
         </div>
 
-        {/* ── Footer — Georgia region info ── */}
+        {/* ── Footer ── */}
         <div className="shrink-0 border-t border-[var(--color-surface-border)] px-4 py-3">
           <p className="text-[11px] text-zinc-600 leading-relaxed">
-            Data covers{" "}
-            <span className="text-zinc-500 font-medium">all 9 regions</span> of Georgia.
-            Community-verified road conditions updated in real time.
+            Covers{" "}
+            <span className="text-zinc-500 font-medium">all 9 regions</span>{" "}
+            of Georgia. Community-verified data updated in real time.
           </p>
         </div>
       </aside>

@@ -2,9 +2,9 @@
 
 import { useState, useCallback } from "react";
 import { SlidersHorizontal } from "lucide-react";
-import { TopBar }   from "./TopBar";
-import { Sidebar }  from "@/features/filters/components/Sidebar";
-import { MapView }  from "@/features/map/components/MapView";
+import { TopBar }        from "./TopBar";
+import { Sidebar }       from "@/features/filters/components/Sidebar";
+import { MapView }       from "@/features/map/components/MapView";
 import { useRouteFilters } from "@/features/filters/hooks/useRouteFilters";
 import { useMapState }     from "@/features/map/hooks/useMapState";
 import { useMapBounds }    from "@/features/map/hooks/useMapBounds";
@@ -18,9 +18,9 @@ export function DashboardLayout(): React.ReactElement {
 
   const {
     filters,
-    toggleAlertCategory,
+    toggleAlertType,
     toggleDifficulty,
-    toggleSpotCategory,
+    toggleSpotType,
     toggleShowRoutes,
     toggleShowAlerts,
     toggleShowSpots,
@@ -32,18 +32,16 @@ export function DashboardLayout(): React.ReactElement {
   const { mapState, onMapReady, resetView } = useMapState();
   const { onBoundsChange } = useMapBounds();
 
-  const toggleSidebar  = useCallback(() => setSidebarOpen((v) => !v), []);
-  const closeSidebar   = useCallback(() => setSidebarOpen(false),     []);
+  const toggleSidebar = useCallback(() => setSidebarOpen((v) => !v), []);
+  const closeSidebar  = useCallback(() => setSidebarOpen(false),     []);
 
-  // Active alert count for the topbar notification badge
   const activeAlertCount = filters.showAlerts
-    ? MOCK_ALERTS.filter((a) => filters.alertCategories.includes(a.category)).length
+    ? MOCK_ALERTS.filter((a) => filters.alertTypes.includes(a.type)).length
     : 0;
 
   return (
     <div className="flex h-dvh w-full flex-col overflow-hidden bg-[var(--color-surface-base)]">
 
-      {/* ── Top navigation bar ── */}
       <TopBar
         searchQuery={filters.searchQuery}
         onSearchChange={setSearchQuery}
@@ -52,29 +50,26 @@ export function DashboardLayout(): React.ReactElement {
         sidebarOpen={sidebarOpen}
       />
 
-      {/* ── Body: sidebar + map ── */}
       <div className="relative flex flex-1 overflow-hidden pt-14">
 
-        {/* Filter sidebar */}
         <Sidebar
           isOpen={sidebarOpen}
           filters={filters}
           activeFilterCount={activeFilterCount}
           onClose={closeSidebar}
-          onToggleAlertCat={toggleAlertCategory}
+          onToggleAlertType={toggleAlertType}
           onToggleDifficulty={toggleDifficulty}
-          onToggleSpotCat={toggleSpotCategory}
+          onToggleSpotType={toggleSpotType}
           onToggleRoutes={toggleShowRoutes}
           onToggleAlerts={toggleShowAlerts}
           onToggleSpots={toggleShowSpots}
           onResetFilters={resetFilters}
         />
 
-        {/* Map view — offset by sidebar width on larger viewports */}
+        {/* Map area — pushed right by sidebar on md+ */}
         <div
           className={cn(
             "flex-1 transition-[margin] duration-300 ease-in-out",
-            // On md+ screens the sidebar pushes the map; on mobile it overlays
             sidebarOpen ? "md:ml-80" : "ml-0"
           )}
         >
@@ -89,7 +84,7 @@ export function DashboardLayout(): React.ReactElement {
           </ErrorBoundary>
         </div>
 
-        {/* Mobile-only floating filter FAB */}
+        {/* Mobile FAB — opens/closes sidebar */}
         <div className="absolute bottom-6 left-1/2 -translate-x-1/2 z-[450] md:hidden">
           <button
             type="button"
@@ -112,7 +107,7 @@ export function DashboardLayout(): React.ReactElement {
           </button>
         </div>
 
-        {/* Desktop sidebar toggle — visible when sidebar is closed */}
+        {/* Desktop toggle shown when sidebar is closed */}
         {!sidebarOpen && (
           <div className="absolute left-3 top-3 z-[450] hidden md:block animate-fade-up">
             <IconButton

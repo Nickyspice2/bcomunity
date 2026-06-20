@@ -2,15 +2,15 @@
 
 import { useState, useCallback, useRef } from "react";
 import type { Map as LeafletMapInstance } from "leaflet";
-import type { MapViewState, LatLng } from "@/lib/types";
+import type { Coordinate, MapViewState } from "@/lib/types";
 import { GEORGIA_CENTER, GEORGIA_DEFAULT_ZOOM } from "@/lib/constants";
 
-interface UseMapStateReturn {
-  mapState:    MapViewState;
-  mapRef:      React.MutableRefObject<LeafletMapInstance | null>;
-  onMapReady:  (map: LeafletMapInstance) => void;
-  flyTo:       (center: LatLng, zoom?: number) => void;
-  resetView:   () => void;
+export interface UseMapStateReturn {
+  mapState:   MapViewState;
+  mapRef:     React.MutableRefObject<LeafletMapInstance | null>;
+  onMapReady: (map: LeafletMapInstance) => void;
+  flyTo:      (center: Coordinate, zoom?: number) => void;
+  resetView:  () => void;
 }
 
 export function useMapState(): UseMapStateReturn {
@@ -29,10 +29,11 @@ export function useMapState(): UseMapStateReturn {
   }, []);
 
   /**
-   * Smoothly animates the map viewport to a new center.
-   * Falls back to a state update when the Leaflet instance is unavailable (SSR).
+   * Smooth animated pan + zoom.
+   * Falls back to a React state update when the Leaflet instance is not yet
+   * available (during SSR or before the dynamic import resolves).
    */
-  const flyTo = useCallback((center: LatLng, zoom: number = GEORGIA_DEFAULT_ZOOM) => {
+  const flyTo = useCallback((center: Coordinate, zoom: number = GEORGIA_DEFAULT_ZOOM) => {
     if (mapRef.current) {
       mapRef.current.flyTo([center.lat, center.lng], zoom, {
         animate:  true,

@@ -4,7 +4,7 @@ import { Marker, Popup } from "react-leaflet";
 import L from "leaflet";
 import { renderToStaticMarkup } from "react-dom/server";
 import type { BikerSpot } from "@/lib/types";
-import { SPOT_CATEGORY_META } from "@/lib/constants";
+import { SPOT_TYPE_META } from "@/lib/constants";
 
 interface SpotMarkerProps {
   spot: BikerSpot;
@@ -14,16 +14,17 @@ function createSpotIcon(emoji: string, color: string): L.DivIcon {
   const html = renderToStaticMarkup(
     <div
       style={{
-        width:           "34px",
-        height:          "34px",
+        width:           "36px",
+        height:          "36px",
         borderRadius:    "50%",
-        backgroundColor: "var(--color-surface-card, #1e2433)",
-        border:          `2px solid ${color}`,
+        backgroundColor: "#1e2433",
+        border:          `2.5px solid ${color}`,
         display:         "flex",
         alignItems:      "center",
         justifyContent:  "center",
-        fontSize:        "15px",
-        boxShadow:       `0 0 0 3px ${color}30, 0 4px 12px rgba(0,0,0,0.5)`,
+        fontSize:        "16px",
+        lineHeight:      "1",
+        boxShadow:       `0 0 0 4px ${color}25, 0 4px 14px rgba(0,0,0,0.55)`,
       }}
     >
       {emoji}
@@ -33,53 +34,65 @@ function createSpotIcon(emoji: string, color: string): L.DivIcon {
   return L.divIcon({
     html,
     className:   "",
-    iconSize:    [34, 34],
-    iconAnchor:  [17, 17],
-    popupAnchor: [0, -20],
+    iconSize:    [36, 36],
+    iconAnchor:  [18, 18],
+    popupAnchor: [0, -22],
   });
 }
 
+/** Star rating string — e.g. 4.5 → "★★★★½☆" approximated to nearest whole. */
+function buildStarString(rating: number): string {
+  const full = Math.round(rating);
+  return "★".repeat(full) + "☆".repeat(Math.max(0, 5 - full));
+}
+
 export function SpotMarker({ spot }: SpotMarkerProps): React.ReactElement {
-  const meta = SPOT_CATEGORY_META[spot.category];
+  const meta = SPOT_TYPE_META[spot.type];
   const icon = createSpotIcon(meta.icon, meta.color);
 
-  const ratingStars = "★".repeat(Math.round(spot.rating)) + "☆".repeat(5 - Math.round(spot.rating));
-
   return (
-    <Marker
-      position={[spot.location.lat, spot.location.lng]}
-      icon={icon}
-    >
+    <Marker position={[spot.lat, spot.lng]} icon={icon}>
       <Popup>
         <article className="min-w-[200px] max-w-[260px]">
-          <header className="flex items-start gap-2 mb-2">
-            <span className="text-2xl" aria-hidden="true">{meta.icon}</span>
-            <div>
-              <h3 className="text-sm font-bold text-zinc-100 leading-tight">{spot.name}</h3>
-              <p className="text-[11px]" style={{ color: meta.color }}>{meta.label}</p>
+          <header className="flex items-start gap-2.5 mb-2">
+            <span className="text-2xl leading-none" aria-hidden="true">{meta.icon}</span>
+            <div className="min-w-0">
+              <h3 className="text-sm font-bold leading-tight text-zinc-100 truncate">
+                {spot.name}
+              </h3>
+              <p className="text-[11px] mt-0.5" style={{ color: meta.color }}>
+                {meta.label}
+              </p>
             </div>
+            {spot.verified && (
+              <span
+                className="ml-auto shrink-0 text-[10px] font-medium text-green-400 mt-0.5"
+                title="Community verified"
+              >
+                ✓
+              </span>
+            )}
           </header>
 
-          <p className="text-xs text-zinc-400 leading-relaxed mb-3">
-            {spot.description}
-          </p>
-
-          <div className="flex items-center justify-between mb-2">
-            <span className="text-amber-400 text-xs tracking-widest" aria-label={`${spot.rating} out of 5`}>
-              {ratingStars}
-            </span>
-            <span className="text-[11px] text-zinc-600">{spot.reviewCount} reviews</span>
-          </div>
-
-          {spot.openHours && (
-            <p className="text-[11px] text-zinc-500">
-              <span className="text-zinc-600">Hours: </span>
-              {spot.openHours}
-            </p>
+          {spot.rating !== undefined && (
+            <div className="flex items-center gap-2 mb-2">
+              <span
+                className="text-xs tracking-widest"
+                style={{ color: meta.color }}
+                aria-label={`${spot.rating} out of 5`}
+              >
+                {buildStarString(spot.rating)}
+              </span>
+              <span className="text-[11px] text-zinc-500">{spot.rating.toFixed(1)}</span>
+            </div>
           )}
 
           {spot.address && (
-            <p className="text-[11px] text-zinc-600 mt-1 truncate">{spot.address}</p>
+            <p className="text-[11px] text-zinc-500 mb-1 truncate">{spot.address}</p>
+          )}
+
+          {spot.phone && (
+            <p className="text-[11px] text-zinc-500">{spot.phone}</p>
           )}
         </article>
       </Popup>

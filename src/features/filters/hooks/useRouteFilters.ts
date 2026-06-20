@@ -1,35 +1,34 @@
 "use client";
 
 import { useState, useCallback, useMemo } from "react";
-import type { FilterState, AlertCategory, DifficultyLevel, SpotCategory } from "@/lib/types";
+import type { AlertType, DifficultyLevel, FilterState, SpotType } from "@/lib/types";
 import { DEFAULT_FILTERS } from "@/lib/constants";
 
-interface UseRouteFiltersReturn {
-  filters:              FilterState;
-  toggleAlertCategory:  (category: AlertCategory) => void;
-  toggleDifficulty:     (level: DifficultyLevel)   => void;
-  toggleSpotCategory:   (category: SpotCategory)   => void;
-  toggleShowRoutes:     () => void;
-  toggleShowAlerts:     () => void;
-  toggleShowSpots:      () => void;
-  setSearchQuery:       (query: string) => void;
-  resetFilters:         () => void;
-  activeFilterCount:    number;
+export interface UseRouteFiltersReturn {
+  filters:            FilterState;
+  toggleAlertType:    (type: AlertType)        => void;
+  toggleDifficulty:   (level: DifficultyLevel) => void;
+  toggleSpotType:     (type: SpotType)         => void;
+  toggleShowRoutes:   () => void;
+  toggleShowAlerts:   () => void;
+  toggleShowSpots:    () => void;
+  setSearchQuery:     (query: string)          => void;
+  resetFilters:       () => void;
+  /** Number of filter groups deviating from default — drives the badge on the filter button. */
+  activeFilterCount:  number;
 }
 
 function toggleItem<T>(list: T[], item: T): T[] {
-  return list.includes(item)
-    ? list.filter((x) => x !== item)
-    : [...list, item];
+  return list.includes(item) ? list.filter((x) => x !== item) : [...list, item];
 }
 
 export function useRouteFilters(): UseRouteFiltersReturn {
   const [filters, setFilters] = useState<FilterState>(DEFAULT_FILTERS);
 
-  const toggleAlertCategory = useCallback((category: AlertCategory) => {
+  const toggleAlertType = useCallback((type: AlertType) => {
     setFilters((prev) => ({
       ...prev,
-      alertCategories: toggleItem(prev.alertCategories, category),
+      alertTypes: toggleItem(prev.alertTypes, type),
     }));
   }, []);
 
@@ -40,10 +39,10 @@ export function useRouteFilters(): UseRouteFiltersReturn {
     }));
   }, []);
 
-  const toggleSpotCategory = useCallback((category: SpotCategory) => {
+  const toggleSpotType = useCallback((type: SpotType) => {
     setFilters((prev) => ({
       ...prev,
-      spotCategories: toggleItem(prev.spotCategories, category),
+      spotTypes: toggleItem(prev.spotTypes, type),
     }));
   }, []);
 
@@ -67,27 +66,23 @@ export function useRouteFilters(): UseRouteFiltersReturn {
     setFilters(DEFAULT_FILTERS);
   }, []);
 
-  /**
-   * Counts how many filter groups deviate from their defaults.
-   * Used to show a "badge" on the filter toggle button.
-   */
-  const activeFilterCount = useMemo(() => {
+  const activeFilterCount = useMemo<number>(() => {
     let count = 0;
     if (!filters.showRoutes) count++;
     if (!filters.showAlerts) count++;
     if (!filters.showSpots)  count++;
-    if (filters.alertCategories.length !== DEFAULT_FILTERS.alertCategories.length) count++;
-    if (filters.difficulties.length    !== DEFAULT_FILTERS.difficulties.length)    count++;
-    if (filters.spotCategories.length  !== DEFAULT_FILTERS.spotCategories.length)  count++;
-    if (filters.searchQuery.trim())  count++;
+    if (filters.alertTypes.length   !== DEFAULT_FILTERS.alertTypes.length)   count++;
+    if (filters.difficulties.length !== DEFAULT_FILTERS.difficulties.length) count++;
+    if (filters.spotTypes.length    !== DEFAULT_FILTERS.spotTypes.length)    count++;
+    if (filters.searchQuery.trim()) count++;
     return count;
   }, [filters]);
 
   return {
     filters,
-    toggleAlertCategory,
+    toggleAlertType,
     toggleDifficulty,
-    toggleSpotCategory,
+    toggleSpotType,
     toggleShowRoutes,
     toggleShowAlerts,
     toggleShowSpots,
