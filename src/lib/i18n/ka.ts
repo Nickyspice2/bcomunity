@@ -1,144 +1,171 @@
 /**
- * Georgian (ქართული) UI string constants.
- * Single source of truth for all user-facing text in the application.
- * Organised by feature area; each key mirrors its semantic meaning in English.
+ * Georgian (ქართული) UI string constants — single source of truth.
+ * Organised by feature; every user-facing string lives here.
  */
 export const KA = {
-  // ─── App identity ───────────────────────────────────────────────────────────
-  appName:      "GeoMotoRoutes",
-  appSubtitle:  "საქართველო",
+  // ─── App ──────────────────────────────────────────────────────────────────
+  appName:     "GeoMotoRoutes",
+  appSubtitle: "საქართველო",
 
-  // ─── Navigation / TopBar ────────────────────────────────────────────────────
-  searchPlaceholder:  "მარშრუტების, რეგიონების, ადგილების ძიება…",
-  online:             "ონლაინ",
-  offline:            "ოფლაინ — ქეშირებული",
-  mapLayersLabel:     "რუკის ფენები",
-  activeAlerts:       "აქტიური გაფრთხილებები",
-  noAlerts:           "გაფრთხილება არ არის",
-  toggleSidebar:      "გვერდითი პანელი",
-  clearSearch:        "გასუფთავება",
-  login:              "შესვლა",
-  myProfile:          "პროფილი",
-  logout:             "გასვლა",
+  // ─── Navigation ───────────────────────────────────────────────────────────
+  navHome:       "მთავარი",
+  navMap:        "ინტერაქტიული რუკა",
+  navProfile:    "ჩემი გვერდი",
+  toggleSidebar: "მენიუ",
 
-  // ─── Sidebar ─────────────────────────────────────────────────────────────────
-  filters:           "ფილტრები",
-  activeCount:       "აქტიური",
-  resetFilters:      "გასუფთავება",
-  mapLayers:         "რუკის ფენები",
+  // ─── TopBar ───────────────────────────────────────────────────────────────
+  searchPlaceholder: "მარშრუტების, ბიკერების ძიება…",
+  online:            "ონლაინ",
+  offline:           "ოფლაინ",
+  mapLayersLabel:    "ფენები",
+  activeAlerts:      "გაფრთხილებები",
+  noAlerts:          "გაფრთხილება არ არის",
+  clearSearch:       "გასუფთავება",
+  login:             "შესვლა",
+  myProfile:         "პროფილი",
+  logout:            "გასვლა",
+
+  // ─── Social hub ───────────────────────────────────────────────────────────
+  feedTitle:          "ბიკერ-ლენტა",
+  groupRidesTitle:    "ჯგუფური გასვლები",
+  likeAction:         "ლაიქი",
+  commentAction:      "კომენტარი",
+  viewRouteAction:    "მარშრუტის ნახვა",
+  joinRideAction:     "შეერთება",
+  joinedLabel:        "შეერთებული",
+  paceLabel:          "სიჩქარე",
+  paceSlow:           "ნელი",
+  paceMedium:         "საშუალო",
+  paceFast:           "სწრაფი",
+  ridersCount:        "მონაწილე",
+  gatheringPoint:     "შეკრების ადგილი",
+  gatheringTime:      "შეკრების დრო",
+  noPostsYet:         "ჯერ პოსტები არ არის.",
+  noRidesYet:         "ახლო მომავალში გასვლები არ არის.",
+  loadMore:           "მეტის ჩვენება",
+
+  // ─── Map page ─────────────────────────────────────────────────────────────
+  mapAriaLabel:          "საქართველოს მოტო-მარშრუტების ინტერაქტიული რუკა",
+  mapInitialising:       "რუკა იტვირთება…",
+  mapLoadingNet:         "ქსელი იტვირთება",
+  openFilters:           "ფილტრები",
+  resetFilters:          "გასუფთავება",
+  filters:               "ფილტრები",
+  activeCount:           "აქტიური",
+
+  // ─── Map — filter sidebar / floating ─────────────────────────────────────
+  mapLayers:         "ფენები",
   routes:            "მარშრუტები",
   roadAlerts:        "გაფრთხილებები",
-  bikerSpots:        "ბიკერის ადგილები",
+  bikerSpots:        "ადგილები",
   roadAlertsSection: "საგზაო გაფრთხილებები",
   difficulty:        "სირთულე",
-  spotsServices:     "ადგილები და სერვისი",
-  featuredRoutes:    "რეკომენდებული მარშრუტები",
+  spotsServices:     "სერვისები",
+  featuredRoutes:    "რეკომენდებული",
   kmSuffix:          "კმ",
   sidebarFooter:     "მოიცავს",
   allNineRegions:    "საქართველოს ყველა 9 რეგიონს",
   communityVerified: "საზოგადოების მიერ დამოწმებული მონაცემები.",
 
-  // ─── Difficulty levels ───────────────────────────────────────────────────────
+  // ─── Difficulty levels ────────────────────────────────────────────────────
   difficultyBeginner:     "მარტივი",
   difficultyIntermediate: "საშუალო",
   difficultyAdvanced:     "რთული",
   difficultyExtreme:      "ექსტრემალური",
 
-  // ─── Asphalt quality ─────────────────────────────────────────────────────────
+  // ─── Asphalt quality ──────────────────────────────────────────────────────
   qualityExcellent: "შესანიშნავი",
   qualityGood:      "კარგი",
   qualityFair:      "დამაკმაყოფილებელი",
   qualityPoor:      "ცუდი",
   qualityUnpaved:   "გზა გარეშე",
 
-  // ─── Alert types ─────────────────────────────────────────────────────────────
-  alertGravel:  "ხრეში",
-  alertCamera:  "სიჩქარის კამერა",
-  alertWork:    "საგზაო სამუშაოები",
-  alertDanger:  "საშიში მონაკვეთი",
+  // ─── Alert types ──────────────────────────────────────────────────────────
+  alertGravel: "ხრეში",
+  alertCamera: "ფარული კამერა",
+  alertWork:   "საგზაო სამუშაოები",
+  alertDanger: "საშიში მოსახვევი",
 
-  alertGravelDesc:  "გზის ზოლ(ებ)ზე ხრეში — სიჩქარე 50 კმ/სთ-ზე დაბლა",
-  alertCameraDesc:  "ფიქსირებული სიჩქარის საკონტროლო კამერა",
-  alertWorkDesc:    "მიმდინარე სამშენებლო სამუშაოები — ზოლი შეიძლება დაკეტილი იყოს",
-  alertDangerDesc:  "სახიფათო მონაკვეთი — ბრმა მოხვევები, არასტაბილური ზედაპირი",
+  alertGravelDesc: "გზის ზოლ(ებ)ზე ხრეში — სიჩქარე 50 კმ/სთ-ზე დაბლა",
+  alertCameraDesc: "ფიქსირებული სიჩქარის საკონტროლო კამერა",
+  alertWorkDesc:   "მიმდინარე სამშენებლო სამუშაოები — ზოლი შეიძლება დაკეტილი იყოს",
+  alertDangerDesc: "სახიფათო მოხვევა — ბრმა კუთხე, უდ ვარდნა, არასტაბილური ზედაპირი",
 
-  // ─── Alert severity ──────────────────────────────────────────────────────────
+  // ─── Alert severity ───────────────────────────────────────────────────────
   severityLow:    "დაბალი",
   severityMedium: "საშუალო",
   severityHigh:   "მაღალი",
 
-  // ─── Spot types ──────────────────────────────────────────────────────────────
-  spotCafe:     "მოტო-კაფე",
-  spotFuel:     "საწვავი",
-  spotViewpoint:"პანორამა",
-  spotRestArea: "დასვენების ზონა",
-  spotMechanic: "მექანიკოსი",
-  spotHotel:    "სასტუმრო",
+  // ─── Spot types ───────────────────────────────────────────────────────────
+  spotCafe:      "მოტო-კაფე",
+  spotFuel:      "საწვავი",
+  spotViewpoint: "პანორამა",
+  spotRestArea:  "დასვენება",
+  spotMechanic:  "მექანიკოსი",
+  spotHotel:     "სასტუმრო",
 
-  // ─── Map aria label ──────────────────────────────────────────────────────────
-  mapAriaLabel: "საქართველოს მოტოციკლის მარშრუტების ინტერაქტიული რუკა",
+  // ─── Map overlays ─────────────────────────────────────────────────────────
+  verified:        "✓ დამოწმებული",
+  communityReport: "საზოგადოების რეპორტი",
+  distance:        "მანძილი",
+  duration:        "ხანგრძლივობა",
+  climb:           "აღმართი",
+  region:          "რეგიონი",
+  surface:         "ზედაპირი",
+  statRoutes:      "მარშრუტი",
+  statAlerts:      "გაფრთხილება",
+  statSpots:       "ადგილი",
 
-  // ─── Open filters ─────────────────────────────────────────────────────────────
-  openFilters: "ფილტრების გახსნა",
+  // ─── Add alert dialog ─────────────────────────────────────────────────────
+  addAlertTitle:           "საფრთხის დამატება",
+  addAlertCoords:          "კოორდინატები",
+  addAlertTypeLabel:       "საფრთხის ტიპი",
+  addAlertDescLabel:       "აღწერა",
+  addAlertDescPlaceholder: "დეტალურად აღწერეთ სიტუაცია — ბიკერების სასარგებლოდ…",
+  addAlertSubmit:          "გაზიარება",
+  addAlertCancel:          "გაუქმება",
+  addAlertLoginRequired:   "გაფრთხილების დასამატებლად გთხოვთ შეხვიდეთ სისტემაში.",
 
-  // ─── Map markers / popups ────────────────────────────────────────────────────
-  distance:         "მანძილი",
-  duration:         "ხანგრძლივობა",
-  climb:            "აღმართი",
-  region:           "რეგიონი",
-  surface:          "ზედაპირი",
-  verified:         "✓ დამოწმებული",
-  communityReport:  "საზოგადოების რეპორტი",
-  justNow:          "ახლახანს",
-  reviews:          "შეფასება",
-  hours:            "სამუშაო საათები",
-
-  // ─── Map skeleton / loading ──────────────────────────────────────────────────
-  mapInitialising:  "რუკა იტვირთება…",
-  mapLoadingNet:    "ქსელი იტვირთება",
-
-  // ─── Map overlay stats ───────────────────────────────────────────────────────
-  statRoutes: "მარშრუტი",
-  statAlerts: "გაფრთხილება",
-  statSpots:  "ადგილი",
-
-  // ─── Add alert dialog ────────────────────────────────────────────────────────
-  addAlertTitle:         "საგზაო რეპორტის დამატება",
-  addAlertCoords:        "კოორდინატები",
-  addAlertTypeLabel:     "გაფრთხილების ტიპი",
-  addAlertDescLabel:     "აღწერა",
-  addAlertDescPlaceholder: "ნახეთ, სად და რა სახის პრობლემაა — ბიკერების გადასარჩენად…",
-  addAlertSubmit:        "გაზიარება",
-  addAlertCancel:        "გაუქმება",
-  addAlertLoginRequired: "გაფრთხილების დასამატებლად გთხოვთ შეხვიდეთ სისტემაში.",
-
-  // ─── Auth modal ──────────────────────────────────────────────────────────────
-  authTabLogin:         "შესვლა",
-  authTabRegister:      "რეგისტრაცია",
-  authEmailLabel:       "ელ-ფოსტა",
-  authEmailPlaceholder: "თქვენი@ელ-ფოსტა.ge",
-  authPasswordLabel:    "პაროლი",
+  // ─── Auth modal ───────────────────────────────────────────────────────────
+  authTabLogin:            "შესვლა",
+  authTabRegister:         "რეგისტრაცია",
+  authEmailLabel:          "ელ-ფოსტა",
+  authEmailPlaceholder:    "თქვენი@ელ-ფოსტა.ge",
+  authPasswordLabel:       "პაროლი",
   authPasswordPlaceholder: "••••••••",
-  authNameLabel:        "სახელი",
-  authNamePlaceholder:  "თქვენი სახელი",
-  authMotoLabel:        "მოტოციკლის მოდელი",
-  authMotoPlaceholder:  "მაგ. Honda CB500X",
-  authLoginCTA:         "შესვლა",
-  authRegisterCTA:      "ანგარიშის შექმნა",
-  authForgotPassword:   "პაროლი დაგავიწყდათ?",
-  authSwitchToRegister: "ანგარიში არ გაქვთ?",
-  authSwitchToLogin:    "უკვე გაქვთ ანგარიში?",
-  authClose:            "დახურვა",
-  authWelcomeBack:      "კეთილი იყოს თქვენი დაბრუნება",
-  authJoinCommunity:    "შეუერთდით ბიკერების საზოგადოებას",
+  authNameLabel:           "სახელი",
+  authNamePlaceholder:     "თქვენი სახელი",
+  authMotoLabel:           "მოტოციკლის მოდელი",
+  authMotoPlaceholder:     "მაგ. Yamaha MT-09",
+  authLoginCTA:            "შევიდეთ",
+  authRegisterCTA:         "ანგარიშის შექმნა",
+  authForgotPassword:      "პაროლი დაგავიწყდათ?",
+  authSwitchToRegister:    "ანგარიში არ გაქვთ?",
+  authSwitchToLogin:       "უკვე გაქვთ ანგარიში?",
+  authClose:               "დახურვა",
+  authWelcomeBack:         "კეთილი იყოს დაბრუნება",
+  authJoinCommunity:       "შეუერთდით ბიკერების საზოგადოებას",
 
-  // ─── Error boundary ──────────────────────────────────────────────────────────
+  // ─── Profile / Digital Garage ─────────────────────────────────────────────
+  garageTitle:       "ჩემი სახელოსნო",
+  garageMyBike:      "ჩემი მოტოციკლი",
+  garageMods:        "მოდიფიკაციები",
+  garageStats:       "სტატისტიკა",
+  statTotalKm:       "გავლილი კმ",
+  statRoutesDone:    "მარშრუტები",
+  statAlertsDone:    "გაფრთხილებები",
+  garageFollowers:   "მიმდევარი",
+  garageRides:       "გასვლა",
+  editProfile:       "პროფილის რედაქტირება",
+  noGarageData:      "შედით სისტემაში პროფილის სანახავად.",
+
+  // ─── Error / General ──────────────────────────────────────────────────────
   errorTitle:     "შეცდომა მოხდა",
   errorMapFailed: "რუკა ვერ ჩაიტვირთა.",
   errorGeneric:   "მოულოდნელი შეცდომა.",
   errorRetry:     "თავიდან ცდა",
-
-  // ─── General ─────────────────────────────────────────────────────────────────
+  mapAriaLabel_notUsed: "",
+  openFilters_notUsed:  "",
   close: "დახურვა",
 } as const;
 

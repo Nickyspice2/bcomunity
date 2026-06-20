@@ -49,6 +49,7 @@ export function AuthProvider({ children }: AuthProviderProps): React.ReactElemen
       name:            email.split("@")[0] ?? "ბიკერი",
       email,
       motorcycleModel: "",
+      avatarColor:     "#f59e0b",
       joinedAt:        new Date().toISOString(),
     };
     setUser(mockUser);
@@ -65,6 +66,7 @@ export function AuthProvider({ children }: AuthProviderProps): React.ReactElemen
       name:            credentials.name,
       email:           credentials.email,
       motorcycleModel: credentials.motorcycleModel,
+      avatarColor:     "#f59e0b",
       joinedAt:        new Date().toISOString(),
     };
     setUser(mockUser);

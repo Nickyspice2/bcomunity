@@ -5,6 +5,8 @@ export interface AuthUser {
   name:            string;
   email:           string;
   motorcycleModel: string;
+  /** CSS colour string used to generate the initials avatar. */
+  avatarColor:     string;
   /** ISO 8601 timestamp */
   joinedAt:        string;
 }

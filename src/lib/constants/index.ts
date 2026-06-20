@@ -1,6 +1,6 @@
 import type {
-  AlertType,
   AlertSeverity,
+  AlertType,
   AsphaltQuality,
   Coordinate,
   DifficultyLevel,
@@ -9,33 +9,25 @@ import type {
 } from "@/lib/types";
 import { KA } from "@/lib/i18n/ka";
 
-// ─── Georgia (Europe) geography ───────────────────────────────────────────────
+// ─── Georgia geography ────────────────────────────────────────────────────────
 
-/**
- * Geographic centroid of Georgia — anchors the map on initial load.
- * Gives balanced coverage across all regions including the Caucasus range.
- */
 export const GEORGIA_CENTER: Coordinate = { lat: 41.9, lng: 43.9 };
-
 export const GEORGIA_DEFAULT_ZOOM = 8;
 export const GEORGIA_MIN_ZOOM     = 6;
 export const GEORGIA_MAX_ZOOM     = 18;
 
 export const GEORGIA_BOUNDS = {
-  north:  43.6,
-  south:  41.0,
-  east:   46.7,
-  west:   39.9,
+  north: 43.6, south: 41.0, east: 46.7, west: 39.9,
 } as const;
 
-// ─── Map tile provider ────────────────────────────────────────────────────────
+// ─── Map tiles ────────────────────────────────────────────────────────────────
 
-/** CartoDB Dark Matter — free, no API key, purpose-built for dark UI overlays. */
+/** CartoDB Dark Matter — free, no API key required. */
 export const MAP_TILE_URL    = "https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png";
 export const MAP_TILE_ATTR   = '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> &copy; <a href="https://carto.com/">CARTO</a>';
 export const MAP_TILE_SUBDOM = "abcd";
 
-// ─── Alert type display metadata ─────────────────────────────────────────────
+// ─── Alert type metadata ──────────────────────────────────────────────────────
 
 export interface AlertMeta {
   label:       string;
@@ -48,41 +40,40 @@ export interface AlertMeta {
 export const ALERT_TYPE_META: Record<AlertType, AlertMeta> = {
   gravel: {
     label:       KA.alertGravel,
-    color:       "#a78bfa",
-    bgColor:     "rgba(167,139,250,0.12)",
-    borderColor: "rgba(167,139,250,0.30)",
+    /** Neon orange — high-visibility on dark map */
+    color:       "#ff6b35",
+    bgColor:     "rgba(255,107,53,0.12)",
+    borderColor: "rgba(255,107,53,0.30)",
     description: KA.alertGravelDesc,
   },
   camera: {
     label:       KA.alertCamera,
-    color:       "#3b82f6",
-    bgColor:     "rgba(59,130,246,0.12)",
-    borderColor: "rgba(59,130,246,0.30)",
+    /** Neon red — instantly recognisable speed cameras */
+    color:       "#ff2d55",
+    bgColor:     "rgba(255,45,85,0.12)",
+    borderColor: "rgba(255,45,85,0.30)",
     description: KA.alertCameraDesc,
   },
   work: {
     label:       KA.alertWork,
-    color:       "#f59e0b",
-    bgColor:     "rgba(245,158,11,0.12)",
-    borderColor: "rgba(245,158,11,0.30)",
+    color:       "#0ea5e9",
+    bgColor:     "rgba(14,165,233,0.12)",
+    borderColor: "rgba(14,165,233,0.30)",
     description: KA.alertWorkDesc,
   },
   danger: {
     label:       KA.alertDanger,
-    color:       "#ef4444",
-    bgColor:     "rgba(239,68,68,0.12)",
-    borderColor: "rgba(239,68,68,0.30)",
+    /** Neon amber — general hazard */
+    color:       "#ffd60a",
+    bgColor:     "rgba(255,214,10,0.12)",
+    borderColor: "rgba(255,214,10,0.30)",
     description: KA.alertDangerDesc,
   },
 };
 
-// ─── Difficulty display metadata ──────────────────────────────────────────────
+// ─── Difficulty metadata ──────────────────────────────────────────────────────
 
-export interface DifficultyMeta {
-  label:   string;
-  color:   string;
-  bgColor: string;
-}
+export interface DifficultyMeta { label: string; color: string; bgColor: string; }
 
 export const DIFFICULTY_META: Record<DifficultyLevel, DifficultyMeta> = {
   beginner:     { label: KA.difficultyBeginner,     color: "#22c55e", bgColor: "rgba(34,197,94,0.12)"   },
@@ -91,13 +82,9 @@ export const DIFFICULTY_META: Record<DifficultyLevel, DifficultyMeta> = {
   extreme:      { label: KA.difficultyExtreme,      color: "#ef4444", bgColor: "rgba(239,68,68,0.12)"   },
 };
 
-// ─── Asphalt quality display metadata ────────────────────────────────────────
+// ─── Asphalt quality metadata ─────────────────────────────────────────────────
 
-export interface AsphaltQualityMeta {
-  label:   string;
-  color:   string;
-  bgColor: string;
-}
+export interface AsphaltQualityMeta { label: string; color: string; bgColor: string; }
 
 export const ASPHALT_QUALITY_META: Record<AsphaltQuality, AsphaltQualityMeta> = {
   excellent: { label: KA.qualityExcellent, color: "#22c55e", bgColor: "rgba(34,197,94,0.12)"   },
@@ -107,13 +94,9 @@ export const ASPHALT_QUALITY_META: Record<AsphaltQuality, AsphaltQualityMeta> = 
   unpaved:   { label: KA.qualityUnpaved,   color: "#a78bfa", bgColor: "rgba(167,139,250,0.12)" },
 };
 
-// ─── Biker spot display metadata ─────────────────────────────────────────────
+// ─── Spot type metadata ───────────────────────────────────────────────────────
 
-export interface SpotMeta {
-  label: string;
-  icon:  string;
-  color: string;
-}
+export interface SpotMeta { label: string; icon: string; color: string; }
 
 export const SPOT_TYPE_META: Record<SpotType, SpotMeta> = {
   cafe:      { label: KA.spotCafe,      icon: "☕", color: "#fb923c" },
@@ -143,7 +126,3 @@ export const DEFAULT_FILTERS: FilterState = {
   showSpots:    true,
   searchQuery:  "",
 };
-
-// ─── UI layout ────────────────────────────────────────────────────────────────
-
-export const SIDEBAR_WIDTH_PX = 320;

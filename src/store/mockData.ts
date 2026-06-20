@@ -1,251 +1,341 @@
-import type { BikerSpot, RoadAlert, Route } from "@/lib/types";
+import type {
+  BikerPost,
+  BikerSpot,
+  BikerUser,
+  GarageMotorcycle,
+  GroupRide,
+  RoadAlert,
+  Route,
+} from "@/lib/types";
+
+// ─── Biker users ──────────────────────────────────────────────────────────────
+
+export const MOCK_USERS: BikerUser[] = [
+  {
+    id: "u-001",
+    name: "გიორგი ბერიძე",
+    username: "giorgi_moto",
+    motorcycleModel: "Yamaha MT-09",
+    avatarColor: "#f59e0b",
+    isVerified: true,
+    followersCount: 1284,
+    rideCount: 147,
+  },
+  {
+    id: "u-002",
+    name: "ნინო ყვარაცხელია",
+    username: "nino_rider",
+    motorcycleModel: "Honda CB500X",
+    avatarColor: "#3b82f6",
+    isVerified: false,
+    followersCount: 537,
+    rideCount: 62,
+  },
+  {
+    id: "u-003",
+    name: "ლუკა მგელაძე",
+    username: "luka_adv",
+    motorcycleModel: "BMW R1250GS",
+    avatarColor: "#22c55e",
+    isVerified: true,
+    followersCount: 3102,
+    rideCount: 389,
+  },
+  {
+    id: "u-004",
+    name: "თამარა გოგიტიძე",
+    username: "tamara_zr",
+    motorcycleModel: "Kawasaki Z900",
+    avatarColor: "#a78bfa",
+    isVerified: false,
+    followersCount: 821,
+    rideCount: 94,
+  },
+  {
+    id: "u-005",
+    name: "დავით ჯავახიშვილი",
+    username: "davit_ktm",
+    motorcycleModel: "KTM Duke 390",
+    avatarColor: "#fb923c",
+    isVerified: false,
+    followersCount: 298,
+    rideCount: 41,
+  },
+];
+
+// ─── Biker posts ──────────────────────────────────────────────────────────────
+
+export const MOCK_POSTS: BikerPost[] = [
+  {
+    id: "p-001",
+    author: MOCK_USERS[0],
+    content:
+      "გუშინ გავიარე სამხედრო გზა ჯვრის უღელტეხილამდე — ასფალტი ახლიაა, გრიფი შესანიშნავია! " +
+      "გუდაურის შემდეგ ყოველ მოხვევაზე ამოსული გული 🏔️ ვინც ჯერ კიდევ არ უნახავს — " +
+      "ეს სეზონი ნამდვილად არ გამოტოვოთ. MT-09 სახლია ამ გზაზე ⚡",
+    routeRef: "r-001",
+    likeCount: 312,
+    commentCount: 47,
+    createdAt: new Date(Date.now() - 3 * 3_600_000).toISOString(),
+    isLiked: false,
+    tags: ["სამხედრო_გზა", "გუდაური", "MT09"],
+  },
+  {
+    id: "p-002",
+    author: MOCK_USERS[1],
+    content:
+      "⚠️ გომბორის გზაზე ფრთხილად! კმ 43-ზე მარცხნივ ახალი ხრეშია ჩამოვარდნილი — " +
+      "წვიმის შემდეგ ნაკადი ჩამოვიდა. CB500X-ზეც კი გამოვიდა 😅 " +
+      "ყველამ სიჩქარე 40-მდე შეამციროს ამ მონაკვეთზე",
+    routeRef: "r-002",
+    likeCount: 289,
+    commentCount: 31,
+    createdAt: new Date(Date.now() - 7 * 3_600_000).toISOString(),
+    isLiked: true,
+    tags: ["გომბორი", "გაფრთხილება", "ხრეში"],
+  },
+  {
+    id: "p-003",
+    author: MOCK_USERS[2],
+    content:
+      "სვანეთი — ამ წელს მე-3 ვიზიტი! ენგურის ხეობა ყოველ ჯერზე სხვა ხიბლი აქვს 🗻 " +
+      "GS-ზე ჩამოსვლა ლენტეხის მხრიდან კლდოვანი მონაკვეთებით... ყველაზე სახალისო 4 საათი " +
+      "ამ სეზონში. ობიექტივი ვერ გადმოსცემს 📸 მომდევნო ჯერს ვინ მეამაყება?",
+    routeRef: "r-003",
+    likeCount: 847,
+    commentCount: 112,
+    createdAt: new Date(Date.now() - 18 * 3_600_000).toISOString(),
+    isLiked: false,
+    tags: ["სვანეთი", "ენგური", "ADV", "BMW_GS"],
+  },
+  {
+    id: "p-004",
+    author: MOCK_USERS[3],
+    content:
+      "ბათუმის სანაპიროს კრიმანჭული — 68 კმ სუფთა ბედნიერება ☀️ " +
+      "შავი ზღვის პირას Z900-ით სიჩქარის შეგრძნება სხვაა... ქარი, მარილი, ზღვის სუნი! " +
+      "ქობულეთი → ურეკი → ფოთი მარშრუტი ყველა ბიკერს ვუდასტურებ 🌊",
+    routeRef: "r-004",
+    likeCount: 463,
+    commentCount: 58,
+    createdAt: new Date(Date.now() - 26 * 3_600_000).toISOString(),
+    isLiked: true,
+    tags: ["ბათუმი", "სანაპირო", "კავასაკი", "Z900"],
+  },
+  {
+    id: "p-005",
+    author: MOCK_USERS[4],
+    content:
+      "Iron Horse-ში გუშინ ახალ ბიკერებს გავეცანი — Duke 390-ის ახალი მფლობელები 🔥 " +
+      "400+-ზე მეტი ბიკერი ერთ ადგილას, KTM-ების ჩვენება... ადრენალინი ჯერ კიდევ სისხლში მდგომარეობს! " +
+      "თბილისის ბიკ-სცენა სერიოზულად იზრდება ყოველ სეზონზე 💪",
+    likeCount: 198,
+    commentCount: 24,
+    createdAt: new Date(Date.now() - 2 * 86_400_000).toISOString(),
+    isLiked: false,
+    tags: ["IronHorse", "KTM", "Duke390", "თბილისი"],
+  },
+];
+
+// ─── Group rides ──────────────────────────────────────────────────────────────
+
+export const MOCK_GROUP_RIDES: GroupRide[] = [
+  {
+    id: "gr-001",
+    name: "გომბორის ჯგუფური გასვლა",
+    destination: "სიღნაღი / კახეთი",
+    gatheringPoint: "Iron Horse, კოსტავას ქ. 14",
+    gatheringTime: new Date(Date.now() + 2 * 86_400_000).toISOString(),
+    pace: "medium",
+    description:
+      "გომბორის უღელტეხილით კახეთის ღვინის გზაზე. სიღნაღში სადილი და Twins Old Cellar.",
+    organizer: MOCK_USERS[0],
+    joinedRiders: [MOCK_USERS[1], MOCK_USERS[2], MOCK_USERS[3]],
+    maxRiders: 12,
+    routeRef: "r-002",
+  },
+  {
+    id: "gr-002",
+    name: "სამხედრო გზა — ყაზბეგი",
+    destination: "სტეფანწმინდა / ყაზბეგი",
+    gatheringPoint: "დიდუბის ავტოსადგური, 07:00",
+    gatheringTime: new Date(Date.now() + 5 * 86_400_000).toISOString(),
+    pace: "fast",
+    description:
+      "ჯვრის უღელტეხილით სტეფანწმინდამდე. გამოცდილი ბიკერებისთვის. სიჩქარე მაღალი!",
+    organizer: MOCK_USERS[2],
+    joinedRiders: [MOCK_USERS[0], MOCK_USERS[4]],
+    maxRiders: 8,
+    routeRef: "r-001",
+  },
+  {
+    id: "gr-003",
+    name: "ბათუმ-ქობულეთის სანაპირო ტური",
+    destination: "ფოთი / შავი ზღვა",
+    gatheringPoint: "ბათუმის ბიკერ-ჰაბი, ნინოშვილის ქ. 8",
+    gatheringTime: new Date(Date.now() + 9 * 86_400_000).toISOString(),
+    pace: "slow",
+    description:
+      "მოდუნებული სანაპირო ტური ყველა გამოცდილების ბიკერებისთვის. ლანჩი ქობულეთში.",
+    organizer: MOCK_USERS[3],
+    joinedRiders: [MOCK_USERS[1]],
+    maxRiders: 20,
+    routeRef: "r-004",
+  },
+];
+
+// ─── Garage (current user mock) ───────────────────────────────────────────────
+
+export const MOCK_GARAGE: GarageMotorcycle = {
+  id:    "g-001",
+  brand: "Yamaha",
+  model: "MT-09",
+  year:  2022,
+  modifications: [
+    "Akrapovič სლიპ-ონ",
+    "Rizoma სარკეები",
+    "Puig ქარსაფარი",
+    "Heidenau K60 Scout საბურავები",
+    "SW-Motech სატვირთო ჩარჩო",
+    "Garmin Zumo GPS",
+  ],
+  stats: {
+    totalKm:         14_820,
+    routesCompleted: 47,
+    alertsSubmitted: 12,
+  },
+};
 
 // ─── Routes ───────────────────────────────────────────────────────────────────
-// ყველა კოორდინატი WGS-84 ათობითი გრადუსებში, OSM-ით დამოწმებული.
-// სიმაღლის მონაცემი SRTM 30 მ-იანი მონაცემთა ბაზიდან.
 
 export const MOCK_ROUTES: Route[] = [
   {
     id:             "r-001",
     name:           "საქართველოს სამხედრო გზა",
     description:
-      "კავკასიის ყველაზე იკონური საავტომობილო გზა. S3 ეროვნული გზა ადის თბილისის " +
-      "გარეუბნებიდან 2 379 მ-იან ჯვრის უღელტეხილამდე, გადის ანანურის შუა საუკუნეების " +
-      "ციხე-სიმაგრის გვერდით ჟინვალის წყალსაცავზე, გუდაურის სათხილამურო კურორტსა და " +
-      "სტეფანწმინდასთან (ყაზბეგი) — სადაც გერგეთის სამება ყაზბეგის მთის ფონზე გამოიყურება. " +
-      "გზა წლის განმავლობაში ღიაა, თუმცა ოქტომბრიდან აპრილამდე მძიმე თოვლის პირობებში " +
-      "უღელტეხილი შეიძლება დაიხუროს.",
+      "კავკასიის ყველაზე იკონური საავტომობილო გზა. S3 ეროვნული გზა ადის თბილისიდან " +
+      "2 379 მ-იან ჯვრის უღელტეხილამდე, ანანურის ციხე-სიმაგრის, გუდაურის სათხილამური " +
+      "კურორტის და სტეფანწმინდის გავლით — გერგეთის სამების ეკლესია კაზბეგის ფონზე.",
     difficulty:     "advanced",
     asphaltQuality: "excellent",
     coordinates: [
-      { lat: 41.693, lng: 44.801 }, // თბილისი — დიდუბის ავტოსადგური
-      { lat: 41.844, lng: 44.720 }, // მცხეთა — ჯვარის გზაჯვარედინი
-      { lat: 42.003, lng: 44.700 }, // ჟინვალის წყალსაცავი
-      { lat: 42.178, lng: 44.671 }, // ანანური (კმ 72)
-      { lat: 42.336, lng: 44.569 }, // პასანაური — მეკალმახეობა
-      { lat: 42.473, lng: 44.487 }, // გუდაური — კურორტი (2 196 მ)
-      { lat: 42.536, lng: 44.471 }, // ჯვრის უღელტეხილი (2 379 მ)
-      { lat: 42.597, lng: 44.531 }, // სნოს ხეობის ჩამოსვლა
-      { lat: 42.659, lng: 44.658 }, // სტეფანწმინდა / ყაზბეგი
+      { lat: 41.693, lng: 44.801 },
+      { lat: 41.844, lng: 44.720 },
+      { lat: 42.178, lng: 44.671 },
+      { lat: 42.473, lng: 44.487 },
+      { lat: 42.536, lng: 44.471 },
+      { lat: 42.659, lng: 44.658 },
     ],
-    distanceKm:    148,
-    durationMin:   210,
-    elevationGain: 2379,
-    region:        "მცხეთა-მთიანეთი",
-    tags:          ["მთა", "პანორამა", "სერპანტინი", "ისტორიული", "იუნესკო"],
-    likeCount:     1247,
-    rideCount:     5830,
+    distanceKm: 148, durationMin: 210, elevationGain: 2379,
+    region: "მცხეთა-მთიანეთი",
+    tags: ["მთა", "პანორამა", "სერპანტინი", "იუნესკო"],
+    likeCount: 1247, rideCount: 5830,
   },
-
   {
     id:             "r-002",
     name:           "გომბორის უღელტეხილი — კახეთის ღვინის გზა",
     description:
-      "კახეთის ღვინის სამეფოში შესასვლელი გვერდითი გზა. გომბორის ქედი (1 620 მ) " +
-      "გამოჰყოფს ქართლს ალაზნის ველიდან — ჭეც ტყის ასვლა კახეთის ვენახიანი ვაკის " +
-      "ჩამოსვლაში გადადის. ჩამოსვლისას თელავი და კავკასიონის კალთები გიხსნება. " +
-      "სიღნაღი — კახეთის პანორამული ქალაქი — მარშრუტის ბოლო მიზანია.",
+      "კახეთის ღვინის სამეფოში შესასვლელი გვერდითი გზა. 1 620 მ გომბორის ქედი " +
+      "ჭეც-ტყის ასვლა კახეთის ვენახიანი ვაკის ჩამოსვლაში გადადის.",
     difficulty:     "intermediate",
     asphaltQuality: "good",
     coordinates: [
-      { lat: 41.740, lng: 44.975 }, // თბილისი — სამგორის გარეუბანი
-      { lat: 41.753, lng: 45.098 }, // გომბორის სოფელი
-      { lat: 41.789, lng: 45.212 }, // გომბორის ასვლა (1 400 მ)
-      { lat: 41.801, lng: 45.280 }, // უღელტეხილის მწვერვალი (1 620 მ)
-      { lat: 41.835, lng: 45.361 }, // ჩამოსვლა — კახეთის ხედი
-      { lat: 41.924, lng: 45.481 }, // თელავი — რეგიონის ცენტრი
-      { lat: 41.841, lng: 45.716 }, // გურჯაანი
-      { lat: 41.612, lng: 45.571 }, // სიღნაღი — "სიყვარულის ქალაქი"
+      { lat: 41.740, lng: 44.975 },
+      { lat: 41.801, lng: 45.280 },
+      { lat: 41.924, lng: 45.481 },
+      { lat: 41.612, lng: 45.571 },
     ],
-    distanceKm:    102,
-    durationMin:   145,
-    elevationGain: 1621,
-    region:        "კახეთი",
-    tags:          ["მთა", "ღვინო", "სართულა-ტყე", "პანორამა", "ვიქ-ენდი"],
-    likeCount:     893,
-    rideCount:     3210,
+    distanceKm: 102, durationMin: 145, elevationGain: 1621,
+    region: "კახეთი",
+    tags: ["მთა", "ღვინო", "პანორამა", "ვიქ-ენდი"],
+    likeCount: 893, rideCount: 3210,
   },
-
   {
     id:             "r-003",
     name:           "სვანეთის გზა — ენგურის ხეობა",
     description:
-      "საქართველოს ყველაზე დრამატული და მომთხოვნი მარშრუტი. მესტიისაკენ მიმავალი გზა " +
-      "ენგურის მდინარის გასწვრივ მიდის სულ უფრო ვიწრო ხეობაში, შემდეგ კი სვანეთში " +
-      "ადის — შუა საუკუნეების სათვალთვალო კოშკების და 4 000+ მ მყინვარების მხარეში. " +
-      "პირველი ნახევარი ასფალტი, მეორე — მოხეტიალე ასფალტი და კომპაქტური ხრეში. " +
-      "წვიმის შემდეგ მდინარის გადასასვლელი და კლდეზვავი ჩვეულებრივია. " +
-      "იუნესკოს სამყარო: მესტია უმეტეს ევროპელ ბიკერს სიცოცხლის განმავლობაში ახსოვს.",
+      "საქართველოს ყველაზე დრამატული მარშრუტი. მესტიისაკენ გზა ვიწრო ხეობით " +
+      "სვანეთის კოშკებამდე — UNESCO-ს მსოფლიო მემკვიდრეობა.",
     difficulty:     "extreme",
     asphaltQuality: "poor",
     coordinates: [
-      { lat: 42.508, lng: 41.871 }, // ზუგდიდი — ბოლო დიდი ქალაქი
-      { lat: 42.574, lng: 42.045 }, // ჯვარი (სოფელი)
-      { lat: 42.645, lng: 42.197 }, // ჩხოროწყუს გზაჯვარედინი
-      { lat: 42.706, lng: 42.396 }, // ენგურის კაშხალი / წყალსაცავი
-      { lat: 42.798, lng: 42.515 }, // უშგულის განშტოება
-      { lat: 42.878, lng: 42.594 }, // ხაიში — ხრეში იწყება
-      { lat: 42.957, lng: 42.661 }, // ლენტეხის გზაჯვარედინი
-      { lat: 43.031, lng: 42.732 }, // მესტია — სვანეთის ცენტრი
+      { lat: 42.508, lng: 41.871 },
+      { lat: 42.706, lng: 42.396 },
+      { lat: 42.878, lng: 42.594 },
+      { lat: 43.031, lng: 42.732 },
     ],
-    distanceKm:    132,
-    durationMin:   300,
-    elevationGain: 1890,
-    region:        "სამეგრელო-ზემო სვანეთი",
-    tags:          ["ექსტრემალური", "ხრეში", "ხეობა", "ალპური", "იუნესკო", "სათავგადასავლო"],
-    likeCount:     2104,
-    rideCount:     1520,
+    distanceKm: 132, durationMin: 300, elevationGain: 1890,
+    region: "სამეგრელო-ზემო სვანეთი",
+    tags: ["ექსტრემალური", "ხრეში", "ხეობა", "იუნესკო"],
+    likeCount: 2104, rideCount: 1520,
   },
-
   {
     id:             "r-004",
-    name:           "აჭარის შავი ზღვის სანაპირო მარშრუტი",
+    name:           "აჭარის შავი ზღვის სანაპირო",
     description:
-      "საქართველოს ყველაზე მოდუნებული გასეირნება — ახლადასფალტებული სანაპირო " +
-      "გზა ბათუმიდან ჩრდილოეთით. სუბტროპიკული მცენარეულობა, შავი ქვიშის პლაჟები " +
-      "და პალმებით მოჩარჩოებული ბულვარი კავკასიის მთის უღელტეხილების ანტიდოტია. " +
-      "გზა თითქმის სრულად ვაკეა, ფართო ზოლებით. გურიის ჩაის პლანტაციებში შემობრუნებით " +
-      "ბათუმში სრულდება.",
+      "ახლადასფალტებული სანაპირო გზა ბათუმიდან ჩრდილოეთით — შავი ქვიშა, " +
+      "სუბტროპიკული მცენარეულობა, პალმები.",
     difficulty:     "beginner",
     asphaltQuality: "excellent",
     coordinates: [
-      { lat: 41.641, lng: 41.636 }, // ბათუმის ცენტრი
-      { lat: 41.668, lng: 41.672 }, // ჩაქვი — ჩაის პლანტაცია
-      { lat: 41.819, lng: 41.777 }, // ქობულეთი — პოპულარული პლაჟი
-      { lat: 41.896, lng: 41.813 }, // ნატანების ხიდი
-      { lat: 41.974, lng: 41.797 }, // ურეკი — მაგნიტური ქვიშა
-      { lat: 42.090, lng: 41.712 }, // სუფსა — გურიის შესასვლელი
-      { lat: 42.148, lng: 41.673 }, // ფოთი — შავი ზღვის პორტი
+      { lat: 41.641, lng: 41.636 },
+      { lat: 41.819, lng: 41.777 },
+      { lat: 41.974, lng: 41.797 },
+      { lat: 42.148, lng: 41.673 },
     ],
-    distanceKm:    68,
-    durationMin:   85,
-    elevationGain: 95,
-    region:        "აჭარა / გურია",
-    tags:          ["სანაპირო", "ზღვა", "მარტივი", "ვაკე", "სუბტროპიკული", "ლამაზი"],
-    likeCount:     671,
-    rideCount:     2890,
-  },
-
-  {
-    id:             "r-005",
-    name:           "ბორჯომის ხეობა — ბაკურიანის ალპური",
-    description:
-      "ორი ზედაპირის ამბავი: ბორჯომის ხეობის მონაკვეთი — ვიწრო კანიონი " +
-      "მინერალური წყაროებით (ბორჯომ-ხარაგაულის ეროვნული პარკი). ბორჯომის შემდეგ " +
-      "გზა ციცაბოდ ადის ბაკურიანის სათხილამურო კურორტამდე ნახევრად გათლილ ასფალტზე. " +
-      "მოკლე მარშრუტი, დიდი ჯილდო — მინერალური ხეობისა და ალპური პლატოს " +
-      "კომბინაცია უნიკალურია.",
-    difficulty:     "intermediate",
-    asphaltQuality: "fair",
-    coordinates: [
-      { lat: 41.983, lng: 44.112 }, // გორი — საწყისი წერტილი
-      { lat: 41.921, lng: 44.026 }, // კასპი
-      { lat: 41.840, lng: 43.537 }, // ხაშური — ბორჯომის გზაჯვარედინი
-      { lat: 41.839, lng: 43.399 }, // ბორჯომი — მინერალური წყაროები
-      { lat: 41.855, lng: 43.333 }, // ბორჯომის ხეობა (ვიწრო)
-      { lat: 41.750, lng: 43.523 }, // წაღვერი — ასვლა იწყება
-      { lat: 41.749, lng: 43.523 }, // ბაკურიანი — ალპური კურორტი (1 700 მ)
-    ],
-    distanceKm:    88,
-    durationMin:   120,
-    elevationGain: 1340,
-    region:        "სამცხე-ჯავახეთი / შიდა ქართლი",
-    tags:          ["ხეობა", "სპა", "ალპური", "მინერალური-წყლები", "ეროვნული-პარკი"],
-    likeCount:     445,
-    rideCount:     1760,
+    distanceKm: 68, durationMin: 85, elevationGain: 95,
+    region: "აჭარა / გურია",
+    tags: ["სანაპირო", "ზღვა", "მარტივი", "სცენური"],
+    likeCount: 671, rideCount: 2890,
   },
 ];
 
 // ─── Road alerts ──────────────────────────────────────────────────────────────
-// კოორდინატები ზუსტად განთავსებულია საგზაო მონაკვეთებზე.
 
 export const MOCK_ALERTS: RoadAlert[] = [
   {
-    id:          "a-001",
-    type:        "gravel",
-    lat:         42.503,
-    lng:         44.469,
+    id: "a-001", type: "gravel",
+    lat: 42.503, lng: 44.469,
     description:
-      "მეწყრული ნარჩენები ორივე ზოლში ჯვრის უღელტეხილის მწვერვალიდან დაახლოებით 300 მ-ზე. " +
-      "ფხვიერი ქვისა და ხრეშის ნამსხვრევები — მოხვევაში შეჭიდება მკვეთრად შემცირებულია. " +
-      "მაქს. 35 კმ/სთ.",
-    severity:    "high",
-    radius:      400,
-    verified:    true,
-    reportedAt:  new Date(Date.now() - 4  * 3_600_000).toISOString(),
-    expiresAt:   new Date(Date.now() + 72 * 3_600_000).toISOString(),
+      "მეწყრული ნარჩენები ორივე ზოლში ჯვრის უღელტეხილიდან 300 მ-ზე. მაქს. 35 კმ/სთ.",
+    severity: "high", radius: 400, verified: true,
+    reportedAt: new Date(Date.now() - 4 * 3_600_000).toISOString(),
+    expiresAt:  new Date(Date.now() + 72 * 3_600_000).toISOString(),
   },
   {
-    id:          "a-002",
-    type:        "camera",
-    lat:         41.786,
-    lng:         45.103,
+    id: "a-002", type: "camera",
+    lat: 41.786, lng: 45.103,
     description:
-      "ფიქსირებული სიჩქარის კამერა თბილისი-კახეთის სახელმწიფო გზაზე (E60), " +
-      "საგარეჯოს გვერდის ავლის შესახვევზე. ლიმიტი 90 კმ/სთ, კამერა 24/7 მუშაობს.",
-    severity:    "low",
-    radius:      150,
-    verified:    true,
-    reportedAt:  new Date(Date.now() - 30 * 86_400_000).toISOString(),
-    expiresAt:   null,
+      "ფიქსირებული კამერა E60-ზე, საგარეჯოს გვერდის ავლის შესახვევზე. 90 კმ/სთ, 24/7.",
+    severity: "low", radius: 150, verified: true,
+    reportedAt: new Date(Date.now() - 30 * 86_400_000).toISOString(),
+    expiresAt:  null,
   },
   {
-    id:          "a-003",
-    type:        "work",
-    lat:         42.706,
-    lng:         42.395,
+    id: "a-003", type: "work",
+    lat: 42.706, lng: 42.395,
     description:
-      "ხიდის გამაგრების სამუშაოები ენგურის კაშხლის გზაზე. ერთი ზოლი, " +
-      "მონაცვლეობითი მოძრაობა. 20–40 წუთის დაგვიანება სამუშაო დღეებში 08:00–18:00.",
-    severity:    "medium",
-    radius:      1_200,
-    verified:    true,
-    reportedAt:  new Date(Date.now() - 5 * 86_400_000).toISOString(),
-    expiresAt:   new Date(Date.now() + 45 * 86_400_000).toISOString(),
+      "ხიდის სამუშაოები ენგურის კაშხლის გზაზე. ერთი ზოლი, 20–40 წუთის დაგვიანება.",
+    severity: "medium", radius: 1_200, verified: true,
+    reportedAt: new Date(Date.now() - 5 * 86_400_000).toISOString(),
+    expiresAt:  new Date(Date.now() + 45 * 86_400_000).toISOString(),
   },
   {
-    id:          "a-004",
-    type:        "danger",
-    lat:         42.536,
-    lng:         44.471,
+    id: "a-004", type: "danger",
+    lat: 42.536, lng: 44.471,
     description:
-      "ჯვრის უღელტეხილი — უკიდურესი სიფრთხილე სველ/ყინვიან პირობებში. " +
-      "ბრმა სერპანტინები 2 379 მ სიმაღლეზე, ჩრდილოეთ პირზე მოაჯირი არ არის. " +
-      "ამინდის პროგნოზი სავალდებულოა ასვლამდე.",
-    severity:    "high",
-    radius:      800,
-    verified:    true,
-    reportedAt:  new Date(Date.now() - 60 * 86_400_000).toISOString(),
-    expiresAt:   null,
+      "ჯვრის უღელტეხილი — ბრმა სერპანტინები 2 379 მ-ზე. მოაჯირი არ არის ჩრდილოეთ პირზე.",
+    severity: "high", radius: 800, verified: true,
+    reportedAt: new Date(Date.now() - 60 * 86_400_000).toISOString(),
+    expiresAt:  null,
   },
   {
-    id:          "a-005",
-    type:        "gravel",
-    lat:         41.755,
-    lng:         43.530,
-    description:
-      "ხრეში ბორჯომი-ბაკურიანის გზაზე, კმ 14–18 შორის. " +
-      "სარემონტო სატვირთო ავტომობილები მუშაობენ — ქვა სატრანსპორტო ნაკადიდან ტყდება.",
-    severity:    "medium",
-    radius:      2_500,
-    verified:    false,
-    reportedAt:  new Date(Date.now() - 90 * 60_000).toISOString(),
-    expiresAt:   new Date(Date.now() + 48 * 3_600_000).toISOString(),
-  },
-  {
-    id:          "a-006",
-    type:        "work",
-    lat:         41.693,
-    lng:         44.880,
-    description:
-      "თბილისის გვერდის ავლის გზის ასფალტის სამუშაოები — გამოსასვლელი მარჯვენა ზოლი " +
-      "დაკეტილია. ვიწრო საპირისპირო ნაკადი. ავტომობილის სიჩქარე 60 კმ/სთ. " +
-      "ზოლი ვიწროა — მაღალი სახელურების მქონე ბიკერებს — სიფრთხილე.",
-    severity:    "low",
-    radius:      3_000,
-    verified:    true,
-    reportedAt:  new Date(Date.now() - 10 * 86_400_000).toISOString(),
-    expiresAt:   new Date(Date.now() + 21 * 86_400_000).toISOString(),
+    id: "a-005", type: "gravel",
+    lat: 41.755, lng: 43.530,
+    description: "ხრეში ბორჯომი-ბაკურიანის გზაზე, კმ 14–18. სარემონტო სამუშაოები.",
+    severity: "medium", radius: 2_500, verified: false,
+    reportedAt: new Date(Date.now() - 90 * 60_000).toISOString(),
+    expiresAt:  new Date(Date.now() + 48 * 3_600_000).toISOString(),
   },
 ];
 
@@ -253,91 +343,36 @@ export const MOCK_ALERTS: RoadAlert[] = [
 
 export const MOCK_SPOTS: BikerSpot[] = [
   {
-    id:      "s-001",
-    name:    "Iron Horse თბილისი",
-    type:    "cafe",
-    lat:     41.693,
-    lng:     44.803,
-    address: "კოსტავას ქ. 14, თბილისი 0108",
-    phone:   "+995 32 292 0014",
-    rating:  4.9,
-    verified: true,
+    id: "s-001", name: "Iron Horse თბილისი", type: "cafe",
+    lat: 41.693, lng: 44.803,
+    address: "კოსტავას ქ. 14, თბილისი", phone: "+995 32 292 0014",
+    rating: 4.9, verified: true,
   },
   {
-    id:      "s-002",
-    name:    "ანანურის პანორამა",
-    type:    "viewpoint",
-    lat:     42.178,
-    lng:     44.671,
-    address: "საქართველოს სამხედრო გზა, კმ 72",
-    phone:   undefined,
-    rating:  4.7,
-    verified: true,
+    id: "s-002", name: "ანანურის პანორამა", type: "viewpoint",
+    lat: 42.178, lng: 44.671,
+    address: "სამხედრო გზა, კმ 72", rating: 4.7, verified: true,
   },
   {
-    id:      "s-003",
-    name:    "სტეფანწმინდის ბიკერ-პოინტი",
-    type:    "cafe",
-    lat:     42.657,
-    lng:     44.654,
-    address: "ყაზბეგის ცენტრალური მოედანი 1, სტეფანწმინდა",
-    phone:   "+995 599 00 1234",
-    rating:  4.8,
-    verified: true,
+    id: "s-003", name: "სტეფანწმინდის ბიკერ-პოინტი", type: "cafe",
+    lat: 42.657, lng: 44.654,
+    address: "ყაზბეგის ცენტრი 1", phone: "+995 599 00 1234",
+    rating: 4.8, verified: true,
   },
   {
-    id:      "s-004",
-    name:    "ზუგდიდის ბოლო გაჩერება — საწვავი",
-    type:    "fuel",
-    lat:     42.509,
-    lng:     41.876,
-    address: "სვანეთის გზა, ზუგდიდის გარეუბანი",
-    phone:   undefined,
-    rating:  4.2,
-    verified: true,
+    id: "s-004", name: "ზუგდიდის ბოლო გაჩერება", type: "fuel",
+    lat: 42.509, lng: 41.876,
+    address: "სვანეთის გზა, ზუგდიდი", rating: 4.2, verified: true,
   },
   {
-    id:      "s-005",
-    name:    "სიღნაღის პანორამული აივანი",
-    type:    "viewpoint",
-    lat:     41.612,
-    lng:     45.571,
-    address: "ძველი სიღნაღი, კახეთი",
-    phone:   undefined,
-    rating:  4.9,
-    verified: true,
+    id: "s-005", name: "სიღნაღის პანორამული აივანი", type: "viewpoint",
+    lat: 41.612, lng: 45.571,
+    address: "ძველი სიღნაღი, კახეთი", rating: 4.9, verified: true,
   },
   {
-    id:      "s-006",
-    name:    "ბათუმის ბიკერ-ჰაბი",
-    type:    "cafe",
-    lat:     41.641,
-    lng:     41.636,
-    address: "ნინოშვილის ქ. 8, ბათუმი 6000",
-    phone:   "+995 422 271 500",
-    rating:  4.6,
-    verified: true,
-  },
-  {
-    id:      "s-007",
-    name:    "გუდაურის ალპური დასვენების ზონა",
-    type:    "rest_area",
-    lat:     42.473,
-    lng:     44.487,
-    address: "საქართველოს სამხედრო გზა, კმ 133 (გუდაური)",
-    phone:   undefined,
-    rating:  4.1,
-    verified: true,
-  },
-  {
-    id:      "s-008",
-    name:    "ბორჯომის მინერალური წყაროების გაჩერება",
-    type:    "rest_area",
-    lat:     41.839,
-    lng:     43.399,
-    address: "ბორჯომის ცენტრალური პარკი, ბორჯომი",
-    phone:   undefined,
-    rating:  4.5,
-    verified: true,
+    id: "s-006", name: "ბათუმის ბიკერ-ჰაბი", type: "cafe",
+    lat: 41.641, lng: 41.636,
+    address: "ნინოშვილის ქ. 8, ბათუმი", phone: "+995 422 271 500",
+    rating: 4.6, verified: true,
   },
 ];

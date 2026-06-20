@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
+import { Providers } from "@/components/layout/Providers";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -15,13 +16,15 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title:       "GeoMotoRoutes — Georgian Motorcycle Route Planner",
-  description: "Discover premium motorcycle routes across Georgia. Real-time road conditions, gravel warnings, biker-friendly spots, and community-verified alerts.",
-  keywords:    ["motorcycle routes Georgia", "biker Georgia", "Georgian roads", "road conditions Georgia"],
-  authors:     [{ name: "GeoMotoRoutes" }],
+  title:       "GeoMotoRoutes — ქართველი ბიკერების სოციალური ქსელი",
+  description:
+    "საქართველოს მოტოციკლისტების პრემიუმ სოციალური ქსელი. პოულობდეთ " +
+    "მარშრუტებს, ჰყვებოდეთ ამბებს და დაამატეთ რეალური საფრთხეები ინტერაქტიულ რუკაზე.",
+  keywords: ["მოტოციკლი", "georgia motorcycle", "ბიკერი", "GeoMotoRoutes"],
+  authors:  [{ name: "GeoMotoRoutes" }],
   openGraph: {
     title:       "GeoMotoRoutes",
-    description: "Premium motorcycle route platform for Georgia (Caucasus)",
+    description: "ქართველი ბიკერების სოციალური ქსელი",
     type:        "website",
   },
 };
@@ -30,17 +33,19 @@ export const viewport: Viewport = {
   width:        "device-width",
   initialScale: 1,
   maximumScale: 1,
-  themeColor:   "#0b0d11",
+  themeColor:   "#09090b",
 };
 
-interface RootLayoutProps {
+export default function RootLayout({
+  children,
+}: {
   children: React.ReactNode;
-}
-
-export default function RootLayout({ children }: RootLayoutProps): React.ReactElement {
+}): React.ReactElement {
   return (
-    <html lang="en" className={`${geistSans.variable} ${geistMono.variable}`}>
-      <body>{children}</body>
+    <html lang="ka" className={`${geistSans.variable} ${geistMono.variable}`}>
+      <body className="bg-[#09090b] text-zinc-50 antialiased">
+        <Providers>{children}</Providers>
+      </body>
     </html>
   );
 }

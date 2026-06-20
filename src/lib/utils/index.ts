@@ -1,29 +1,17 @@
 import type { AsphaltQuality, DifficultyLevel } from "@/lib/types";
 
-/**
- * Formats a route distance with consistent units.
- * Values < 1 km are shown in metres.
- */
 export function formatDistance(km: number): string {
-  if (km < 1)  return `${Math.round(km * 1_000)} m`;
-  if (km < 10) return `${km.toFixed(1)} km`;
-  return `${Math.round(km)} km`;
+  if (km < 1)  return `${Math.round(km * 1_000)} მ`;
+  if (km < 10) return `${km.toFixed(1)} კმ`;
+  return `${Math.round(km)} კმ`;
 }
 
-/**
- * Converts minutes to a human-readable duration.
- * 90 → "1h 30min", 45 → "45 min", 120 → "2h"
- */
 export function formatDuration(minutes: number): string {
-  if (minutes < 60) return `${minutes} min`;
-  const h   = Math.floor(minutes / 60);
-  const min = minutes % 60;
-  return min === 0 ? `${h}h` : `${h}h ${min}min`;
+  if (minutes < 60) return `${minutes} წთ`;
+  const h = Math.floor(minutes / 60), m = minutes % 60;
+  return m === 0 ? `${h} სთ` : `${h} სთ ${m} წთ`;
 }
 
-/**
- * Maps a DifficultyLevel to a Tailwind text-colour class.
- */
 export function getDifficultyColour(level: DifficultyLevel): string {
   const map: Record<DifficultyLevel, string> = {
     beginner:     "text-green-400",
@@ -34,30 +22,24 @@ export function getDifficultyColour(level: DifficultyLevel): string {
   return map[level];
 }
 
-/**
- * Returns a short human-readable label for an asphalt quality value.
- */
 export function getAsphaltQualityLabel(quality: AsphaltQuality): string {
   const labels: Record<AsphaltQuality, string> = {
-    excellent: "Excellent surface",
-    good:      "Good surface",
-    fair:      "Fair — some wear",
-    poor:      "Poor — caution",
-    unpaved:   "Unpaved / gravel",
+    excellent: "შესანიშნავი ზედაპირი",
+    good:      "კარგი ზედაპირი",
+    fair:      "დამაკმაყოფილებელი",
+    poor:      "ცუდი — სიფრთხილე",
+    unpaved:   "ასფალტის გარეშე",
   };
   return labels[quality];
 }
 
-/**
- * Clamps a numeric value within [min, max].
- */
 export function clamp(value: number, min: number, max: number): number {
   return Math.min(Math.max(value, min), max);
 }
 
 /**
- * Returns a human-readable relative-time string for an ISO 8601 timestamp.
- * e.g. "Just now", "14m ago", "3h ago", "5d ago"
+ * Returns a Georgian relative-time string.
+ * e.g. "ახლახანს", "14 წ. წინ", "3 სთ. წინ", "5 დ. წინ"
  */
 export function timeAgo(isoString: string): string {
   const diff  = Date.now() - new Date(isoString).getTime();
@@ -65,15 +47,14 @@ export function timeAgo(isoString: string): string {
   const hours = Math.floor(diff / 3_600_000);
   const days  = Math.floor(diff / 86_400_000);
 
-  if (mins  < 2)  return "Just now";
-  if (mins  < 60) return `${mins}m ago`;
-  if (hours < 24) return `${hours}h ago`;
-  return `${days}d ago`;
+  if (mins  < 2)  return "ახლახანს";
+  if (mins  < 60) return `${mins} წ. წინ`;
+  if (hours < 24) return `${hours} სთ. წინ`;
+  return `${days} დ. წინ`;
 }
 
 /**
- * Lightweight class-name merger — filters out falsy values.
- * Usage: cn("base", condition && "extra", undefined)
+ * Lightweight className merger.
  */
 export function cn(...classes: (string | false | null | undefined)[]): string {
   return classes.filter(Boolean).join(" ");

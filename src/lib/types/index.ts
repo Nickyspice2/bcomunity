@@ -14,26 +14,18 @@ export interface BoundingBox {
 
 // ─── Route ────────────────────────────────────────────────────────────────────
 
-/**
- * Rider-perceived difficulty of the road — based on surface quality,
- * elevation change, and technical sections, not vehicle type.
- */
 export type DifficultyLevel =
   | "beginner"
   | "intermediate"
   | "advanced"
   | "extreme";
 
-/**
- * Physical condition of the riding surface at time of last verification.
- * Determines icon styling and filter chip colour on the map.
- */
 export type AsphaltQuality =
-  | "excellent"   // newly paved, smooth, full lane markings
-  | "good"        // maintained, minor cracks, grippy
-  | "fair"        // visible wear, patched sections, caution advised
-  | "poor"        // significant damage, potholes, reduced speed required
-  | "unpaved";    // gravel/dirt surface — off-road capable bike recommended
+  | "excellent"
+  | "good"
+  | "fair"
+  | "poor"
+  | "unpaved";
 
 export interface Route {
   id:             string;
@@ -41,11 +33,9 @@ export interface Route {
   description:    string;
   difficulty:     DifficultyLevel;
   asphaltQuality: AsphaltQuality;
-  /** Ordered array of waypoints defining the polyline on the map. */
   coordinates:    Coordinate[];
   distanceKm:     number;
   durationMin:    number;
-  /** Total elevation gain in metres over the full route. */
   elevationGain:  number;
   region:         string;
   tags:           string[];
@@ -55,63 +45,42 @@ export interface Route {
 
 // ─── Road alert ───────────────────────────────────────────────────────────────
 
-/**
- * Four alert categories surfaced to riders on the map.
- * Kept intentionally narrow — covers the highest-impact hazards for motorcyclists.
- */
-export type AlertType =
-  | "gravel"    // loose gravel spread across lane(s)
-  | "camera"    // fixed speed enforcement camera
-  | "work"      // active road construction / lane closures
-  | "danger";   // general high-risk section (hairpins, unstable surface, landslide)
-
+export type AlertType     = "gravel" | "camera" | "work" | "danger";
 export type AlertSeverity = "low" | "medium" | "high";
 
 export interface RoadAlert {
   id:          string;
   type:        AlertType;
-  /** WGS-84 decimal latitude of the alert point. */
   lat:         number;
-  /** WGS-84 decimal longitude of the alert point. */
   lng:         number;
   description: string;
   severity:    AlertSeverity;
-  /** Radius in metres for the area-of-effect circle rendered on the map. */
   radius:      number;
   verified:    boolean;
-  reportedAt:  string;   // ISO 8601
+  reportedAt:  string;
   expiresAt:   string | null;
 }
 
 // ─── Biker spot ───────────────────────────────────────────────────────────────
 
 export type SpotType =
-  | "cafe"
-  | "fuel"
-  | "viewpoint"
-  | "rest_area"
-  | "mechanic"
-  | "hotel";
+  | "cafe" | "fuel" | "viewpoint" | "rest_area" | "mechanic" | "hotel";
 
 export interface BikerSpot {
   id:       string;
   name:     string;
   type:     SpotType;
-  /** WGS-84 decimal latitude. */
   lat:      number;
-  /** WGS-84 decimal longitude. */
   lng:      number;
   address?: string;
   phone?:   string;
-  /** Average rating 1–5. */
   rating?:  number;
   verified: boolean;
 }
 
-// ─── Active filter state ──────────────────────────────────────────────────────
+// ─── Filter state ─────────────────────────────────────────────────────────────
 
 export interface FilterState {
-  /** Which alert types are currently visible on the map. */
   alertTypes:   AlertType[];
   difficulties: DifficultyLevel[];
   spotTypes:    SpotType[];
@@ -128,4 +97,69 @@ export interface MapViewState {
   zoom:    number;
   bounds:  BoundingBox | null;
   isReady: boolean;
+}
+
+// ─── Social — Biker user ──────────────────────────────────────────────────────
+
+/**
+ * Public-facing profile of a biker in the social hub.
+ * `avatarColor` is a CSS colour string used to generate the letter-avatar.
+ */
+export interface BikerUser {
+  id:              string;
+  name:            string;
+  username:        string;
+  motorcycleModel: string;
+  avatarColor:     string;
+  isVerified:      boolean;
+  followersCount:  number;
+  rideCount:       number;
+}
+
+// ─── Social — Post ────────────────────────────────────────────────────────────
+
+export interface BikerPost {
+  id:           string;
+  author:       BikerUser;
+  content:      string;
+  /** Optional reference to a Route id — shows "მარშრუტის ნახვა" button. */
+  routeRef?:    string;
+  likeCount:    number;
+  commentCount: number;
+  createdAt:    string;
+  isLiked:      boolean;
+  tags:         string[];
+}
+
+// ─── Social — Group ride ──────────────────────────────────────────────────────
+
+export type RidePace = "slow" | "medium" | "fast";
+
+export interface GroupRide {
+  id:              string;
+  name:            string;
+  destination:     string;
+  gatheringPoint:  string;
+  gatheringTime:   string; // ISO 8601
+  pace:            RidePace;
+  description:     string;
+  organizer:       BikerUser;
+  joinedRiders:    BikerUser[];
+  maxRiders:       number;
+  routeRef?:       string;
+}
+
+// ─── Profile — Motorcycle garage ─────────────────────────────────────────────
+
+export interface GarageMotorcycle {
+  id:            string;
+  brand:         string;
+  model:         string;
+  year:          number;
+  modifications: string[];
+  stats: {
+    totalKm:          number;
+    routesCompleted:  number;
+    alertsSubmitted:  number;
+  };
 }
