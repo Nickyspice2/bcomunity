@@ -1,6 +1,6 @@
 // ─── Geographic primitives ────────────────────────────────────────────────────
 
-export interface LatLng {
+export interface Coordinate {
   lat: number;
   lng: number;
 }
@@ -8,101 +8,124 @@ export interface LatLng {
 export interface BoundingBox {
   north: number;
   south: number;
-  east: number;
-  west: number;
+  east:  number;
+  west:  number;
 }
 
-// ─── Route domain ─────────────────────────────────────────────────────────────
+// ─── Route ────────────────────────────────────────────────────────────────────
 
-export type RoadSurfaceType = "asphalt_new" | "asphalt_old" | "gravel" | "dirt" | "cobblestone";
-export type DifficultyLevel  = "beginner" | "intermediate" | "advanced" | "extreme";
-export type RouteStatus      = "verified" | "unverified" | "reported" | "closed";
+/**
+ * Rider-perceived difficulty of the road — based on surface quality,
+ * elevation change, and technical sections, not vehicle type.
+ */
+export type DifficultyLevel =
+  | "beginner"
+  | "intermediate"
+  | "advanced"
+  | "extreme";
+
+/**
+ * Physical condition of the riding surface at time of last verification.
+ * Determines icon styling and filter chip colour on the map.
+ */
+export type AsphaltQuality =
+  | "excellent"   // newly paved, smooth, full lane markings
+  | "good"        // maintained, minor cracks, grippy
+  | "fair"        // visible wear, patched sections, caution advised
+  | "poor"        // significant damage, potholes, reduced speed required
+  | "unpaved";    // gravel/dirt surface — off-road capable bike recommended
 
 export interface Route {
-  id:           string;
-  name:         string;
-  description:  string;
-  difficulty:   DifficultyLevel;
-  surface:      RoadSurfaceType;
-  status:       RouteStatus;
-  distanceKm:   number;
-  durationMin:  number;
-  elevationGain: number;
-  waypoints:    LatLng[];
-  startPoint:   LatLng;
-  endPoint:     LatLng;
-  tags:         string[];
-  region:       string;
-  createdAt:    string;
-  updatedAt:    string;
-  likeCount:    number;
-  rideCount:    number;
+  id:             string;
+  name:           string;
+  description:    string;
+  difficulty:     DifficultyLevel;
+  asphaltQuality: AsphaltQuality;
+  /** Ordered array of waypoints defining the polyline on the map. */
+  coordinates:    Coordinate[];
+  distanceKm:     number;
+  durationMin:    number;
+  /** Total elevation gain in metres over the full route. */
+  elevationGain:  number;
+  region:         string;
+  tags:           string[];
+  likeCount:      number;
+  rideCount:      number;
 }
 
-// ─── Road condition alerts ────────────────────────────────────────────────────
+// ─── Road alert ───────────────────────────────────────────────────────────────
 
-export type AlertSeverity = "low" | "medium" | "high" | "critical";
-export type AlertCategory =
-  | "new_asphalt"
-  | "gravel_hazard"
-  | "speed_camera"
-  | "roadworks"
-  | "accident"
-  | "fuel_station"
-  | "biker_cafe";
+/**
+ * Four alert categories surfaced to riders on the map.
+ * Kept intentionally narrow — covers the highest-impact hazards for motorcyclists.
+ */
+export type AlertType =
+  | "gravel"    // loose gravel spread across lane(s)
+  | "camera"    // fixed speed enforcement camera
+  | "work"      // active road construction / lane closures
+  | "danger";   // general high-risk section (hairpins, unstable surface, landslide)
+
+export type AlertSeverity = "low" | "medium" | "high";
 
 export interface RoadAlert {
   id:          string;
-  category:    AlertCategory;
-  severity:    AlertSeverity;
-  title:       string;
+  type:        AlertType;
+  /** WGS-84 decimal latitude of the alert point. */
+  lat:         number;
+  /** WGS-84 decimal longitude of the alert point. */
+  lng:         number;
   description: string;
-  location:    LatLng;
-  radius:      number;   // metres — display area of effect on map
-  reportedAt:  string;
-  expiresAt:   string | null;
-  upvotes:     number;
+  severity:    AlertSeverity;
+  /** Radius in metres for the area-of-effect circle rendered on the map. */
+  radius:      number;
   verified:    boolean;
+  reportedAt:  string;   // ISO 8601
+  expiresAt:   string | null;
 }
 
-// ─── Biker-friendly spots ─────────────────────────────────────────────────────
+// ─── Biker spot ───────────────────────────────────────────────────────────────
 
-export type SpotCategory = "cafe" | "fuel" | "rest_area" | "viewpoint" | "mechanic" | "hotel";
+export type SpotType =
+  | "cafe"
+  | "fuel"
+  | "viewpoint"
+  | "rest_area"
+  | "mechanic"
+  | "hotel";
 
 export interface BikerSpot {
-  id:          string;
-  name:        string;
-  category:    SpotCategory;
-  description: string;
-  location:    LatLng;
-  address:     string;
-  phone:       string | null;
-  website:     string | null;
-  openHours:   string | null;
-  rating:      number;
-  reviewCount: number;
-  amenities:   string[];
-  verified:    boolean;
+  id:       string;
+  name:     string;
+  type:     SpotType;
+  /** WGS-84 decimal latitude. */
+  lat:      number;
+  /** WGS-84 decimal longitude. */
+  lng:      number;
+  address?: string;
+  phone?:   string;
+  /** Average rating 1–5. */
+  rating?:  number;
+  verified: boolean;
 }
 
-// ─── Filter state ─────────────────────────────────────────────────────────────
+// ─── Active filter state ──────────────────────────────────────────────────────
 
 export interface FilterState {
-  alertCategories: AlertCategory[];
-  difficulties:    DifficultyLevel[];
-  surfaces:        RoadSurfaceType[];
-  spotCategories:  SpotCategory[];
-  showRoutes:      boolean;
-  showAlerts:      boolean;
-  showSpots:       boolean;
-  searchQuery:     string;
+  /** Which alert types are currently visible on the map. */
+  alertTypes:   AlertType[];
+  difficulties: DifficultyLevel[];
+  spotTypes:    SpotType[];
+  showRoutes:   boolean;
+  showAlerts:   boolean;
+  showSpots:    boolean;
+  searchQuery:  string;
 }
 
-// ─── Map view state ───────────────────────────────────────────────────────────
+// ─── Map viewport state ───────────────────────────────────────────────────────
 
 export interface MapViewState {
-  center:   LatLng;
-  zoom:     number;
-  bounds:   BoundingBox | null;
-  isReady:  boolean;
+  center:  Coordinate;
+  zoom:    number;
+  bounds:  BoundingBox | null;
+  isReady: boolean;
 }
