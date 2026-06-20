@@ -1,4 +1,5 @@
 import { SkeletonBlock } from "@/components/ui/SkeletonBlock";
+import { KA } from "@/lib/i18n/ka";
 
 /**
  * Shown while the Leaflet map bundle is loading (dynamic import).
@@ -9,7 +10,7 @@ export function MapSkeleton(): React.ReactElement {
     <div
       className="relative flex h-full w-full items-center justify-center overflow-hidden"
       style={{ backgroundColor: "var(--color-surface-base)" }}
-      aria-label="Map loading"
+      aria-label={KA.mapInitialising}
       aria-busy="true"
     >
       {/* Simulated map grid lines */}
@@ -55,8 +56,8 @@ export function MapSkeleton(): React.ReactElement {
           </svg>
         </div>
 
-        <p className="text-sm font-medium text-zinc-400">Initialising map…</p>
-        <p className="text-xs text-zinc-600">Loading Georgian road network</p>
+        <p className="text-sm font-medium text-zinc-400">{KA.mapInitialising}</p>
+        <p className="text-xs text-zinc-600">{KA.mapLoadingNet}</p>
       </div>
     </div>
   );

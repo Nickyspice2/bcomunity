@@ -13,6 +13,7 @@ import {
 import type { ReactElement } from "react";
 import type { AlertType, DifficultyLevel, FilterState, SpotType } from "@/lib/types";
 import { ALERT_TYPE_META, DIFFICULTY_META, SPOT_TYPE_META } from "@/lib/constants";
+import { KA } from "@/lib/i18n/ka";
 import { SidebarSection }   from "./SidebarSection";
 import { FilterToggleChip } from "./FilterToggleChip";
 import { LayerToggleRow }   from "./LayerToggleRow";
@@ -45,9 +46,18 @@ export function Sidebar({
   onToggleSpots,
   onResetFilters,
 }: SidebarProps): ReactElement {
-  const alertTypes    = Object.keys(ALERT_TYPE_META)   as AlertType[];
-  const difficulties  = Object.keys(DIFFICULTY_META)   as DifficultyLevel[];
-  const spotTypes     = Object.keys(SPOT_TYPE_META)    as SpotType[];
+  const alertTypes   = Object.keys(ALERT_TYPE_META)  as AlertType[];
+  const difficulties = Object.keys(DIFFICULTY_META)  as DifficultyLevel[];
+  const spotTypes    = Object.keys(SPOT_TYPE_META)   as SpotType[];
+
+  // Static featured route list — kept in Sidebar since it's presentational
+  const featuredRoutes = [
+    { id: "r-001", name: "სამხედრო გზა",       region: "მცხეთა-მთიანეთი",  km: 148, diff: "რთული"      },
+    { id: "r-002", name: "გომბორის უღელტეხილი", region: "კახეთი",           km: 102, diff: "საშუალო"    },
+    { id: "r-003", name: "სვანეთის გზა",         region: "სვანეთი",          km: 132, diff: "ექსტრემ."   },
+    { id: "r-004", name: "აჭარის სანაპირო",      region: "აჭარა",            km: 68,  diff: "მარტივი"    },
+    { id: "r-005", name: "ბორჯომის ხეობა",       region: "სამცხე-ჯავახეთი", km: 88,  diff: "საშუალო"    },
+  ];
 
   return (
     <>
@@ -62,7 +72,7 @@ export function Sidebar({
 
       <aside
         role="complementary"
-        aria-label="Route and map filters"
+        aria-label={KA.filters}
         className={cn(
           "fixed left-0 top-14 z-40 h-[calc(100dvh-3.5rem)]",
           "w-80 flex flex-col",
@@ -76,10 +86,10 @@ export function Sidebar({
         <div className="flex h-12 shrink-0 items-center justify-between border-b border-[var(--color-surface-border)] px-4">
           <div className="flex items-center gap-2">
             <Map size={15} className="text-amber-400" />
-            <span className="text-sm font-semibold text-zinc-200">Filters</span>
+            <span className="text-sm font-semibold text-zinc-200">{KA.filters}</span>
             {activeFilterCount > 0 && (
               <span className="rounded-full bg-amber-500/20 px-2 py-0.5 text-[10px] font-bold text-amber-400">
-                {activeFilterCount} active
+                {activeFilterCount} {KA.activeCount}
               </span>
             )}
           </div>
@@ -89,16 +99,16 @@ export function Sidebar({
               <button
                 type="button"
                 onClick={onResetFilters}
-                title="Reset all filters"
+                title={KA.resetFilters}
                 className="flex items-center gap-1.5 rounded-lg px-2 py-1.5 text-[11px] font-medium text-zinc-500 hover:bg-white/5 hover:text-amber-400 transition-colors"
               >
                 <RotateCcw size={11} />
-                Reset
+                {KA.resetFilters}
               </button>
             )}
             <button
               type="button"
-              aria-label="Close filters"
+              aria-label={KA.close}
               onClick={onClose}
               className="rounded-lg p-1.5 text-zinc-500 hover:bg-white/5 hover:text-zinc-300 transition-colors md:hidden"
             >
@@ -111,23 +121,23 @@ export function Sidebar({
         <div className="flex-1 overflow-y-auto overscroll-contain">
 
           {/* Layer visibility toggles */}
-          <SidebarSection title="Map Layers" icon={<Map size={14} />} defaultOpen={true}>
+          <SidebarSection title={KA.mapLayers} icon={<Map size={14} />} defaultOpen={true}>
             <LayerToggleRow
-              label="Routes"
+              label={KA.routes}
               active={filters.showRoutes}
               icon={<Navigation size={16} />}
               color="#f59e0b"
               onToggle={onToggleRoutes}
             />
             <LayerToggleRow
-              label="Road Alerts"
+              label={KA.roadAlerts}
               active={filters.showAlerts}
               icon={<TriangleAlert size={16} />}
               color="#ef4444"
               onToggle={onToggleAlerts}
             />
             <LayerToggleRow
-              label="Biker Spots"
+              label={KA.bikerSpots}
               active={filters.showSpots}
               icon={<Coffee size={16} />}
               color="#fb923c"
@@ -137,7 +147,7 @@ export function Sidebar({
 
           {/* Road alert type filters */}
           <SidebarSection
-            title="Road Alerts"
+            title={KA.roadAlertsSection}
             icon={<TriangleAlert size={14} />}
             defaultOpen={true}
             badge={filters.alertTypes.length}
@@ -160,7 +170,7 @@ export function Sidebar({
 
           {/* Route difficulty filters */}
           <SidebarSection
-            title="Difficulty"
+            title={KA.difficulty}
             icon={<Mountain size={14} />}
             defaultOpen={false}
             badge={filters.difficulties.length}
@@ -183,7 +193,7 @@ export function Sidebar({
 
           {/* Biker spot type filters */}
           <SidebarSection
-            title="Spots & Services"
+            title={KA.spotsServices}
             icon={<Coffee size={14} />}
             defaultOpen={false}
             badge={filters.spotTypes.length}
@@ -206,14 +216,12 @@ export function Sidebar({
           </SidebarSection>
 
           {/* Featured routes quick list */}
-          <SidebarSection title="Featured Routes" icon={<Route size={14} />} defaultOpen={true}>
-            {[
-              { id: "r-001", name: "Military Highway",   region: "Mtskheta-Mtianeti", km: 148, diff: "Advanced"  },
-              { id: "r-002", name: "Gombori Pass",        region: "Kakheti",           km: 102, diff: "Intermed." },
-              { id: "r-003", name: "Svaneti Road",        region: "Svaneti",           km: 132, diff: "Extreme"   },
-              { id: "r-004", name: "Adjara Coastal Loop", region: "Adjara",            km: 68,  diff: "Beginner"  },
-              { id: "r-005", name: "Borjomi Gorge",       region: "Samtskhe-Javakheti",km: 88,  diff: "Intermed." },
-            ].map((route) => (
+          <SidebarSection
+            title={KA.featuredRoutes}
+            icon={<Route size={14} />}
+            defaultOpen={true}
+          >
+            {featuredRoutes.map((route) => (
               <button
                 type="button"
                 key={route.id}
@@ -232,7 +240,7 @@ export function Sidebar({
                   <span className="flex items-center gap-2 mt-0.5">
                     <span className="text-[11px] text-zinc-600">{route.region}</span>
                     <span className="text-[11px] text-zinc-700" aria-hidden="true">·</span>
-                    <span className="text-[11px] text-zinc-600">{route.km} km</span>
+                    <span className="text-[11px] text-zinc-600">{route.km} {KA.kmSuffix}</span>
                   </span>
                 </span>
                 <span className="shrink-0 text-[10px] font-medium text-amber-500/70 pt-0.5">
@@ -246,9 +254,9 @@ export function Sidebar({
         {/* ── Footer ── */}
         <div className="shrink-0 border-t border-[var(--color-surface-border)] px-4 py-3">
           <p className="text-[11px] text-zinc-600 leading-relaxed">
-            Covers{" "}
-            <span className="text-zinc-500 font-medium">all 9 regions</span>{" "}
-            of Georgia. Community-verified data updated in real time.
+            {KA.sidebarFooter}{" "}
+            <span className="text-zinc-500 font-medium">{KA.allNineRegions}</span>.{" "}
+            {KA.communityVerified}
           </p>
         </div>
       </aside>

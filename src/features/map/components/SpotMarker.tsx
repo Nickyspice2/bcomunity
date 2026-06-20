@@ -5,6 +5,7 @@ import L from "leaflet";
 import { renderToStaticMarkup } from "react-dom/server";
 import type { BikerSpot } from "@/lib/types";
 import { SPOT_TYPE_META } from "@/lib/constants";
+import { KA } from "@/lib/i18n/ka";
 
 interface SpotMarkerProps {
   spot: BikerSpot;
@@ -40,7 +41,7 @@ function createSpotIcon(emoji: string, color: string): L.DivIcon {
   });
 }
 
-/** Star rating string — e.g. 4.5 → "★★★★½☆" approximated to nearest whole. */
+/** Star string approximated to nearest whole star (e.g. 4.7 → ★★★★★). */
 function buildStarString(rating: number): string {
   const full = Math.round(rating);
   return "★".repeat(full) + "☆".repeat(Math.max(0, 5 - full));
@@ -67,7 +68,7 @@ export function SpotMarker({ spot }: SpotMarkerProps): React.ReactElement {
             {spot.verified && (
               <span
                 className="ml-auto shrink-0 text-[10px] font-medium text-green-400 mt-0.5"
-                title="Community verified"
+                title={KA.verified}
               >
                 ✓
               </span>
@@ -79,7 +80,7 @@ export function SpotMarker({ spot }: SpotMarkerProps): React.ReactElement {
               <span
                 className="text-xs tracking-widest"
                 style={{ color: meta.color }}
-                aria-label={`${spot.rating} out of 5`}
+                aria-label={`${spot.rating} — 5-დან`}
               >
                 {buildStarString(spot.rating)}
               </span>

@@ -5,6 +5,7 @@ import L from "leaflet";
 import { renderToStaticMarkup } from "react-dom/server";
 import type { RoadAlert } from "@/lib/types";
 import { ALERT_TYPE_META, ALERT_SEVERITY_META } from "@/lib/constants";
+import { KA } from "@/lib/i18n/ka";
 import { timeAgo } from "@/lib/utils";
 
 interface AlertMarkerProps {
@@ -13,10 +14,13 @@ interface AlertMarkerProps {
 
 /**
  * Builds a custom SVG DivIcon from design-system colour tokens.
- * The pin shape encodes alert type via colour; a pulsing circle shadow
- * is added for high-severity alerts via CSS.
+ * High-severity alerts receive a CSS pulse-glow animation.
  */
-function createAlertIcon(color: string, bgColor: string, severity: RoadAlert["severity"]): L.DivIcon {
+function createAlertIcon(
+  color:    string,
+  bgColor:  string,
+  severity: RoadAlert["severity"]
+): L.DivIcon {
   const isPulsing = severity === "high";
 
   const svgMarkup = renderToStaticMarkup(
@@ -75,7 +79,10 @@ export function AlertMarker({ alert }: AlertMarkerProps): React.ReactElement {
             <header className="flex items-center gap-2 mb-2.5">
               <span
                 className="inline-flex h-5 w-5 shrink-0 items-center justify-center rounded-full"
-                style={{ backgroundColor: typeMeta.bgColor.replace("0.12", "0.22"), color: typeMeta.color }}
+                style={{
+                  backgroundColor: typeMeta.bgColor.replace("0.12", "0.22"),
+                  color:           typeMeta.color,
+                }}
                 aria-hidden="true"
               >
                 ●
@@ -104,8 +111,8 @@ export function AlertMarker({ alert }: AlertMarkerProps): React.ReactElement {
             <footer className="flex items-center justify-between border-t border-zinc-700/50 pt-2">
               <span className="text-[11px] text-zinc-600">{timeAgo(alert.reportedAt)}</span>
               {alert.verified
-                ? <span className="text-[11px] font-medium text-green-400">✓ Verified</span>
-                : <span className="text-[11px] text-zinc-600">Community report</span>
+                ? <span className="text-[11px] font-medium text-green-400">{KA.verified}</span>
+                : <span className="text-[11px] text-zinc-600">{KA.communityReport}</span>
               }
             </footer>
           </article>

@@ -2,18 +2,23 @@
 
 import { useState, useCallback } from "react";
 import { SlidersHorizontal } from "lucide-react";
-import { TopBar }        from "./TopBar";
-import { Sidebar }       from "@/features/filters/components/Sidebar";
-import { MapView }       from "@/features/map/components/MapView";
-import { useRouteFilters } from "@/features/filters/hooks/useRouteFilters";
-import { useMapState }     from "@/features/map/hooks/useMapState";
-import { useMapBounds }    from "@/features/map/hooks/useMapBounds";
-import { IconButton }      from "@/components/ui/IconButton";
-import { ErrorBoundary }   from "@/components/ui/ErrorBoundary";
-import { cn } from "@/lib/utils";
-import { MOCK_ALERTS } from "@/store/mockData";
+import { AuthProvider }     from "@/features/auth/context/AuthContext";
+import { AuthModal }        from "@/features/auth/components/AuthModal";
+import { TopBar }           from "./TopBar";
+import { Sidebar }          from "@/features/filters/components/Sidebar";
+import { MapView }          from "@/features/map/components/MapView";
+import { useRouteFilters }  from "@/features/filters/hooks/useRouteFilters";
+import { useMapState }      from "@/features/map/hooks/useMapState";
+import { useMapBounds }     from "@/features/map/hooks/useMapBounds";
+import { IconButton }       from "@/components/ui/IconButton";
+import { ErrorBoundary }    from "@/components/ui/ErrorBoundary";
+import { KA }               from "@/lib/i18n/ka";
+import { cn }               from "@/lib/utils";
+import { MOCK_ALERTS }      from "@/store/mockData";
 
-export function DashboardLayout(): React.ReactElement {
+// ─── Inner layout (consumes AuthContext) ──────────────────────────────────────
+
+function DashboardInner(): React.ReactElement {
   const [sidebarOpen, setSidebarOpen] = useState(true);
 
   const {
@@ -98,7 +103,7 @@ export function DashboardLayout(): React.ReactElement {
             )}
           >
             <SlidersHorizontal size={16} strokeWidth={2.5} />
-            Filters
+            {KA.filters}
             {activeFilterCount > 0 && (
               <span className="rounded-full bg-zinc-900/40 px-1.5 py-0.5 text-[10px] font-bold">
                 {activeFilterCount}
@@ -112,7 +117,7 @@ export function DashboardLayout(): React.ReactElement {
           <div className="absolute left-3 top-3 z-[450] hidden md:block animate-fade-up">
             <IconButton
               icon={<SlidersHorizontal size={16} />}
-              label="Open filters"
+              label={KA.openFilters}
               badge={activeFilterCount}
               active={false}
               onClick={toggleSidebar}
@@ -121,6 +126,19 @@ export function DashboardLayout(): React.ReactElement {
           </div>
         )}
       </div>
+
+      {/* Auth modal — subscribes to AuthContext, renders/hides itself */}
+      <AuthModal />
     </div>
+  );
+}
+
+// ─── Public export — wraps everything with the AuthProvider ──────────────────
+
+export function DashboardLayout(): React.ReactElement {
+  return (
+    <AuthProvider>
+      <DashboardInner />
+    </AuthProvider>
   );
 }

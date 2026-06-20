@@ -2,15 +2,16 @@
 
 import { Component, type ErrorInfo, type ReactNode } from "react";
 import { AlertTriangle, RefreshCw } from "lucide-react";
+import { KA } from "@/lib/i18n/ka";
 
 interface Props {
-  children:   ReactNode;
-  fallback?:  ReactNode;
-  context?:   string;
+  children:  ReactNode;
+  fallback?: ReactNode;
+  context?:  string;
 }
 
 interface State {
-  hasError:   boolean;
+  hasError:     boolean;
   errorMessage: string;
 }
 
@@ -35,8 +36,7 @@ export class ErrorBoundary extends Component<Props, State> {
 
   override render(): ReactNode {
     if (!this.state.hasError) return this.props.children;
-
-    if (this.props.fallback) return this.props.fallback;
+    if (this.props.fallback)  return this.props.fallback;
 
     return (
       <div
@@ -46,17 +46,20 @@ export class ErrorBoundary extends Component<Props, State> {
       >
         <div
           className="flex h-14 w-14 items-center justify-center rounded-2xl"
-          style={{ backgroundColor: "rgba(239,68,68,0.1)", border: "1px solid rgba(239,68,68,0.2)" }}
+          style={{
+            backgroundColor: "rgba(239,68,68,0.1)",
+            border:          "1px solid rgba(239,68,68,0.2)",
+          }}
         >
           <AlertTriangle size={24} className="text-red-400" />
         </div>
 
         <div className="text-center">
-          <h2 className="text-base font-semibold text-zinc-200">Something went wrong</h2>
+          <h2 className="text-base font-semibold text-zinc-200">
+            {KA.errorTitle}
+          </h2>
           <p className="mt-1 text-sm text-zinc-500">
-            {this.props.context
-              ? `The ${this.props.context} failed to load.`
-              : "An unexpected error occurred."}
+            {this.props.context === "map" ? KA.errorMapFailed : KA.errorGeneric}
           </p>
           {this.state.errorMessage && (
             <p className="mt-2 rounded-lg bg-red-900/20 px-3 py-1.5 font-mono text-xs text-red-400">
@@ -71,7 +74,7 @@ export class ErrorBoundary extends Component<Props, State> {
           className="flex items-center gap-2 rounded-xl bg-zinc-800 px-4 py-2 text-sm font-medium text-zinc-300 hover:bg-zinc-700 hover:text-zinc-100 transition-colors"
         >
           <RefreshCw size={14} />
-          Try again
+          {KA.errorRetry}
         </button>
       </div>
     );

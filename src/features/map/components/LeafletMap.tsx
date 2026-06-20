@@ -7,8 +7,8 @@ import {
   useMap,
   useMapEvents,
 } from "react-leaflet";
-import type { Map as LeafletMapInstance, LeafletEvent } from "leaflet";
-import type { FilterState } from "@/lib/types";
+import type { Map as LeafletMapInstance, LeafletEvent, LeafletMouseEvent } from "leaflet";
+import type { FilterState, RoadAlert } from "@/lib/types";
 import {
   GEORGIA_CENTER,
   GEORGIA_DEFAULT_ZOOM,
@@ -29,13 +29,18 @@ import { MapControls }   from "./MapControls";
 interface MapEventBridgeProps {
   onReady:        (map: LeafletMapInstance) => void;
   onBoundsChange: (event: LeafletEvent)     => void;
+  onMapClick:     (lat: number, lng: number) => void;
 }
 
 /**
  * Must be rendered inside <MapContainer> to access the Leaflet map context.
- * Bridges the Leaflet instance and bound-change events to our React hooks.
+ * Bridges Leaflet instance events to our React hook callbacks.
+ *
+ * Click coordinates are only forwarded when the user left-clicks the base map,
+ * not when they interact with a marker or popup (those events bubble-stop
+ * at the marker layer so this handler fires correctly on empty areas).
  */
-function MapEventBridge({ onReady, onBoundsChange }: MapEventBridgeProps): null {
+function MapEventBridge({ onReady, onBoundsChange, onMapClick }: MapEventBridgeProps): null {
   const map = useMap() as LeafletMapInstance;
 
   useEffect(() => {
@@ -45,6 +50,9 @@ function MapEventBridge({ onReady, onBoundsChange }: MapEventBridgeProps): null 
   useMapEvents({
     moveend: onBoundsChange,
     zoomend: onBoundsChange,
+    click: (e: LeafletMouseEvent) => {
+      onMapClick(e.latlng.lat, e.latlng.lng);
+    },
   });
 
   return null;
@@ -54,16 +62,21 @@ function MapEventBridge({ onReady, onBoundsChange }: MapEventBridgeProps): null 
 
 interface LeafletMapProps {
   filters:        FilterState;
+  userAlerts:     RoadAlert[];
   onMapReady:     (map: LeafletMapInstance) => void;
   onBoundsChange: (event: LeafletEvent)     => void;
   onResetView:    () => void;
+  /** Called when the user clicks an empty area on the map. */
+  onMapClick:     (lat: number, lng: number) => void;
 }
 
 export function LeafletMap({
   filters,
+  userAlerts,
   onMapReady,
   onBoundsChange,
   onResetView,
+  onMapClick,
 }: LeafletMapProps): React.ReactElement {
   const visibleRoutes = filters.showRoutes
     ? MOCK_ROUTES.filter((r) => filters.difficulties.includes(r.difficulty))
@@ -76,6 +89,10 @@ export function LeafletMap({
   const visibleSpots = filters.showSpots
     ? MOCK_SPOTS.filter((s) => filters.spotTypes.includes(s.type))
     : [];
+
+  // User-created alerts are always visible regardless of current filter state,
+  // giving instant visual confirmation that the report was received.
+  const allAlerts = [...visibleAlerts, ...userAlerts];
 
   return (
     <MapContainer
@@ -95,14 +112,19 @@ export function LeafletMap({
         maxZoom={GEORGIA_MAX_ZOOM}
       />
 
-      <MapEventBridge onReady={onMapReady} onBoundsChange={onBoundsChange} />
+      <MapEventBridge
+        onReady={onMapReady}
+        onBoundsChange={onBoundsChange}
+        onMapClick={onMapClick}
+      />
+
       <MapControls onResetView={onResetView} />
 
       {visibleRoutes.map((route) => (
         <RoutePolyline key={route.id} route={route} />
       ))}
 
-      {visibleAlerts.map((alert) => (
+      {allAlerts.map((alert) => (
         <AlertMarker key={alert.id} alert={alert} />
       ))}
 

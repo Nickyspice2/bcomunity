@@ -3,6 +3,7 @@
 import { Polyline, Popup } from "react-leaflet";
 import type { Route } from "@/lib/types";
 import { DIFFICULTY_META, ASPHALT_QUALITY_META } from "@/lib/constants";
+import { KA } from "@/lib/i18n/ka";
 import { formatDistance, formatDuration } from "@/lib/utils";
 
 interface RoutePolylineProps {
@@ -13,7 +14,7 @@ export function RoutePolyline({ route }: RoutePolylineProps): React.ReactElement
   const diffMeta    = DIFFICULTY_META[route.difficulty];
   const qualityMeta = ASPHALT_QUALITY_META[route.asphaltQuality];
 
-  // Route needs at least two waypoints to form a valid line
+  // Route needs at least two waypoints to form a valid polyline
   if (route.coordinates.length < 2) return <></>;
 
   const positions = route.coordinates.map(
@@ -33,13 +34,12 @@ export function RoutePolyline({ route }: RoutePolylineProps): React.ReactElement
     >
       <Popup>
         <article className="min-w-[230px] max-w-[290px]">
-          {/* Route name + quality badge */}
           <header className="mb-2">
             <h3 className="text-sm font-bold leading-tight text-zinc-100">
               {route.name}
             </h3>
             <p className="text-[11px] mt-0.5" style={{ color: qualityMeta.color }}>
-              {qualityMeta.label} surface
+              {qualityMeta.label} — {KA.surface}
             </p>
           </header>
 
@@ -50,9 +50,9 @@ export function RoutePolyline({ route }: RoutePolylineProps): React.ReactElement
           {/* Stats grid */}
           <div className="grid grid-cols-3 gap-1.5 mb-3">
             {[
-              { label: "Distance", value: formatDistance(route.distanceKm)   },
-              { label: "Duration", value: formatDuration(route.durationMin)  },
-              { label: "Climb",    value: `${route.elevationGain} m`         },
+              { label: KA.distance, value: formatDistance(route.distanceKm)   },
+              { label: KA.duration, value: formatDuration(route.durationMin)  },
+              { label: KA.climb,    value: `${route.elevationGain} მ`         },
             ].map(({ label, value }) => (
               <div
                 key={label}
@@ -65,7 +65,6 @@ export function RoutePolyline({ route }: RoutePolylineProps): React.ReactElement
             ))}
           </div>
 
-          {/* Difficulty + region */}
           <div className="flex items-center justify-between">
             <span
               className="rounded-full px-2.5 py-0.5 text-[11px] font-semibold"
