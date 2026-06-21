@@ -141,6 +141,7 @@ export default eslintConfig;
     "src/app/layout.tsx",
     "src/app/page.tsx",
     "src/app/map/page.tsx",
+    "src/app/marketplace/page.tsx",
     "src/app/profile/page.tsx",
 
     "src/lib/types/index.ts",
@@ -178,6 +179,10 @@ export default eslintConfig;
     "src/features/social/components/PostCard.tsx",
     "src/features/social/components/BikerFeed.tsx",
     "src/features/social/components/GroupRideCard.tsx",
+    "src/features/social/components/ClubCard.tsx",
+
+    "src/features/marketplace/components/ListingCard.tsx",
+    "src/features/marketplace/components/MarketplaceContent.tsx",
 
     "src/features/profile/components/DigitalGarage.tsx",
 
@@ -257,9 +262,10 @@ def write_files() -> None:
     print(textwrap.dedent(f"""
   \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500
   Routes:
-    /           \u2014 Social Hub  (BikerFeed + Group Rides sidebar)
-    /map        \u2014 Interactive Map  (full-screen CartoDB Dark)
-    /profile    \u2014 Digital Garage  (auth-gated)
+    /             \u2014 Social Hub  (Clubs + BikerFeed + Group Rides)
+    /map          \u2014 Interactive Map  (full-screen CartoDB Dark)
+    /marketplace  \u2014 Moto-Marketplace  (bikes / gear / parts)
+    /profile      \u2014 Digital Garage  (auth-gated)
 
   Next steps:
     cd {ROOT}
