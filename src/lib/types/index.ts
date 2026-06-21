@@ -1,97 +1,3 @@
-// ─── Geographic primitives ────────────────────────────────────────────────────
-
-export interface Coordinate {
-  lat: number;
-  lng: number;
-}
-
-export interface BoundingBox {
-  north: number;
-  south: number;
-  east:  number;
-  west:  number;
-}
-
-// ─── Route ────────────────────────────────────────────────────────────────────
-
-export type DifficultyLevel =
-  | "beginner" | "intermediate" | "advanced" | "extreme";
-
-export type AsphaltQuality =
-  | "excellent" | "good" | "fair" | "poor" | "unpaved";
-
-export interface Route {
-  id:             string;
-  name:           string;
-  description:    string;
-  difficulty:     DifficultyLevel;
-  asphaltQuality: AsphaltQuality;
-  coordinates:    Coordinate[];
-  distanceKm:     number;
-  durationMin:    number;
-  elevationGain:  number;
-  region:         string;
-  tags:           string[];
-  likeCount:      number;
-  rideCount:      number;
-}
-
-// ─── Road alert ───────────────────────────────────────────────────────────────
-
-export type AlertType     = "gravel" | "camera" | "work" | "danger";
-export type AlertSeverity = "low" | "medium" | "high";
-
-export interface RoadAlert {
-  id:          string;
-  type:        AlertType;
-  lat:         number;
-  lng:         number;
-  description: string;
-  severity:    AlertSeverity;
-  radius:      number;
-  verified:    boolean;
-  reportedAt:  string;
-  expiresAt:   string | null;
-}
-
-// ─── Biker spot ───────────────────────────────────────────────────────────────
-
-export type SpotType =
-  | "cafe" | "fuel" | "viewpoint" | "rest_area" | "mechanic" | "hotel";
-
-export interface BikerSpot {
-  id:       string;
-  name:     string;
-  type:     SpotType;
-  lat:      number;
-  lng:      number;
-  address?: string;
-  phone?:   string;
-  rating?:  number;
-  verified: boolean;
-}
-
-// ─── Filter state ─────────────────────────────────────────────────────────────
-
-export interface FilterState {
-  alertTypes:   AlertType[];
-  difficulties: DifficultyLevel[];
-  spotTypes:    SpotType[];
-  showRoutes:   boolean;
-  showAlerts:   boolean;
-  showSpots:    boolean;
-  searchQuery:  string;
-}
-
-// ─── Map viewport state ───────────────────────────────────────────────────────
-
-export interface MapViewState {
-  center:  Coordinate;
-  zoom:    number;
-  bounds:  BoundingBox | null;
-  isReady: boolean;
-}
-
 // ─── Social — Biker user ──────────────────────────────────────────────────────
 
 export interface BikerUser {
@@ -111,7 +17,6 @@ export interface BikerPost {
   id:           string;
   author:       BikerUser;
   content:      string;
-  routeRef?:    string;
   likeCount:    number;
   commentCount: number;
   createdAt:    string;
@@ -134,7 +39,6 @@ export interface GroupRide {
   organizer:      BikerUser;
   joinedRiders:   BikerUser[];
   maxRiders:      number;
-  routeRef?:      string;
 }
 
 // ─── Social — Biker club ──────────────────────────────────────────────────────
@@ -146,9 +50,7 @@ export interface BikerClub {
   memberCount: number;
   isVerified:  boolean;
   description: string;
-  /** Dominant bike styles / ride types this club focuses on */
   tags:        string[];
-  /** CSS colour used to generate the initials logo */
   logoColor:   string;
   foundedYear: number;
 }
@@ -172,6 +74,49 @@ export interface MarketplaceListing {
   createdAt:    string;
   isNegotiable: boolean;
   views:        number;
+}
+
+// ─── Hub — Service directory ──────────────────────────────────────────────────
+
+export type ServiceCategory =
+  | "mechanic"
+  | "tires"
+  | "towing"
+  | "parts_store"
+  | "wash";
+
+export interface ServiceProvider {
+  id:              string;
+  name:            string;
+  category:        ServiceCategory;
+  /** Brand / bike-type specialisations (e.g. "Yamaha", "ADV") */
+  specializations: string[];
+  /** Full text address — no coordinates */
+  location:        string;
+  city:            string;
+  phone?:          string;
+  /** 1–5 star rating */
+  rating:          number;
+  reviewCount:     number;
+  isVerified:      boolean;
+  /** List of offered services in Georgian */
+  services:        string[];
+  workingHours:    string;
+}
+
+// ─── Hub — City chat ──────────────────────────────────────────────────────────
+
+export interface ChatMessage {
+  id:        string;
+  author:    BikerUser;
+  content:   string;
+  createdAt: string;
+}
+
+export interface CityRoom {
+  id:       string;
+  city:     string;
+  messages: ChatMessage[];
 }
 
 // ─── Profile — Garage ────────────────────────────────────────────────────────

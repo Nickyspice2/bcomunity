@@ -3,8 +3,8 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
-  Map, LogIn, UserCircle, LogOut, ChevronRight,
-  Bike, ShoppingBag,
+  Bike, LogIn, UserCircle, LogOut, ChevronRight,
+  ShoppingBag, Wrench,
 } from "lucide-react";
 import { useState, useRef, useEffect } from "react";
 import { useAuth } from "@/features/auth/context/AuthContext";
@@ -14,22 +14,22 @@ import { cn } from "@/lib/utils";
 // ─── Navigation tab definition ────────────────────────────────────────────────
 
 interface NavTab {
-  href:  string;
-  label: string;
-  icon?: React.ReactNode;
+  href:   string;
+  label:  string;
+  icon?:  React.ReactNode;
   exact?: boolean;
 }
 
 const NAV_TABS: NavTab[] = [
   { href: "/",            label: KA.navHome,        exact: true },
-  { href: "/map",         label: KA.navMap,         icon: <Map size={13} /> },
   { href: "/marketplace", label: KA.navMarketplace, icon: <ShoppingBag size={13} /> },
+  { href: "/hub",         label: KA.navHub,         icon: <Wrench size={13} /> },
 ];
 
 // ─── Component ────────────────────────────────────────────────────────────────
 
 export function TopBar(): React.ReactElement {
-  const pathname  = usePathname();
+  const pathname = usePathname();
   const { user, isAuthenticated, openModal, logout } = useAuth();
 
   const [profileOpen, setProfileOpen] = useState(false);
@@ -57,7 +57,7 @@ export function TopBar(): React.ReactElement {
         "shadow-[0_1px_0_0_rgba(255,255,255,0.04)]"
       )}
     >
-      {/* ── Left: Logo ── */}
+      {/* ── Logo ── */}
       <Link
         href="/"
         className="flex shrink-0 items-center gap-2.5 group"
@@ -73,7 +73,7 @@ export function TopBar(): React.ReactElement {
           )}
           aria-hidden="true"
         >
-          <Map size={16} className="text-zinc-900" strokeWidth={2.5} />
+          <Bike size={16} className="text-zinc-900" strokeWidth={2.5} />
         </span>
         <span className="hidden sm:flex flex-col leading-none">
           <span className="text-sm font-bold tracking-tight text-zinc-100">
@@ -85,7 +85,7 @@ export function TopBar(): React.ReactElement {
         </span>
       </Link>
 
-      {/* ── Centre: Navigation tabs ── */}
+      {/* ── Centred navigation tabs ── */}
       <nav
         className="absolute left-1/2 -translate-x-1/2 hidden sm:flex items-center gap-0.5 rounded-xl border border-zinc-800/60 bg-zinc-900/60 backdrop-blur-sm p-1"
         aria-label="მთავარი ნავიგაცია"
@@ -120,7 +120,7 @@ export function TopBar(): React.ReactElement {
         })}
       </nav>
 
-      {/* ── Right: Profile / Login ── */}
+      {/* ── Profile / Login ── */}
       <div className="flex items-center gap-2">
         {isAuthenticated && user ? (
           <div ref={profileRef} className="relative">
@@ -174,7 +174,6 @@ export function TopBar(): React.ReactElement {
                     </div>
                   )}
                 </div>
-
                 <Link
                   href="/profile"
                   onClick={() => setProfileOpen(false)}
@@ -183,7 +182,6 @@ export function TopBar(): React.ReactElement {
                   <UserCircle size={15} />
                   {KA.navProfile}
                 </Link>
-
                 <div className="border-t border-zinc-800/60">
                   <button
                     type="button"

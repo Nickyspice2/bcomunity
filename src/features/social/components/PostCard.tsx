@@ -1,8 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import Link from "next/link";
-import { Heart, MessageCircle, Navigation, BadgeCheck } from "lucide-react";
+import { Heart, MessageCircle, BadgeCheck } from "lucide-react";
 import type { BikerPost } from "@/lib/types";
 import { KA } from "@/lib/i18n/ka";
 import { timeAgo, cn } from "@/lib/utils";
@@ -158,20 +157,6 @@ export function PostCard({ post }: PostCardProps): React.ReactElement {
           count={post.commentCount}
         />
 
-        {post.routeRef && (
-          <Link
-            href="/map"
-            className={cn(
-              "ml-auto flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-medium",
-              "text-amber-400 bg-amber-500/10 border border-amber-500/20",
-              "hover:bg-amber-500/18 hover:border-amber-500/35",
-              "transition-all duration-150"
-            )}
-          >
-            <Navigation size={12} />
-            {KA.viewRouteAction}
-          </Link>
-        )}
       </footer>
     </article>
   );

@@ -59,7 +59,7 @@ export class ErrorBoundary extends Component<Props, State> {
             {KA.errorTitle}
           </h2>
           <p className="mt-1 text-sm text-zinc-500">
-            {this.props.context === "map" ? KA.errorMapFailed : KA.errorGeneric}
+            {KA.errorGeneric}
           </p>
           {this.state.errorMessage && (
             <p className="mt-2 rounded-lg bg-red-900/20 px-3 py-1.5 font-mono text-xs text-red-400">
