@@ -1,6 +1,6 @@
 /**
  * Georgian (ქართული) UI string constants — single source of truth.
- * Organised by feature; every user-facing string lives here.
+ * All user-facing text lives here; no magic strings in components.
  */
 export const KA = {
   // ─── App ──────────────────────────────────────────────────────────────────
@@ -8,13 +8,14 @@ export const KA = {
   appSubtitle: "საქართველო",
 
   // ─── Navigation ───────────────────────────────────────────────────────────
-  navHome:       "მთავარი",
-  navMap:        "ინტერაქტიული რუკა",
-  navProfile:    "ჩემი გვერდი",
-  toggleSidebar: "მენიუ",
+  navHome:        "მთავარი",
+  navMap:         "ინტერაქტიული რუკა",
+  navMarketplace: "მოტო-ბაზარი",
+  navProfile:     "ჩემი გვერდი",
+  toggleSidebar:  "მენიუ",
 
   // ─── TopBar ───────────────────────────────────────────────────────────────
-  searchPlaceholder: "მარშრუტების, ბიკერების ძიება…",
+  searchPlaceholder: "მარშრუტების, ბიკერების, ბაზრის ძიება…",
   online:            "ონლაინ",
   offline:           "ოფლაინ",
   mapLayersLabel:    "ფენები",
@@ -26,34 +27,43 @@ export const KA = {
   logout:            "გასვლა",
 
   // ─── Social hub ───────────────────────────────────────────────────────────
-  feedTitle:          "ბიკერ-ლენტა",
-  groupRidesTitle:    "ჯგუფური გასვლები",
-  likeAction:         "ლაიქი",
-  commentAction:      "კომენტარი",
-  viewRouteAction:    "მარშრუტის ნახვა",
-  joinRideAction:     "შეერთება",
-  joinedLabel:        "შეერთებული",
-  paceLabel:          "სიჩქარე",
-  paceSlow:           "ნელი",
-  paceMedium:         "საშუალო",
-  paceFast:           "სწრაფი",
-  ridersCount:        "მონაწილე",
-  gatheringPoint:     "შეკრების ადგილი",
-  gatheringTime:      "შეკრების დრო",
-  noPostsYet:         "ჯერ პოსტები არ არის.",
-  noRidesYet:         "ახლო მომავალში გასვლები არ არის.",
-  loadMore:           "მეტის ჩვენება",
+  feedTitle:       "ბიკერ-ლენტა",
+  groupRidesTitle: "ჯგუფური გასვლები",
+  clubsTitle:      "მოტო-კლუბები",
+  likeAction:      "ლაიქი",
+  commentAction:   "კომენტარი",
+  viewRouteAction: "მარშრუტის ნახვა",
+  joinRideAction:  "შეერთება",
+  joinedLabel:     "შეერთებული",
+  paceLabel:       "სიჩქარე",
+  paceSlow:        "ნელი",
+  paceMedium:      "საშუალო",
+  paceFast:        "სწრაფი",
+  ridersCount:     "მონაწილე",
+  gatheringPoint:  "შეკრების ადგილი",
+  gatheringTime:   "შეკრების დრო",
+  noPostsYet:      "ჯერ პოსტები არ არის.",
+  noRidesYet:      "ახლო მომავალში გასვლები არ არის.",
+
+  // ─── Clubs ────────────────────────────────────────────────────────────────
+  joinClub:         "გაწევრება",
+  joinedClub:       "წევრი ხარ",
+  clubVerified:     "დამოწმებული",
+  clubFounded:      "დაარსდა",
+  clubMemberCount:  "წევრი",
+  noClubsYet:       "კლუბები ჯერ არ არის.",
+  viewAllClubs:     "ყველა კლუბი",
 
   // ─── Map page ─────────────────────────────────────────────────────────────
-  mapAriaLabel:          "საქართველოს მოტო-მარშრუტების ინტერაქტიული რუკა",
-  mapInitialising:       "რუკა იტვირთება…",
-  mapLoadingNet:         "ქსელი იტვირთება",
-  openFilters:           "ფილტრები",
-  resetFilters:          "გასუფთავება",
-  filters:               "ფილტრები",
-  activeCount:           "აქტიური",
+  mapAriaLabel:     "საქართველოს მოტო-მარშრუტების ინტერაქტიული რუკა",
+  mapInitialising:  "რუკა იტვირთება…",
+  mapLoadingNet:    "ქსელი იტვირთება",
+  openFilters:      "ფილტრები",
+  resetFilters:     "გასუფთავება",
+  filters:          "ფილტრები",
+  activeCount:      "აქტიური",
 
-  // ─── Map — filter sidebar / floating ─────────────────────────────────────
+  // ─── Map filters ──────────────────────────────────────────────────────────
   mapLayers:         "ფენები",
   routes:            "მარშრუტები",
   roadAlerts:        "გაფრთხილებები",
@@ -89,7 +99,7 @@ export const KA = {
   alertGravelDesc: "გზის ზოლ(ებ)ზე ხრეში — სიჩქარე 50 კმ/სთ-ზე დაბლა",
   alertCameraDesc: "ფიქსირებული სიჩქარის საკონტროლო კამერა",
   alertWorkDesc:   "მიმდინარე სამშენებლო სამუშაოები — ზოლი შეიძლება დაკეტილი იყოს",
-  alertDangerDesc: "სახიფათო მოხვევა — ბრმა კუთხე, უდ ვარდნა, არასტაბილური ზედაპირი",
+  alertDangerDesc: "სახიფათო მოხვევა — ბრმა კუთხე, ვარდნა, არასტაბილური ზედაპირი",
 
   // ─── Alert severity ───────────────────────────────────────────────────────
   severityLow:    "დაბალი",
@@ -146,27 +156,50 @@ export const KA = {
   authWelcomeBack:         "კეთილი იყოს დაბრუნება",
   authJoinCommunity:       "შეუერთდით ბიკერების საზოგადოებას",
 
-  // ─── Profile / Digital Garage ─────────────────────────────────────────────
-  garageTitle:       "ჩემი სახელოსნო",
-  garageMyBike:      "ჩემი მოტოციკლი",
-  garageMods:        "მოდიფიკაციები",
-  garageStats:       "სტატისტიკა",
-  statTotalKm:       "გავლილი კმ",
-  statRoutesDone:    "მარშრუტები",
-  statAlertsDone:    "გაფრთხილებები",
-  garageFollowers:   "მიმდევარი",
-  garageRides:       "გასვლა",
-  editProfile:       "პროფილის რედაქტირება",
-  noGarageData:      "შედით სისტემაში პროფილის სანახავად.",
+  // ─── Marketplace ─────────────────────────────────────────────────────────
+  marketplaceTitle:    "მოტო-ბაზარი",
+  marketplaceSubtitle: "ბიკერიდან ბიკერისთვის",
+  catAll:              "ყველა",
+  catBikes:            "მოტოციკლები",
+  catGear:             "ეკიპირება",
+  catParts:            "ნაწილები",
+  condNew:             "ახალი",
+  condLikeNew:         "საღად ნახმარი",
+  condGood:            "კარგი მდ.",
+  condFair:            "დამაკმ.",
+  priceGEL:            "₾",
+  priceUSD:            "$",
+  negotiable:          "/ შეთანხმ.",
+  contactSeller:       "კონტაქტი",
+  addToFavorites:      "ფავორიტი",
+  listingsCount:       "განცხადება",
+  noListings:          "ამ კატეგორიაში განცხადებები არ არის.",
+  postListing:         "განცხადების დამატება",
+  sellerLabel:         "გამყიდველი",
+  locationLabel:       "ადგილ.",
+  viewsLabel:          "ნახვა",
+  postedLabel:         "გამოქვ.",
+  searchListings:      "განცხადებების ძიება…",
 
-  // ─── Error / General ──────────────────────────────────────────────────────
+  // ─── Profile / Digital Garage ─────────────────────────────────────────────
+  garageTitle:     "ჩემი სახელოსნო",
+  garageMyBike:    "ჩემი მოტოციკლი",
+  garageMods:      "მოდიფიკაციები",
+  garageStats:     "სტატისტიკა",
+  statTotalKm:     "გავლილი კმ",
+  statRoutesDone:  "მარშრუტები",
+  statAlertsDone:  "გაფრთხილებები",
+  garageFollowers: "მიმდევარი",
+  garageRides:     "გასვლა",
+  editProfile:     "პროფილის რედაქტირება",
+  noGarageData:    "შედით სისტემაში პროფილის სანახავად.",
+
+  // ─── Errors / General ─────────────────────────────────────────────────────
   errorTitle:     "შეცდომა მოხდა",
   errorMapFailed: "რუკა ვერ ჩაიტვირთა.",
   errorGeneric:   "მოულოდნელი შეცდომა.",
   errorRetry:     "თავიდან ცდა",
-  mapAriaLabel_notUsed: "",
-  openFilters_notUsed:  "",
-  close: "დახურვა",
+  close:          "დახურვა",
 } as const;
 
 export type KaKey = keyof typeof KA;

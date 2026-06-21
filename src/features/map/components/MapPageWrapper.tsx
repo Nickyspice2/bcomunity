@@ -114,7 +114,7 @@ export function MapPageWrapper(): React.ReactElement {
 
   return (
     <div
-      className="relative h-[calc(100vh-64px)] w-full overflow-hidden"
+      className="relative h-full w-full overflow-hidden"
       aria-label={KA.mapAriaLabel}
     >
       <Suspense fallback={<MapSkeleton />}>

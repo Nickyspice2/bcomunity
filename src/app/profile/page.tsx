@@ -1,16 +1,16 @@
 "use client";
 
-import { useAuth }           from "@/features/auth/context/AuthContext";
-import { DigitalGarage }     from "@/features/profile/components/DigitalGarage";
-import { MOCK_GARAGE }       from "@/store/mockData";
-import { KA }                from "@/lib/i18n/ka";
+import { useAuth }        from "@/features/auth/context/AuthContext";
+import { DigitalGarage }  from "@/features/profile/components/DigitalGarage";
+import { MOCK_GARAGE }    from "@/store/mockData";
+import { KA }             from "@/lib/i18n/ka";
 
 export default function ProfilePage(): React.ReactElement {
   const { user, isAuthenticated, openModal } = useAuth();
 
   if (!isAuthenticated || !user) {
     return (
-      <div className="flex min-h-[calc(100vh-64px)] items-center justify-center pt-16">
+      <div className="flex h-screen items-center justify-center pt-16">
         <div className="flex flex-col items-center gap-4 text-center">
           <span className="text-5xl" aria-hidden="true">🏍</span>
           <p className="text-sm text-zinc-500">{KA.noGarageData}</p>
@@ -27,7 +27,7 @@ export default function ProfilePage(): React.ReactElement {
   }
 
   return (
-    <div className="pt-16 min-h-screen">
+    <div className="pt-16 min-h-screen overflow-y-auto">
       <DigitalGarage user={user} garage={MOCK_GARAGE} />
     </div>
   );

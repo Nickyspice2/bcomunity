@@ -3,24 +3,27 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
-  Map, LogIn, UserCircle, LogOut, ChevronRight, Bike,
+  Map, LogIn, UserCircle, LogOut, ChevronRight,
+  Bike, ShoppingBag,
 } from "lucide-react";
 import { useState, useRef, useEffect } from "react";
 import { useAuth } from "@/features/auth/context/AuthContext";
 import { KA } from "@/lib/i18n/ka";
 import { cn } from "@/lib/utils";
 
-// ─── Nav tab definition ───────────────────────────────────────────────────────
+// ─── Navigation tab definition ────────────────────────────────────────────────
 
 interface NavTab {
   href:  string;
   label: string;
+  icon?: React.ReactNode;
   exact?: boolean;
 }
 
 const NAV_TABS: NavTab[] = [
-  { href: "/",    label: KA.navHome,  exact: true },
-  { href: "/map", label: KA.navMap },
+  { href: "/",            label: KA.navHome,        exact: true },
+  { href: "/map",         label: KA.navMap,         icon: <Map size={13} /> },
+  { href: "/marketplace", label: KA.navMarketplace, icon: <ShoppingBag size={13} /> },
 ];
 
 // ─── Component ────────────────────────────────────────────────────────────────
@@ -32,7 +35,6 @@ export function TopBar(): React.ReactElement {
   const [profileOpen, setProfileOpen] = useState(false);
   const profileRef = useRef<HTMLDivElement>(null);
 
-  // Close profile dropdown on outside click
   useEffect(() => {
     const handler = (e: PointerEvent) => {
       if (profileRef.current && !profileRef.current.contains(e.target as Node)) {
@@ -51,8 +53,7 @@ export function TopBar(): React.ReactElement {
       className={cn(
         "fixed inset-x-0 top-0 z-50 h-16",
         "flex items-center justify-between px-4 md:px-6",
-        "backdrop-blur-xl backdrop-saturate-150",
-        "bg-[var(--glass-bg)] border-b border-[var(--glass-border)]",
+        "backdrop-blur-md bg-zinc-900/70 border-b border-zinc-800/60",
         "shadow-[0_1px_0_0_rgba(255,255,255,0.04)]"
       )}
     >
@@ -66,7 +67,7 @@ export function TopBar(): React.ReactElement {
           className={cn(
             "flex h-8 w-8 items-center justify-center rounded-lg",
             "bg-gradient-to-br from-amber-500 to-orange-500",
-            "shadow-[0_0_16px_rgba(245,158,11,0.35)]",
+            "shadow-[0_0_14px_rgba(245,158,11,0.35)]",
             "group-hover:shadow-[0_0_22px_rgba(245,158,11,0.55)]",
             "transition-shadow duration-200"
           )}
@@ -86,7 +87,7 @@ export function TopBar(): React.ReactElement {
 
       {/* ── Centre: Navigation tabs ── */}
       <nav
-        className="absolute left-1/2 -translate-x-1/2 flex items-center gap-1 rounded-xl border border-[var(--color-surface-border)] bg-[var(--color-surface-raised)] p-1"
+        className="absolute left-1/2 -translate-x-1/2 hidden sm:flex items-center gap-0.5 rounded-xl border border-zinc-800/60 bg-zinc-900/60 backdrop-blur-sm p-1"
         aria-label="მთავარი ნავიგაცია"
       >
         {NAV_TABS.map((tab) => {
@@ -96,7 +97,7 @@ export function TopBar(): React.ReactElement {
               key={tab.href}
               href={tab.href}
               className={cn(
-                "flex items-center gap-1.5 rounded-lg px-4 py-1.5 text-sm font-medium",
+                "flex items-center gap-1.5 rounded-lg px-3.5 py-1.5 text-sm font-medium",
                 "transition-all duration-150",
                 "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400/50",
                 active
@@ -105,8 +106,13 @@ export function TopBar(): React.ReactElement {
               )}
               aria-current={active ? "page" : undefined}
             >
-              {tab.href === "/map" && (
-                <Map size={13} className={active ? "text-amber-400" : "text-zinc-600"} />
+              {tab.icon && (
+                <span
+                  className={active ? "text-amber-400" : "text-zinc-600"}
+                  aria-hidden="true"
+                >
+                  {tab.icon}
+                </span>
               )}
               {tab.label}
             </Link>
@@ -127,10 +133,9 @@ export function TopBar(): React.ReactElement {
                 "border transition-all duration-150",
                 profileOpen
                   ? "bg-amber-500/12 border-amber-500/30 text-amber-400"
-                  : "border-[var(--color-surface-border)] text-zinc-300 hover:bg-white/[0.04] hover:text-zinc-100"
+                  : "border-zinc-800/60 text-zinc-300 hover:bg-white/[0.04] hover:text-zinc-100 hover:border-zinc-700/60"
               )}
             >
-              {/* Initials avatar */}
               <span
                 className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-[11px] font-bold text-zinc-900"
                 style={{ background: `linear-gradient(135deg, ${user.avatarColor}, ${user.avatarColor}bb)` }}
@@ -143,10 +148,7 @@ export function TopBar(): React.ReactElement {
               </span>
               <ChevronRight
                 size={12}
-                className={cn(
-                  "text-zinc-600 transition-transform duration-150",
-                  profileOpen ? "rotate-90" : "rotate-0"
-                )}
+                className={cn("text-zinc-600 transition-transform duration-150", profileOpen && "rotate-90")}
               />
             </button>
 
@@ -154,14 +156,13 @@ export function TopBar(): React.ReactElement {
               <div
                 className={cn(
                   "absolute right-0 top-full mt-2 w-56 z-50 animate-fade-up",
-                  "rounded-2xl border border-[var(--color-surface-border)]",
-                  "bg-[var(--color-surface-card)]",
+                  "rounded-2xl border border-zinc-800/60",
+                  "bg-zinc-900/90 backdrop-blur-xl",
                   "shadow-[0_20px_60px_rgba(0,0,0,0.7)]",
                   "overflow-hidden"
                 )}
               >
-                {/* User info */}
-                <div className="px-4 py-3 border-b border-[var(--color-surface-border)]">
+                <div className="px-4 py-3 border-b border-zinc-800/60">
                   <p className="text-sm font-semibold text-zinc-100 truncate">{user.name}</p>
                   <p className="text-[11px] text-zinc-500 truncate mt-0.5">{user.email}</p>
                   {user.motorcycleModel && (
@@ -183,7 +184,7 @@ export function TopBar(): React.ReactElement {
                   {KA.navProfile}
                 </Link>
 
-                <div className="border-t border-[var(--color-surface-border)]">
+                <div className="border-t border-zinc-800/60">
                   <button
                     type="button"
                     onClick={() => { logout(); setProfileOpen(false); }}
@@ -209,7 +210,7 @@ export function TopBar(): React.ReactElement {
             )}
           >
             <LogIn size={15} strokeWidth={2.5} />
-            {KA.login}
+            <span className="hidden sm:inline">{KA.login}</span>
           </button>
         )}
       </div>

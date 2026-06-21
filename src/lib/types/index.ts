@@ -15,17 +15,10 @@ export interface BoundingBox {
 // ─── Route ────────────────────────────────────────────────────────────────────
 
 export type DifficultyLevel =
-  | "beginner"
-  | "intermediate"
-  | "advanced"
-  | "extreme";
+  | "beginner" | "intermediate" | "advanced" | "extreme";
 
 export type AsphaltQuality =
-  | "excellent"
-  | "good"
-  | "fair"
-  | "poor"
-  | "unpaved";
+  | "excellent" | "good" | "fair" | "poor" | "unpaved";
 
 export interface Route {
   id:             string;
@@ -101,10 +94,6 @@ export interface MapViewState {
 
 // ─── Social — Biker user ──────────────────────────────────────────────────────
 
-/**
- * Public-facing profile of a biker in the social hub.
- * `avatarColor` is a CSS colour string used to generate the letter-avatar.
- */
 export interface BikerUser {
   id:              string;
   name:            string;
@@ -122,7 +111,6 @@ export interface BikerPost {
   id:           string;
   author:       BikerUser;
   content:      string;
-  /** Optional reference to a Route id — shows "მარშრუტის ნახვა" button. */
   routeRef?:    string;
   likeCount:    number;
   commentCount: number;
@@ -136,20 +124,57 @@ export interface BikerPost {
 export type RidePace = "slow" | "medium" | "fast";
 
 export interface GroupRide {
-  id:              string;
-  name:            string;
-  destination:     string;
-  gatheringPoint:  string;
-  gatheringTime:   string; // ISO 8601
-  pace:            RidePace;
-  description:     string;
-  organizer:       BikerUser;
-  joinedRiders:    BikerUser[];
-  maxRiders:       number;
-  routeRef?:       string;
+  id:             string;
+  name:           string;
+  destination:    string;
+  gatheringPoint: string;
+  gatheringTime:  string;
+  pace:           RidePace;
+  description:    string;
+  organizer:      BikerUser;
+  joinedRiders:   BikerUser[];
+  maxRiders:      number;
+  routeRef?:      string;
 }
 
-// ─── Profile — Motorcycle garage ─────────────────────────────────────────────
+// ─── Social — Biker club ──────────────────────────────────────────────────────
+
+export interface BikerClub {
+  id:          string;
+  name:        string;
+  location:    string;
+  memberCount: number;
+  isVerified:  boolean;
+  description: string;
+  /** Dominant bike styles / ride types this club focuses on */
+  tags:        string[];
+  /** CSS colour used to generate the initials logo */
+  logoColor:   string;
+  foundedYear: number;
+}
+
+// ─── Marketplace ──────────────────────────────────────────────────────────────
+
+export type MarketplaceCategory = "bikes" | "gear" | "parts";
+export type ItemCondition       = "new" | "like_new" | "good" | "fair";
+export type PriceCurrency       = "GEL" | "USD";
+
+export interface MarketplaceListing {
+  id:           string;
+  title:        string;
+  description:  string;
+  price:        number;
+  currency:     PriceCurrency;
+  category:     MarketplaceCategory;
+  condition:    ItemCondition;
+  seller:       BikerUser;
+  location:     string;
+  createdAt:    string;
+  isNegotiable: boolean;
+  views:        number;
+}
+
+// ─── Profile — Garage ────────────────────────────────────────────────────────
 
 export interface GarageMotorcycle {
   id:            string;
@@ -158,8 +183,8 @@ export interface GarageMotorcycle {
   year:          number;
   modifications: string[];
   stats: {
-    totalKm:          number;
-    routesCompleted:  number;
-    alertsSubmitted:  number;
+    totalKm:         number;
+    routesCompleted: number;
+    alertsSubmitted: number;
   };
 }

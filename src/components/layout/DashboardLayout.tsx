@@ -1,9 +1,18 @@
+import type { ReactNode } from "react";
+
+interface DashboardLayoutProps {
+  children: ReactNode;
+}
+
 /**
- * @deprecated The app now uses src/components/layout/Providers.tsx as the
- * client shell and individual page files (app/page.tsx, app/map/page.tsx)
- * for layout. This file is kept to avoid breaking any accidental imports
- * during the transition but it is not used by any active route.
+ * Full-viewport layout frame — sits beneath the fixed TopBar (h-16 / 64px).
+ * Provides h-screen overflow-hidden flex-col so child content can manage
+ * its own internal scrolling without the outer viewport scrolling.
  */
-export function DashboardLayout(): React.ReactElement {
-  return <></>;
+export function DashboardLayout({ children }: DashboardLayoutProps): React.ReactElement {
+  return (
+    <div className="h-screen overflow-hidden flex flex-col pt-16">
+      {children}
+    </div>
+  );
 }
