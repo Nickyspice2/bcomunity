@@ -1,18 +1,24 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-GeoMotoRoutes \u2014 Full Project Generator (Phases 1\u20134)
+GeoMotoRoutes \u2014 Full Project Generator (Phases 1\u20136)
 =====================================================
-This script is SELF-REFERENTIAL: it reads all source files from the repo
-it lives in, then writes them to a new target folder.
+Scaffolds the complete GeoMotoRoutes text-based social network for
+Georgian bikers. NO map library dependencies.
+
+Architecture: 4 routes
+  /             \u2014 Community Hub  (Clubs + BikerFeed + Group Rides)
+  /marketplace  \u2014 Moto-Marketplace  (bikes / gear / parts)
+  /hub          \u2014 Moto-Hub  (service directory + city chats)
+  /profile      \u2014 Digital Garage  (auth-gated)
 
 Requirements: Python 3.8+  (no external packages)
 
 Usage
 -----
   # Run from the repo root (same folder as this script)
-  python create_geomotoroutes.py                 # creates ./geomotoroutes/
-  python create_geomotoroutes.py my-folder       # creates ./my-folder/
+  python create_geomotoroutes.py                 # \u2192 ./geomotoroutes/
+  python create_geomotoroutes.py my-folder       # \u2192 ./my-folder/
 
 After scaffold
 --------------
@@ -26,19 +32,16 @@ import os
 import sys
 import textwrap
 
-# ─── Destination ─────────────────────────────────────────────────────────────
-
 ROOT       = sys.argv[1] if len(sys.argv) > 1 else "geomotoroutes"
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 
 # ─── File registry ────────────────────────────────────────────────────────────
-# Each entry is either:
-#   (a) a 2-tuple (relative_dest_path, string_content) for small config files
-#   (b) a string source_path relative to SCRIPT_DIR  — content read from disk
+# String  entries  : read content from SCRIPT_DIR/<path>
+# 2-tuple entries  : (dest_path, literal_string_content)
 
 ENTRIES: list[str | tuple[str, str]] = [
 
-    # ── Config files (content inlined — no unicode issues) ──────────────────
+    # ── Config files (inlined \u2014 no unicode complications) ─────────────────────
 
     ("package.json", """\
 {
@@ -52,13 +55,10 @@ ENTRIES: list[str | tuple[str, str]] = [
     "lint": "eslint"
   },
   "dependencies": {
-    "@types/leaflet": "^1.9.21",
-    "leaflet": "^1.9.4",
     "lucide-react": "^0.468.0",
     "next": "^15.1.0",
     "react": "^19.0.0",
-    "react-dom": "^19.0.0",
-    "react-leaflet": "^5.0.0"
+    "react-dom": "^19.0.0"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4",
@@ -117,7 +117,6 @@ ENTRIES: list[str | tuple[str, str]] = [
 .DS_Store
 *.pem
 npm-debug.log*
-yarn-debug.log*
 .env*
 .vercel
 *.tsbuildinfo
@@ -135,59 +134,53 @@ const eslintConfig = defineConfig([
 export default eslintConfig;
 """),
 
-    # ── All src/ files — read from disk ─────────────────────────────────────
+    # ── All src/ files \u2014 read from disk ──────────────────────────────────────
 
+    # App
     "src/app/globals.css",
     "src/app/layout.tsx",
     "src/app/page.tsx",
-    "src/app/map/page.tsx",
+    "src/app/hub/page.tsx",
     "src/app/marketplace/page.tsx",
     "src/app/profile/page.tsx",
 
+    # Lib
     "src/lib/types/index.ts",
     "src/lib/i18n/ka.ts",
-    "src/lib/constants/index.ts",
     "src/lib/utils/index.ts",
 
+    # Store
     "src/store/mockData.ts",
 
+    # Auth feature
     "src/features/auth/types.ts",
     "src/features/auth/context/AuthContext.tsx",
     "src/features/auth/components/AuthModal.tsx",
 
-    "src/features/filters/hooks/useRouteFilters.ts",
-    "src/features/filters/components/FilterToggleChip.tsx",
-    "src/features/filters/components/LayerToggleRow.tsx",
-    "src/features/filters/components/SidebarSection.tsx",
-    "src/features/filters/components/Sidebar.tsx",
-
-    "src/features/map/hooks/useMapState.ts",
-    "src/features/map/hooks/useMapBounds.ts",
-    "src/features/map/hooks/useUserAlerts.ts",
-    "src/features/map/components/AlertMarker.tsx",
-    "src/features/map/components/RoutePolyline.tsx",
-    "src/features/map/components/SpotMarker.tsx",
-    "src/features/map/components/AddAlertDialog.tsx",
-    "src/features/map/components/LeafletMap.tsx",
-    "src/features/map/components/MapControls.tsx",
-    "src/features/map/components/MapSkeleton.tsx",
-    "src/features/map/components/MapOverlayStats.tsx",
-    "src/features/map/components/MapPageWrapper.tsx",
-    "src/features/map/components/MapFloatingFilter.tsx",
-    "src/features/map/components/MapView.tsx",
-
+    # Social feature
     "src/features/social/components/PostCard.tsx",
     "src/features/social/components/BikerFeed.tsx",
     "src/features/social/components/GroupRideCard.tsx",
     "src/features/social/components/ClubCard.tsx",
 
+    # Marketplace feature
     "src/features/marketplace/components/ListingCard.tsx",
     "src/features/marketplace/components/MarketplaceContent.tsx",
 
+    # Hub feature (NEW in Phase 6)
+    "src/features/hub/components/MechanicCard.tsx",
+    "src/features/hub/components/CityChatRoom.tsx",
+    "src/features/hub/components/HubContent.tsx",
+
+    # Profile feature
     "src/features/profile/components/DigitalGarage.tsx",
 
+    # Layout components
     "src/components/layout/TopBar.tsx",
     "src/components/layout/Providers.tsx",
+    "src/components/layout/DashboardLayout.tsx",
+
+    # UI primitives
     "src/components/ui/Badge.tsx",
     "src/components/ui/SkeletonBlock.tsx",
     "src/components/ui/IconButton.tsx",
@@ -197,10 +190,8 @@ export default eslintConfig;
 # ─── Writer ───────────────────────────────────────────────────────────────────
 
 def resolve(entry: str | tuple[str, str]) -> tuple[str, str]:
-    """Returns (relative_dest_path, content_string)."""
     if isinstance(entry, tuple):
         return entry
-    # Read from SCRIPT_DIR
     src_abs = os.path.join(SCRIPT_DIR, entry)
     try:
         with open(src_abs, "r", encoding="utf-8") as fh:
@@ -236,11 +227,10 @@ def write_files() -> None:
             fh.write(content)
         created_files.append(rel_path)
 
-    # ── Summary ───────────────────────────────────────────────────────────────
-    width = 66
+    width = 68
     print()
     print("=" * width)
-    print("  GeoMotoRoutes \u2014 project scaffold complete (Phases 1\u20134)")
+    print("  GeoMotoRoutes \u2014 project scaffold complete (Phases 1\u20136)")
     print("=" * width)
     print(f"\n  Root      : {os.path.abspath(ROOT)}")
     print(f"  Dirs      : {len(created_dirs)} created")
@@ -254,17 +244,17 @@ def write_files() -> None:
             print(f"    \u2026 and {len(skipped_files) - 6} more")
 
     if missing:
-        print(f"\n  \u26a0  {len(missing)} source file(s) not found (stub written):")
+        print(f"\n  \u26a0  {len(missing)} source file(s) not found:")
         for f in missing:
             print(f"    \u2013 {f}")
-        print("  Make sure you run this script from the repo root directory.")
+        print("  Run this script from the repo root directory.")
 
     print(textwrap.dedent(f"""
-  \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500
-  Routes:
-    /             \u2014 Social Hub  (Clubs + BikerFeed + Group Rides)
-    /map          \u2014 Interactive Map  (full-screen CartoDB Dark)
+  \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500
+  Routes (NO map library \u2014 pure text/community):
+    /             \u2014 Community Hub  (Clubs + BikerFeed + Group Rides)
     /marketplace  \u2014 Moto-Marketplace  (bikes / gear / parts)
+    /hub          \u2014 Moto-Hub  (service directory + city live chats)
     /profile      \u2014 Digital Garage  (auth-gated)
 
   Next steps:
@@ -272,7 +262,7 @@ def write_files() -> None:
     npm install
     npm run dev
     \u2192 http://localhost:3000
-  \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500
+  \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500
 """))
 
 
