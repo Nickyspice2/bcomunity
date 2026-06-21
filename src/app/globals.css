@@ -1,0 +1,98 @@
+@import "tailwindcss";
+
+/* ─────────────────────────────────────────────────────────────
+   GeoMotoRoutes — Design Tokens
+   Premium dark theme: zinc-950 base, neon accent palette
+   ───────────────────────────────────────────────────────────── */
+@theme inline {
+  /* Surface palette — zinc-950 base */
+  --color-surface-base:    #09090b;
+  --color-surface-overlay: #0f0f13;
+  --color-surface-raised:  #141418;
+  --color-surface-card:    #18181c;
+  --color-surface-border:  #27272a;
+  --color-surface-muted:   #3f3f46;
+
+  /* Text */
+  --color-text-primary:   #fafafa;
+  --color-text-secondary: #a1a1aa;
+  --color-text-muted:     #52525b;
+
+  /* Amber accent */
+  --color-accent-primary:   #f59e0b;
+  --color-accent-secondary: #fb923c;
+  --color-accent-glow:      rgba(245, 158, 11, 0.22);
+
+  /* Semantic status */
+  --color-status-danger:  #ef4444;
+  --color-status-warning: #f59e0b;
+  --color-status-success: #22c55e;
+  --color-status-info:    #3b82f6;
+
+  /* Glassmorphism */
+  --glass-bg:     rgba(9, 9, 11, 0.75);
+  --glass-border: rgba(255, 255, 255, 0.07);
+
+  /* Typography */
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+}
+
+/* ─── Reset ────────────────────────────────────────────────── */
+*, *::before, *::after { box-sizing: border-box; }
+
+html {
+  font-size: 16px;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  color-scheme: dark;
+}
+
+body {
+  background-color: var(--color-surface-base);
+  color: var(--color-text-primary);
+  font-family: var(--font-sans), system-ui, sans-serif;
+}
+
+/* ─── Scrollbar ─────────────────────────────────────────────── */
+::-webkit-scrollbar        { width: 4px; height: 4px; }
+::-webkit-scrollbar-track  { background: transparent; }
+::-webkit-scrollbar-thumb  { background: var(--color-surface-muted); border-radius: 9999px; }
+::-webkit-scrollbar-thumb:hover { background: var(--color-accent-primary); }
+
+/* ─── Animations ────────────────────────────────────────────── */
+@keyframes slide-in-left {
+  from { transform: translateX(-100%); opacity: 0; }
+  to   { transform: translateX(0);     opacity: 1; }
+}
+@keyframes fade-up {
+  from { transform: translateY(10px); opacity: 0; }
+  to   { transform: translateY(0);    opacity: 1; }
+}
+@keyframes fade-in {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+@keyframes shimmer {
+  0%   { background-position: -200% 0; }
+  100% { background-position:  200% 0; }
+}
+@keyframes pulse-live {
+  0%,100% { opacity: 1; }
+  50%     { opacity: 0.4; }
+}
+
+.animate-slide-in-left { animation: slide-in-left 0.28s ease-out both; }
+.animate-fade-up       { animation: fade-up       0.22s ease-out both; }
+.animate-fade-in       { animation: fade-in       0.18s ease-out both; }
+.animate-pulse-live    { animation: pulse-live    1.4s ease-in-out infinite; }
+.animate-shimmer {
+  background: linear-gradient(
+    90deg,
+    var(--color-surface-card)   25%,
+    var(--color-surface-raised) 50%,
+    var(--color-surface-card)   75%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 1.5s ease-in-out infinite;
+}
